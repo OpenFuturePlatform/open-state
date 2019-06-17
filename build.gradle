@@ -20,7 +20,6 @@ repositories {
 ext {
     kotlinVersion = '1.3.31'
     springBootVersion = '2.1.5.RELEASE'
-    swaggerVersion = '2.9.2'
 }
 
 dependencies {
