@@ -1,0 +1,82 @@
+plugins {
+    id 'jacoco'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.31'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.3.31'
+    id 'org.jetbrains.kotlin.plugin.jpa' version '1.3.31'
+    id 'org.jetbrains.kotlin.kapt' version '1.3.31'
+    id 'org.springframework.boot' version '2.1.5.RELEASE'
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+group = "io.openfuture"
+version = "0.0.1-SNAPSHOT"
+java.sourceCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    kotlinVersion = '1.3.31'
+    springBootVersion = '2.1.5.RELEASE'
+    swaggerVersion = '2.9.2'
+}
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+
+    // Kotlin
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin"
+    implementation "org.jetbrains.kotlin:kotlin-reflect"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+
+    // DB
+    runtime "org.postgresql:postgresql"
+    implementation "org.flywaydb:flyway-core"
+
+    // Swagger
+    compile "io.springfox:springfox-swagger2:$swaggerVersion"
+    compile "io.springfox:springfox-swagger-ui:$swaggerVersion"
+
+    // Tools
+    implementation "org.apache.httpcomponents:httpclient:4.5.7"
+
+    // Tests
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+
+}
+
+// Kotlin
+compileKotlin {
+    kotlinOptions {
+        freeCompilerArgs = ['-Xjsr305=strict']
+        jvmTarget = '1.8'
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        freeCompilerArgs = ['-Xjsr305=strict']
+        jvmTarget = '1.8'
+    }
+}
+
+// Tests
+jacoco {
+    toolVersion = "0.8.3"
+}
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+    afterEvaluate {
+        classDirectories.from = files(classDirectories.files.collect {
+            fileTree(dir: it,
+                    exclude: ['io/openfuture/state/entity/**'
+                    ])
+        })
+    }
+}
+check.dependsOn jacocoTestReport
