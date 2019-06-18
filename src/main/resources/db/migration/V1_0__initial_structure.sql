@@ -1,6 +1,7 @@
 CREATE TABLE integrations
 (
-    id BIGSERIAL PRIMARY KEY
+    id BIGSERIAL PRIMARY KEY,
+    blockchain_id INT NOT NULL
 );
 
 CREATE TABLE states

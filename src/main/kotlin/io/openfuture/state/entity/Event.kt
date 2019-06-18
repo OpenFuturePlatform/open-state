@@ -1,5 +1,6 @@
 package io.openfuture.state.entity
 
+import io.openfuture.state.entity.base.BaseModel
 import java.time.LocalDateTime
 import javax.persistence.*
 

@@ -1,4 +1,4 @@
-package io.openfuture.state.entity
+package io.openfuture.state.entity.base
 
 import java.io.Serializable
 import javax.persistence.GeneratedValue

@@ -1,6 +1,6 @@
 package io.openfuture.state.repository
 
-import io.openfuture.state.entity.BaseModel
+import io.openfuture.state.entity.base.BaseModel
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
 

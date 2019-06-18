@@ -1,4 +1,4 @@
-package io.openfuture.state.entity
+package io.openfuture.state.entity.base
 
 interface Dictionary {
 
