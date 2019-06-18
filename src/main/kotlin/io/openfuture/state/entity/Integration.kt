@@ -12,6 +12,12 @@ class Integration(
         @Column(name = "balance", nullable = false)
         var balance: Long = 0,
 
+        @OneToMany(mappedBy = "integration")
+        var transactions: List<Transaction>,
+
+        @OneToMany(mappedBy = "integration")
+        var events: List<Event>,
+
         @ManyToOne
         @JoinColumn(name = "state_id")
         var state: State,
