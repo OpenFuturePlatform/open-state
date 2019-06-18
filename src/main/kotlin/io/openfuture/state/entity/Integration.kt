@@ -6,23 +6,10 @@ import javax.persistence.*
 @Table(name = "integrations")
 class Integration(
 
-        @Column(name = "address", nullable = false)
-        var address: String,
-
-        @Column(name = "balance", nullable = false)
-        var balance: Long = 0,
+        @OneToMany(mappedBy = "integration")
+        var transactions: List<Transaction> = emptyList(),
 
         @OneToMany(mappedBy = "integration")
-        var transactions: List<Transaction>,
-
-        @OneToMany(mappedBy = "integration")
-        var events: List<Event>,
-
-        @ManyToOne
-        @JoinColumn(name = "state_id")
-        var state: State,
-
-        @Column(name = "disabled", nullable = false)
-        var disabled: Boolean = false
+        var events: List<Event> = emptyList()
 
 ) : BaseModel()

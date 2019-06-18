@@ -1,15 +1,15 @@
+CREATE TABLE integrations
+(
+    id BIGSERIAL PRIMARY KEY
+);
+
 CREATE TABLE states
 (
     id BIGSERIAL PRIMARY KEY,
-    root VARCHAR(64) NOT NULL
-);
-
-CREATE TABLE integrations
-(
-    id BIGSERIAL PRIMARY KEY,
+    root VARCHAR(64) NOT NULL,
     address VARCHAR(64) NOT NULL,
     balance BIGINT NOT NULL DEFAULT 0,
-    state_id BIGINT REFERENCES states,
+    integration_id BIGINT REFERENCES integrations,
     disabled BOOLEAN NOT NULL DEFAULT FALSE
 );
 
