@@ -20,7 +20,7 @@ class State(
         @Column(name = "last_updated", nullable = false)
         var lastUpdated: LocalDateTime = LocalDateTime.now(),
 
-        @Column(name = "path_phrase", nullable = true)
+        @Column(name = "seed_phrase", nullable = true)
         var seedPhrase: String? = null,
 
         @ManyToOne

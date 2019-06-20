@@ -4,7 +4,7 @@ import io.openfuture.state.entity.base.BaseModel
 import javax.persistence.*
 
 @Entity
-@Table(name = "integrations")
+@Table(name = "blockchains")
 class Blockchain(
 
         @Column(name = "blockchain_type_id", nullable = false)
