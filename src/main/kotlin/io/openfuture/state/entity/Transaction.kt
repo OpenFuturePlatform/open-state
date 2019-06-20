@@ -11,14 +11,19 @@ class Transaction(
         @Column(name = "hash", nullable = false)
         var hash: String,
 
-        @Column(name = "data", nullable = false)
-        var data: String,
+        @Column(name = "from_address", nullable = false)
+        var fromAddress: String,
+
+        @Column(name = "to_address", nullable = false)
+        var toAddress: String,
 
         @Column(name = "date", nullable = false)
         var date: LocalDateTime,
 
-        @ManyToOne
-        @JoinColumn(name = "integration_id", nullable = false)
-        var integration: Integration
+        @Column(name = "block_number", nullable = false)
+        var blockNumber: Long,
+
+        @Column(name = "blockchain_type_id", nullable = false)
+        var blockchainTypeId: Int
 
 ) : BaseModel()

@@ -49,7 +49,7 @@ CREATE TABLE transactions
     hash               VARCHAR(64) NOT NULL,
     from_address       VARCHAR(64) NOT NULL,
     to_address         VARCHAR(64) NOT NULL,
-    block              BIGINT      NOT NULL,
+    block_number       BIGINT      NOT NULL,
     date               TIMESTAMP   NOT NULL,
     blockchain_type_id BIGINT REFERENCES blockchain_types,
     UNIQUE (hash, blockchain_type_id)
