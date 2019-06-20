@@ -23,6 +23,10 @@ class State(
         @Column(name = "path_phrase", nullable = true)
         var seedPhrase: String? = null,
 
+        @ManyToOne
+        @JoinColumn(name = "account_id")
+        var account: Account,
+
         @OneToOne
         @JoinColumn(name = "blockchain_id")
         var blockchain: Blockchain,
