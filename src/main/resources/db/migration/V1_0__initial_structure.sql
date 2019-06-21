@@ -1,68 +1,55 @@
-CREATE TABLE blockchain_types
+CREATE TABLE coins
 (
-    id   INT PRIMARY KEY,
-    name VARCHAR(64) NOT NULL
+    id          BIGSERIAL PRIMARY KEY,
+    title       VARCHAR(64) NOT NULL,
+    short_title VARCHAR(16) NOT NULL,
+    decimals    INT         NOT NULL
 );
-
-INSERT INTO blockchain_types(id, name)
-VALUES (1, 'OPEN'),
-       (2, 'ETHEREUM'),
-       (3, 'BINANCE');
 
 CREATE TABLE blockchains
 (
-    id                 BIGSERIAL PRIMARY KEY,
-    blockchain_type_id INT REFERENCES blockchain_types,
-    network_url        VARCHAR(64) NOT NULL,
-    private_key        VARCHAR(64) NOT NULL,
-    currency           VARCHAR(16) NOT NULL,
-    decimals           INT         NOT NULL
+    id      BIGSERIAL PRIMARY KEY,
+    coin_id BIGINT REFERENCES coins,
+    title   VARCHAR(64) NOT NULL
 );
 
-INSERT INTO blockchains
-VALUES (1, 1, 'OPEN_NETWORK_URL', 'OPEN_PRIVATE_KEY', 'OPEN', 1),
-       (2, 2, 'https://mainnet.infura.io/v3/cb0239186ffd439b87fb62beb5b864e2', 'PRIVATE_KEY', 'ETH', 18),
-       (3, 3, 'BINANCE_NETWORK_URL', 'BINANCE_PRIVATE_KEY', 'BNB', 8);
-
-CREATE TABLE accounts
+CREATE TABLE web_hooks
 (
-    id       BIGSERIAL PRIMARY KEY,
-    webhook  VARCHAR(64) NOT NULL,
-    disabled BOOLEAN     NOT NULL DEFAULT FALSE
+    id         BIGSERIAL PRIMARY KEY,
+    url        VARCHAR(64) NOT NULL,
+    is_enabled BOOLEAN     NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE wallets
+(
+    id                  BIGSERIAL PRIMARY KEY,
+    web_hook_id         BIGINT REFERENCES web_hooks,
+    blockchain_id       BIGINT REFERENCES blockchains,
+    address             VARCHAR(64) NOT NULL,
+    start_tracking_date TIMESTAMP   NOT NULL,
+    is_active           BOOLEAN     NOT NULL DEFAULT TRUE,
+    UNIQUE (address, blockchain_id)
 );
 
 CREATE TABLE states
 (
-    id            BIGSERIAL PRIMARY KEY,
-    address       VARCHAR(64) NOT NULL,
-    balance       BIGINT      NOT NULL DEFAULT 0,
-    root          VARCHAR(64) NOT NULL,
-    last_updated  TIMESTAMP   NOT NULL,
-    seed_phrase   VARCHAR(64) NOT NULL,
-    account_id    BIGINT REFERENCES accounts,
-    blockchain_id BIGINT REFERENCES blockchains,
-    disabled      BOOLEAN     NOT NULL DEFAULT FALSE,
-    UNIQUE (address, blockchain_id)
-);
-
-CREATE TABLE states_history
-(
-    id       BIGSERIAL PRIMARY KEY,
-    address  VARCHAR(64) NOT NULL,
-    balance  BIGINT      NOT NULL,
-    date     TIMESTAMP   NOT NULL,
-    state_id BIGINT REFERENCES states,
-    UNIQUE (address, state_id)
+    id        BIGSERIAL PRIMARY KEY,
+    wallet_id BIGINT REFERENCES wallets,
+    balance   BIGINT      NOT NULL DEFAULT 0,
+    root      VARCHAR(64) NOT NULL,
+    date      TIMESTAMP   NOT NULL
 );
 
 CREATE TABLE transactions
 (
-    id                 BIGSERIAL PRIMARY KEY,
-    hash               VARCHAR(64) NOT NULL,
-    from_address       VARCHAR(64) NOT NULL,
-    to_address         VARCHAR(64) NOT NULL,
-    block_number       BIGINT      NOT NULL,
-    date               TIMESTAMP   NOT NULL,
-    blockchain_type_id INT REFERENCES blockchain_types,
-    UNIQUE (hash, blockchain_type_id)
+    id           BIGSERIAL PRIMARY KEY,
+    wallet_id    BIGINT REFERENCES wallets,
+    hash         VARCHAR(64) NOT NULL,
+    type         VARCHAR(16) NOT NULL,
+    participant  VARCHAR(64) NOT NULL,
+    amount       BIGINT      NOT NULL,
+    date         TIMESTAMP   NOT NULL,
+    block_height BIGINT      NOT NULL,
+    block_hash   VARCHAR(64) NOT NULL,
+    UNIQUE (wallet_id, hash)
 );

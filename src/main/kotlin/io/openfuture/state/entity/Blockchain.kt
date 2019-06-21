@@ -7,19 +7,11 @@ import javax.persistence.*
 @Table(name = "blockchains")
 class Blockchain(
 
-        @Column(name = "blockchain_type_id", nullable = false)
-        var blockchainTypeId: Int,
+        @OneToOne
+        @JoinColumn(name = "coin_id")
+        var coin: Coin,
 
-        @Column(name = "network_url", nullable = false)
-        var networkUrl: String,
-
-        @Column(name = "private_key", nullable = false)
-        var privateKey: String,
-
-        @Column(name = "currency", nullable = false)
-        var currency: String,
-
-        @Column(name = "decimals")
-        var decimals: Int
+        @Column(name = "title", nullable = false)
+        var title: String
 
 ) : BaseModel()

@@ -10,16 +10,19 @@ import org.springframework.stereotype.Repository
 interface BaseRepository<T : BaseModel> : JpaRepository<T, Long>
 
 @Repository
-interface AccountRepository : BaseRepository<Account>
-
-@Repository
-interface StateRepository : BaseRepository<State>
+interface CoinRepository : BaseRepository<Coin>
 
 @Repository
 interface BlockchainRepository : BaseRepository<Blockchain>
 
 @Repository
+interface StateRepository : BaseRepository<State>
+
+@Repository
 interface TransactionRepository : BaseRepository<Transaction>
 
 @Repository
-interface StateHistoryRepository : BaseRepository<StateHistory>
+interface WalletRepository : BaseRepository<Wallet>
+
+@Repository
+interface WebHookRepository : BaseRepository<WebHook>

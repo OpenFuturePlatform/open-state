@@ -8,8 +8,9 @@ import javax.persistence.*
 @Table(name = "states")
 class State(
 
-        @Column(name = "address", nullable = false)
-        var address: String,
+        @OneToOne
+        @JoinColumn(name = "wallet_id")
+        var wallet: Wallet,
 
         @Column(name = "balance", nullable = false)
         var balance: Long = 0,
@@ -17,21 +18,7 @@ class State(
         @Column(name = "root", nullable = false)
         var root: String,
 
-        @Column(name = "last_updated", nullable = false)
-        var lastUpdated: LocalDateTime = LocalDateTime.now(),
-
-        @Column(name = "seed_phrase", nullable = true)
-        var seedPhrase: String? = null,
-
-        @ManyToOne
-        @JoinColumn(name = "account_id")
-        var account: Account,
-
-        @OneToOne
-        @JoinColumn(name = "blockchain_id")
-        var blockchain: Blockchain,
-
-        @Column(name = "disabled", nullable = false)
-        var disabled: Boolean = false
+        @Column(name = "date", nullable = false)
+        var date: LocalDateTime = LocalDateTime.now()
 
 ) : BaseModel()

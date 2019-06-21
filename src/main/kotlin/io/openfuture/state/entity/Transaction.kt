@@ -8,22 +8,29 @@ import javax.persistence.*
 @Table(name = "transactions")
 class Transaction(
 
+        @ManyToOne
+        @JoinColumn(name = "wallet_id")
+        var wallet: Wallet,
+
         @Column(name = "hash", nullable = false)
         var hash: String,
 
-        @Column(name = "from_address", nullable = false)
-        var fromAddress: String,
+        @Column(name = "type", nullable = false)
+        var type: String,
 
-        @Column(name = "to_address", nullable = false)
-        var toAddress: String,
+        @Column(name = "participant", nullable = false)
+        var participant: String,
+
+        @Column(name = "amount", nullable = false)
+        var amount: Long,
 
         @Column(name = "date", nullable = false)
         var date: LocalDateTime,
 
-        @Column(name = "block_number", nullable = false)
-        var blockNumber: Long,
+        @Column(name = "block_height", nullable = false)
+        var blockHeight: Long,
 
-        @Column(name = "blockchain_type_id", nullable = false)
-        var blockchainTypeId: Int
+        @Column(name = "block_hash", nullable = false)
+        var blockHash: String
 
 ) : BaseModel()
