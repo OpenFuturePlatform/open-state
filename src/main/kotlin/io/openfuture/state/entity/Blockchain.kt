@@ -14,6 +14,12 @@ class Blockchain(
         var networkUrl: String,
 
         @Column(name = "private_key", nullable = false)
-        var privateKey: String
+        var privateKey: String,
+
+        @Column(name = "currency", nullable = false)
+        var currency: String,
+
+        @Column(name = "decimals")
+        var decimals: Int
 
 ) : BaseModel()

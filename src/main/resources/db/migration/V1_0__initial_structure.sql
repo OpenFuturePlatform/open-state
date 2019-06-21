@@ -14,13 +14,15 @@ CREATE TABLE blockchains
     id                 BIGSERIAL PRIMARY KEY,
     blockchain_type_id INT REFERENCES blockchain_types,
     network_url        VARCHAR(64) NOT NULL,
-    private_key        VARCHAR(64) NOT NULL
+    private_key        VARCHAR(64) NOT NULL,
+    currency           VARCHAR(16) NOT NULL,
+    decimals           INT         NOT NULL
 );
 
 INSERT INTO blockchains
-VALUES (1, 1, 'https://mainnet.infura.io/v3/cb0239186ffd439b87fb62beb5b864e2', 'PRIVATE_KEY'),
-       (2, 2, 'OPEN_NETWORK_URL', 'OPEN_PRIVATE_KEY'),
-       (3, 3, 'BINANCE_NETWORK_URL', 'BINANCE_PRIVATE_KEY');
+VALUES (1, 1, 'OPEN_NETWORK_URL', 'OPEN_PRIVATE_KEY', 'OPEN', 1),
+       (2, 2, 'https://mainnet.infura.io/v3/cb0239186ffd439b87fb62beb5b864e2', 'PRIVATE_KEY', 'ETH', 18),
+       (3, 3, 'BINANCE_NETWORK_URL', 'BINANCE_PRIVATE_KEY', 'BNB', 8);
 
 CREATE TABLE accounts
 (
