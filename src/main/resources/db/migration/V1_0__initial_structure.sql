@@ -43,6 +43,16 @@ CREATE TABLE states
     UNIQUE (address, blockchain_id)
 );
 
+CREATE TABLE states_history
+(
+    id       BIGSERIAL PRIMARY KEY,
+    address  VARCHAR(64) NOT NULL,
+    balance  BIGINT      NOT NULL,
+    date     TIMESTAMP   NOT NULL,
+    state_id BIGINT REFERENCES states,
+    UNIQUE (address, state_id)
+);
+
 CREATE TABLE transactions
 (
     id                 BIGSERIAL PRIMARY KEY,

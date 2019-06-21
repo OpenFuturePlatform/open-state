@@ -1,9 +1,6 @@
 package io.openfuture.state.repository
 
-import io.openfuture.state.entity.Account
-import io.openfuture.state.entity.Blockchain
-import io.openfuture.state.entity.State
-import io.openfuture.state.entity.Transaction
+import io.openfuture.state.entity.*
 import io.openfuture.state.entity.base.BaseModel
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
@@ -23,3 +20,6 @@ interface BlockchainRepository : BaseRepository<Blockchain>
 
 @Repository
 interface TransactionRepository : BaseRepository<Transaction>
+
+@Repository
+interface StateHistoryRepository : BaseRepository<StateHistory>
