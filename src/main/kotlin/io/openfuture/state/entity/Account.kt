@@ -15,5 +15,4 @@ class Account(
         @Column(name = "disabled", nullable = false)
         var disabled: Boolean = false
 
-
 ) : BaseModel()
