@@ -1,10 +1,7 @@
 package io.openfuture.state.service
 
 import io.openfuture.state.domain.TransactionDto
-import io.openfuture.state.entity.State
-import io.openfuture.state.entity.Transaction
-import io.openfuture.state.entity.Wallet
-import io.openfuture.state.entity.WebHook
+import io.openfuture.state.entity.*
 
 
 interface StateTrackingService {
@@ -17,11 +14,13 @@ interface StateService {
 
     fun getByWalletId(wallet: Wallet): State
 
-    fun update(state: State)
+    fun save(state: State)
 
 }
 
 interface WalletService {
+
+    fun create(url: String, blockchainId: Long, address: String)
 
     fun getByBlockchainAddress(blockchainId: Long, address: String): Wallet?
 
@@ -36,5 +35,11 @@ interface TransactionService {
 interface WebHookService {
 
     fun save(webHook: WebHook): WebHook
+
+}
+
+interface BlockchainService {
+
+    fun get(id: Long): Blockchain
 
 }

@@ -5,6 +5,7 @@ import io.openfuture.state.entity.Transaction
 import io.openfuture.state.entity.TransactionType
 import io.openfuture.state.entity.Wallet
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 @Service
@@ -14,6 +15,7 @@ class DefaultStateTrackingService(
         private val transactionService: TransactionService
 ) : StateTrackingService {
 
+    @Transactional
     override fun processTransaction(tx: TransactionDto) {
 
         val fromWallet = walletService.getByBlockchainAddress(tx.blockchainId, tx.from)
@@ -34,13 +36,13 @@ class DefaultStateTrackingService(
 
     }
 
-    fun updateState(wallet: Wallet, amount: Long) {
+    private fun updateState(wallet: Wallet, amount: Long) {
         val state = stateService.getByWalletId(wallet)
         state.balance += amount
         state.date = LocalDateTime.now()
         state.root = calculateRootHash()
 
-        stateService.update(state)
+        stateService.save(state)
     }
 
     private fun createTransaction(wallet: Wallet, type: TransactionType, tx: TransactionDto): Transaction {
