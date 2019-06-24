@@ -45,7 +45,7 @@ CREATE TABLE transactions
     id           BIGSERIAL PRIMARY KEY,
     wallet_id    BIGINT REFERENCES wallets,
     hash         VARCHAR(64) NOT NULL,
-    type         VARCHAR(16) NOT NULL,
+    type_id      INT         NOT NULL,
     participant  VARCHAR(64) NOT NULL,
     amount       BIGINT      NOT NULL,
     date         TIMESTAMP   NOT NULL,
