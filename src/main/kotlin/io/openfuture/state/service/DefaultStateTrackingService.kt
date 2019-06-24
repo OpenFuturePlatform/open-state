@@ -43,8 +43,14 @@ class DefaultStateTrackingService(
         stateService.update(state)
     }
 
-    private fun createTransaction(wallet: Wallet, type: TransactionType, tx: TransactionDto): Transaction =
-            Transaction(wallet, tx.hash, type.getId(), tx.to, tx.amount, tx.date, tx.blockHeight, tx.blockHash)
+    private fun createTransaction(wallet: Wallet, type: TransactionType, tx: TransactionDto): Transaction {
+        val hash = calculateHash(tx)
+        return Transaction(wallet, tx.hash, hash, type.getId(), tx.to, tx.amount, tx.date, tx.blockHeight, tx.blockHash)
+    }
+
+    private fun calculateHash(tx: TransactionDto): String {
+        return "hash"
+    }
 
     private fun calculateRootHash(): String {
         return "hash"

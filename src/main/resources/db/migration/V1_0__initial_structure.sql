@@ -42,14 +42,15 @@ CREATE TABLE states
 
 CREATE TABLE transactions
 (
-    id           BIGSERIAL PRIMARY KEY,
-    wallet_id    BIGINT REFERENCES wallets,
-    hash         VARCHAR(64) NOT NULL,
-    type_id      INT         NOT NULL,
-    participant  VARCHAR(64) NOT NULL,
-    amount       BIGINT      NOT NULL,
-    date         TIMESTAMP   NOT NULL,
-    block_height BIGINT      NOT NULL,
-    block_hash   VARCHAR(64) NOT NULL,
+    id            BIGSERIAL PRIMARY KEY,
+    wallet_id     BIGINT REFERENCES wallets,
+    hash          VARCHAR(64) NOT NULL,
+    external_hash VARCHAR(64) NOT NULL,
+    type_id       INT         NOT NULL,
+    participant   VARCHAR(64) NOT NULL,
+    amount        BIGINT      NOT NULL,
+    date          TIMESTAMP   NOT NULL,
+    block_height  BIGINT      NOT NULL,
+    block_hash    VARCHAR(64) NOT NULL,
     UNIQUE (wallet_id, hash)
 );

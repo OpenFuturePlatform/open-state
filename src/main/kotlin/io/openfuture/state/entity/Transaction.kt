@@ -16,6 +16,9 @@ class Transaction(
         @Column(name = "hash", nullable = false)
         var hash: String,
 
+        @Column(name = "external_hash", nullable = false)
+        var externalHash: String,
+
         @Column(name = "type_id", nullable = false)
         var type_id: Int,
 

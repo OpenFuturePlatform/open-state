@@ -4,6 +4,7 @@ import io.openfuture.state.domain.TransactionDto
 import io.openfuture.state.entity.State
 import io.openfuture.state.entity.Transaction
 import io.openfuture.state.entity.Wallet
+import io.openfuture.state.entity.WebHook
 
 
 interface StateTrackingService {
@@ -29,5 +30,11 @@ interface WalletService {
 interface TransactionService {
 
     fun save(transaction: Transaction): Transaction
+
+}
+
+interface WebHookService {
+
+    fun save(webHook: WebHook): WebHook
 
 }
