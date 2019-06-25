@@ -15,14 +15,16 @@ class DefaultWalletService(
         private val blockchainService: BlockchainService
 ) : WalletService {
 
-    override fun create(url: String, blockchainId: Long, address: String) {
-        val webHook = webHookService.save(WebHook("url"))
+    override fun create(url: String, blockchainId: Long, address: String): Wallet {
+        val webHook = webHookService.save(WebHook(url))
 
         val blockchain = blockchainService.get(blockchainId)
 
         val wallet = Wallet(webHook, blockchain, address)
         repository.save(wallet)
         stateService.save(State(wallet, root = "start root"))
+
+        return wallet
     }
 
     @Transactional(readOnly = true)

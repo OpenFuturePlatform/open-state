@@ -20,7 +20,7 @@ interface StateService {
 
 interface WalletService {
 
-    fun create(url: String, blockchainId: Long, address: String)
+    fun create(url: String, blockchainId: Long, address: String): Wallet
 
     fun getByBlockchainAddress(blockchainId: Long, address: String): Wallet?
 
