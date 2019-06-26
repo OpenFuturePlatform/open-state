@@ -31,6 +31,10 @@ interface TransactionService {
 
     fun save(transaction: Transaction): Transaction
 
+    fun get(id: Long, walletId: Long): Transaction
+
+    fun getAllByWalletId(walletId: Long): List<Transaction>
+
 }
 
 interface WebHookService {

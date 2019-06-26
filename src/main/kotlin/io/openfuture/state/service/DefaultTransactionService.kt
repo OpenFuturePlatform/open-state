@@ -15,4 +15,14 @@ class DefaultTransactionService(
         return repository.save(transaction)
     }
 
+    @Transactional(readOnly = true)
+    override fun get(id: Long, walletId: Long): Transaction {
+        return repository.findByIdAndWalletId(id, walletId)
+    }
+
+    @Transactional(readOnly = true)
+    override fun getAllByWalletId(walletId: Long): List<Transaction> {
+        return repository.findAllByWalletId(walletId)
+    }
+
 }

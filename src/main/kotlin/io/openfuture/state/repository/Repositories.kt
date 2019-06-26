@@ -23,7 +23,13 @@ interface StateRepository : BaseRepository<State> {
 }
 
 @Repository
-interface TransactionRepository : BaseRepository<Transaction>
+interface TransactionRepository : BaseRepository<Transaction> {
+
+    fun findByIdAndWalletId(id: Long, walletId: Long): Transaction
+
+    fun findAllByWalletId(walletId: Long): List<Transaction>
+
+}
 
 @Repository
 interface WalletRepository : BaseRepository<Wallet> {
