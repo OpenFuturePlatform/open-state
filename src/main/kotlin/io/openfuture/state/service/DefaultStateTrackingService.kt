@@ -1,6 +1,6 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.domain.TransactionDto
+import io.openfuture.state.domain.dto.TransactionDto
 import io.openfuture.state.entity.Transaction
 import io.openfuture.state.entity.TransactionType
 import io.openfuture.state.entity.Wallet

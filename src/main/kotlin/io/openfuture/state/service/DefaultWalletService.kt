@@ -1,5 +1,6 @@
 package io.openfuture.state.service
 
+import io.openfuture.state.domain.request.CreateIntegrationRequest
 import io.openfuture.state.entity.State
 import io.openfuture.state.entity.Wallet
 import io.openfuture.state.entity.WebHook
@@ -15,16 +16,14 @@ class DefaultWalletService(
         private val blockchainService: BlockchainService
 ) : WalletService {
 
-    override fun create(url: String, blockchainId: Long, address: String): Wallet {
+    override fun create(url: String, integrations: Set<CreateIntegrationRequest>) {
         val webHook = webHookService.save(WebHook(url))
 
-        val blockchain = blockchainService.get(blockchainId)
-
-        val wallet = Wallet(webHook, blockchain, address)
-        repository.save(wallet)
-        stateService.save(State(wallet, root = "start root"))
-
-        return wallet
+        integrations.forEach {
+            val blockchain = blockchainService.get(it.blockchainId)
+            val wallet = repository.save(Wallet(webHook, blockchain, it.address))
+            stateService.save(State(wallet, root = "start root"))
+        }
     }
 
     @Transactional(readOnly = true)

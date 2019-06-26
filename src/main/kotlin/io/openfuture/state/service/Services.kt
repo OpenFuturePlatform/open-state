@@ -1,6 +1,7 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.domain.TransactionDto
+import io.openfuture.state.domain.dto.TransactionDto
+import io.openfuture.state.domain.request.CreateIntegrationRequest
 import io.openfuture.state.entity.*
 
 
@@ -20,7 +21,7 @@ interface StateService {
 
 interface WalletService {
 
-    fun create(url: String, blockchainId: Long, address: String): Wallet
+    fun create(url: String, integrations: Set<CreateIntegrationRequest>)
 
     fun getByBlockchainAddress(blockchainId: Long, address: String): Wallet?
 
