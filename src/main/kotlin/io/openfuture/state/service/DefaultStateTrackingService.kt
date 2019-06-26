@@ -21,16 +21,14 @@ class DefaultStateTrackingService(
         val fromWallet = walletService.getByBlockchainAddress(tx.blockchainId, tx.from)
 
         if (fromWallet != null) {
-            val outputTransaction = createTransaction(fromWallet, TransactionType.OUTPUT, tx)
-            transactionService.save(outputTransaction)
+            val outputTransaction = saveTransaction(fromWallet, TransactionType.OUTPUT, tx.to, tx)
             updateState(fromWallet, -outputTransaction.amount)
         }
 
         val toWallet = walletService.getByBlockchainAddress(tx.blockchainId, tx.to)
 
         if (toWallet != null) {
-            val inputTransaction = createTransaction(toWallet, TransactionType.INPUT, tx)
-            transactionService.save(inputTransaction)
+            val inputTransaction = saveTransaction(toWallet, TransactionType.INPUT, tx.from, tx)
             updateState(toWallet, inputTransaction.amount)
         }
 
@@ -45,9 +43,11 @@ class DefaultStateTrackingService(
         stateService.save(state)
     }
 
-    private fun createTransaction(wallet: Wallet, type: TransactionType, tx: TransactionDto): Transaction {
+    private fun saveTransaction(wallet: Wallet, type: TransactionType, participant: String, tx: TransactionDto): Transaction {
         val hash = calculateHash(tx)
-        return Transaction(wallet, tx.hash, hash, type.getId(), tx.to, tx.amount, tx.date, tx.blockHeight, tx.blockHash)
+        val transaction = Transaction(wallet, tx.hash, hash, type.getId(), participant, tx.amount, tx.date, tx.blockHeight, tx.blockHash)
+
+        return transactionService.save(transaction)
     }
 
     private fun calculateHash(tx: TransactionDto): String {
