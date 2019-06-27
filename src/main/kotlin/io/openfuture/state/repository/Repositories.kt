@@ -18,7 +18,7 @@ interface BlockchainRepository : BaseRepository<Blockchain>
 @Repository
 interface StateRepository : BaseRepository<State> {
 
-    fun findByWallet(wallet: Wallet): State
+    fun findByWalletId(walletId: Long): State
 
 }
 

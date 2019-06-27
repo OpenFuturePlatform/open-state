@@ -22,20 +22,20 @@ class DefaultStateTrackingService(
 
         if (fromWallet != null) {
             val outputTransaction = saveTransaction(fromWallet, TransactionType.OUTPUT, tx.to, tx)
-            updateState(fromWallet, -outputTransaction.amount)
+            updateState(fromWallet.id, -outputTransaction.amount)
         }
 
         val toWallet = walletService.getByBlockchainAddress(tx.blockchainId, tx.to)
 
         if (toWallet != null) {
             val inputTransaction = saveTransaction(toWallet, TransactionType.INPUT, tx.from, tx)
-            updateState(toWallet, inputTransaction.amount)
+            updateState(toWallet.id, inputTransaction.amount)
         }
 
     }
 
-    private fun updateState(wallet: Wallet, amount: Long) {
-        val state = stateService.getByWalletId(wallet)
+    private fun updateState(walletId: Long, amount: Long) {
+        val state = stateService.getByWalletId(walletId)
         state.balance += amount
         state.date = LocalDateTime.now()
         state.root = calculateRootHash()

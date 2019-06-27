@@ -13,7 +13,7 @@ interface StateTrackingService {
 
 interface StateService {
 
-    fun getByWalletId(wallet: Wallet): State
+    fun getByWalletId(walletId: Long): State
 
     fun save(state: State)
 

@@ -12,8 +12,8 @@ class DefaultStateService(
 ) : StateService {
 
     @Transactional(readOnly = true)
-    override fun getByWalletId(wallet: Wallet): State {
-        return repository.findByWallet(wallet)
+    override fun getByWalletId(walletId: Long): State {
+        return repository.findByWalletId(walletId)
     }
 
     @Transactional
