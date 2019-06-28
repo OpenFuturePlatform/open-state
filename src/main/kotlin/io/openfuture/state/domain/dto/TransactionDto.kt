@@ -3,7 +3,6 @@ package io.openfuture.state.domain.dto
 import java.time.LocalDateTime
 
 class TransactionDto(
-
         val blockchainId: Long,
         val hash: String,
         val from: String,

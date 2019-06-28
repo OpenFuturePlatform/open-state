@@ -2,6 +2,8 @@ package io.openfuture.state.service
 
 import io.openfuture.state.entity.Transaction
 import io.openfuture.state.repository.TransactionRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -21,8 +23,8 @@ class DefaultTransactionService(
     }
 
     @Transactional(readOnly = true)
-    override fun getAllByWalletId(walletId: Long): List<Transaction> {
-        return repository.findAllByWalletId(walletId)
+    override fun getAllByWalletId(walletId: Long, pageable: Pageable): Page<Transaction> {
+        return repository.findAllByWalletIdOrderByDateDesc(walletId, pageable)
     }
 
 }

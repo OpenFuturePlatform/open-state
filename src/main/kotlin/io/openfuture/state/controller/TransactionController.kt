@@ -1,5 +1,7 @@
 package io.openfuture.state.controller
 
+import io.openfuture.state.domain.page.PageRequest
+import io.openfuture.state.domain.page.PageResponse
 import io.openfuture.state.entity.Transaction
 import io.openfuture.state.service.TransactionService
 import org.springframework.web.bind.annotation.GetMapping
@@ -13,12 +15,13 @@ class TransactionController(
         private val transactionService: TransactionService
 ) {
 
-    @GetMapping("/wallets/{walletId}/transactions")
-    fun getAllTransaction(@PathVariable walletId: Long): List<Transaction> {
-        return transactionService.getAllByWalletId(walletId)
+    @GetMapping
+    fun getAllTransaction(@PathVariable walletId: Long, pageRequest: PageRequest): PageResponse<Transaction> {
+        val transactions = transactionService.getAllByWalletId(walletId, pageRequest)
+        return PageResponse(transactions)
     }
 
-    @GetMapping("/wallets/{walletId}/transactions/{txId}")
+    @GetMapping("/{txId}")
     fun getTransaction(@PathVariable walletId: Long, @PathVariable txId: Long): Transaction {
         return transactionService.get(txId, walletId)
     }

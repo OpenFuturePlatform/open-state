@@ -3,6 +3,9 @@ package io.openfuture.state.service
 import io.openfuture.state.domain.dto.TransactionDto
 import io.openfuture.state.domain.request.CreateIntegrationRequest
 import io.openfuture.state.entity.*
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 
 
 interface StateTrackingService {
@@ -33,7 +36,7 @@ interface TransactionService {
 
     fun get(id: Long, walletId: Long): Transaction
 
-    fun getAllByWalletId(walletId: Long): List<Transaction>
+    fun getAllByWalletId(walletId: Long, pageable: Pageable): Page<Transaction>
 
 }
 
