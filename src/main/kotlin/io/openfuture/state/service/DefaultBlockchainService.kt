@@ -15,4 +15,9 @@ class DefaultBlockchainService(
         return repository.findById(id).get()
     }
 
+    @Transactional(readOnly = true)
+    override fun getAll(): List<Blockchain> {
+        return repository.findAll()
+    }
+
 }

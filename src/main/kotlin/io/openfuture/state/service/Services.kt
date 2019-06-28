@@ -50,4 +50,6 @@ interface BlockchainService {
 
     fun get(id: Long): Blockchain
 
+    fun getAll(): List<Blockchain>
+
 }
