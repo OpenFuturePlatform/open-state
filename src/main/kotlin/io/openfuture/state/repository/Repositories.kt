@@ -18,11 +18,7 @@ interface CoinRepository : BaseRepository<Coin>
 interface BlockchainRepository : BaseRepository<Blockchain>
 
 @Repository
-interface StateRepository : BaseRepository<State> {
-
-    fun findByWalletId(walletId: Long): State
-
-}
+interface StateRepository : BaseRepository<State>
 
 @Repository
 interface TransactionRepository : BaseRepository<Transaction> {
@@ -38,7 +34,11 @@ interface WalletRepository : BaseRepository<Wallet> {
 
     fun findByBlockchainIdAndAddress(blockchainId: Long, address: String): Wallet?
 
+    fun findAllByAccountId(accountId: Long): List<Wallet>
+
+    fun findByIdAndAccountId(id: Long, accountId: Long): Wallet
+
 }
 
 @Repository
-interface WebHookRepository : BaseRepository<WebHook>
+interface AccountRepository : BaseRepository<Account>

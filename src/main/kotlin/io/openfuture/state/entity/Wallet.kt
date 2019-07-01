@@ -9,8 +9,8 @@ import javax.persistence.*
 class Wallet(
 
         @ManyToOne
-        @JoinColumn(name = "web_hook_id", nullable = false)
-        var webHook: WebHook,
+        @JoinColumn(name = "account_id", nullable = false)
+        var account: Account,
 
         @ManyToOne
         @JoinColumn(name = "blockchain_id")
@@ -18,6 +18,10 @@ class Wallet(
 
         @Column(name = "address", nullable = false)
         var address: String,
+
+        @OneToOne
+        @JoinColumn(name = "state_id")
+        var state: State,
 
         @Column(name = "start_tracking_date", nullable = false)
         var startTrackingDate: LocalDateTime = LocalDateTime.now(),

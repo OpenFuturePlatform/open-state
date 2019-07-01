@@ -5,20 +5,21 @@ import io.openfuture.state.entity.Wallet
 import io.openfuture.state.repository.StateRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.*
 
 @Service
 class DefaultStateService(
         private val repository: StateRepository
 ) : StateService {
 
-    @Transactional(readOnly = true)
-    override fun getByWalletId(walletId: Long): State {
-        return repository.findByWalletId(walletId)
+    @Transactional
+    override fun save(state: State): State {
+        return repository.save(state)
     }
 
-    @Transactional
-    override fun save(state: State) {
-        repository.save(state)
+    @Transactional(readOnly = true)
+    override fun get(id: Long): State {
+        return repository.findById(id).get()
     }
 
 }

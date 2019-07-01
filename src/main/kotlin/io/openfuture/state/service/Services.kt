@@ -4,7 +4,6 @@ import io.openfuture.state.domain.dto.TransactionDto
 import io.openfuture.state.domain.request.CreateIntegrationRequest
 import io.openfuture.state.entity.*
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 
 
@@ -14,19 +13,35 @@ interface StateTrackingService {
 
 }
 
+interface AccountService {
+
+    fun create(webHook: String, integrations: Set<CreateIntegrationRequest>)
+
+    fun get(id: Long): Account
+
+    fun update(id: Long, webHook: String): Account
+
+    fun addWallets(id: Long, integrations: Set<CreateIntegrationRequest>): Account
+
+}
+
 interface StateService {
 
-    fun getByWalletId(walletId: Long): State
+    fun save(state: State): State
 
-    fun save(state: State)
+    fun get(id: Long): State
 
 }
 
 interface WalletService {
 
-    fun create(url: String, integrations: Set<CreateIntegrationRequest>)
+    fun save(wallet: Wallet): Wallet
 
     fun getByBlockchainAddress(blockchainId: Long, address: String): Wallet?
+
+    fun getAllByAccount(accountId: Long): List<Wallet>
+
+    fun get(id: Long, accountId: Long): Wallet
 
 }
 
@@ -37,12 +52,6 @@ interface TransactionService {
     fun get(id: Long, walletId: Long): Transaction
 
     fun getAllByWalletId(walletId: Long, pageable: Pageable): Page<Transaction>
-
-}
-
-interface WebHookService {
-
-    fun save(webHook: WebHook): WebHook
 
 }
 

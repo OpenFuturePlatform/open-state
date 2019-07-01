@@ -8,10 +8,6 @@ import javax.persistence.*
 @Table(name = "states")
 class State(
 
-        @OneToOne
-        @JoinColumn(name = "wallet_id")
-        var wallet: Wallet,
-
         @Column(name = "balance", nullable = false)
         var balance: Long = 0,
 
