@@ -9,7 +9,7 @@ import javax.persistence.*
 class State(
 
         @Column(name = "balance", nullable = false)
-        var balance: Long = 0,
+        var balance: Double = 0.0,
 
         @Column(name = "root", nullable = false)
         var root: String,

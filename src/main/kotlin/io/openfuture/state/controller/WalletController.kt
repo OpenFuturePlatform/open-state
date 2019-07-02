@@ -1,8 +1,7 @@
 package io.openfuture.state.controller
 
+import io.openfuture.state.domain.dto.WalletDto
 import io.openfuture.state.domain.request.AddWalletsRequest
-import io.openfuture.state.entity.Account
-import io.openfuture.state.entity.Wallet
 import io.openfuture.state.service.AccountService
 import io.openfuture.state.service.WalletService
 import org.springframework.web.bind.annotation.*
@@ -15,18 +14,20 @@ class WalletController(
 ) {
 
     @PostMapping
-    fun add(@PathVariable accountId: Long, @RequestBody request: AddWalletsRequest): Account {
-        return accountService.addWallets(accountId, request.integrations)
+    fun add(@PathVariable accountId: Long, @RequestBody request: AddWalletsRequest) {
+        accountService.addWallets(accountId, request.integrations)
     }
 
     @GetMapping
-    fun getAll(@PathVariable accountId: Long): List<Wallet> {
-        return walletService.getAllByAccount(accountId)
+    fun getAll(@PathVariable accountId: Long): List<WalletDto> {
+        val wallets = walletService.getAllByAccount(accountId)
+        return wallets.map { WalletDto(it) }
     }
 
     @GetMapping("/{id}")
-    fun get(@PathVariable accountId: Long, @PathVariable id: Long): Wallet {
-        return walletService.get(id, accountId)
+    fun get(@PathVariable accountId: Long, @PathVariable id: Long): WalletDto {
+        val wallet = walletService.get(id, accountId)
+        return WalletDto(wallet)
     }
 
 }

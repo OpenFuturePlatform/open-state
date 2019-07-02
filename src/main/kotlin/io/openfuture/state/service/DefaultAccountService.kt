@@ -38,11 +38,11 @@ class DefaultAccountService(
     }
 
     @Transactional
-    override fun addWallets(id: Long, integrations: Set<CreateIntegrationRequest>): Account {
+    override fun addWallets(id: Long, integrations: Set<CreateIntegrationRequest>) {
         val account = get(id)
         addWallets(account, integrations)
 
-        return repository.save(account)
+        repository.save(account)
     }
 
     private fun addWallets(account: Account, integrations: Set<CreateIntegrationRequest>) {

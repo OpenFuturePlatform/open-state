@@ -21,7 +21,7 @@ interface AccountService {
 
     fun update(id: Long, webHook: String): Account
 
-    fun addWallets(id: Long, integrations: Set<CreateIntegrationRequest>): Account
+    fun addWallets(id: Long, integrations: Set<CreateIntegrationRequest>)
 
 }
 
