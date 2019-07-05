@@ -2,6 +2,7 @@ package io.openfuture.state.entity
 
 import io.openfuture.state.entity.base.BaseModel
 import java.time.LocalDateTime
+import java.util.*
 import javax.persistence.*
 
 @Entity
@@ -15,6 +16,6 @@ class State(
         var root: String,
 
         @Column(name = "date", nullable = false)
-        var date: LocalDateTime = LocalDateTime.now()
+        var date: Long = Date().time
 
 ) : BaseModel()

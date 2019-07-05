@@ -4,9 +4,12 @@ import io.openfuture.state.domain.dto.TransactionDto
 import io.openfuture.state.entity.Transaction
 import io.openfuture.state.entity.TransactionType
 import io.openfuture.state.entity.Wallet
+import io.openfuture.state.util.HashUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
 @Service
 class DefaultStateTrackingService(
@@ -37,21 +40,17 @@ class DefaultStateTrackingService(
     private fun updateState(stateId: Long, amount: Long) {
         val state = stateService.get(stateId)
         state.balance += amount
-        state.date = LocalDateTime.now()
+        state.date = Date().time
         state.root = calculateRootHash()
 
         stateService.save(state)
     }
 
     private fun saveTransaction(wallet: Wallet, type: TransactionType, participant: String, tx: TransactionDto): Transaction {
-        val hash = calculateHash(tx)
+        val hash = Transaction.generateHash(wallet.address, type.getId(), participant, tx.amount, tx.date)
         val transaction = Transaction(wallet, tx.hash, hash, type.getId(), participant, tx.amount, tx.date, tx.blockHeight, tx.blockHash)
 
         return transactionService.save(transaction)
-    }
-
-    private fun calculateHash(tx: TransactionDto): String {
-        return "hash"
     }
 
     private fun calculateRootHash(): String {
