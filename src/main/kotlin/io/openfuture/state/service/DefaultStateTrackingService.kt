@@ -48,7 +48,7 @@ class DefaultStateTrackingService(
 
     private fun saveTransaction(wallet: Wallet, type: TransactionType, participant: String, tx: TransactionDto): Transaction {
         val hash = Transaction.generateHash(wallet.address, type.getId(), participant, tx.amount, tx.date)
-        val transaction = Transaction(wallet, tx.hash, hash, type.getId(), participant, tx.amount, tx.date, tx.blockHeight, tx.blockHash)
+        val transaction = Transaction(wallet, hash, tx.hash, type.getId(), participant, tx.amount, tx.date, tx.blockHeight, tx.blockHash)
 
         return transactionService.save(transaction)
     }
