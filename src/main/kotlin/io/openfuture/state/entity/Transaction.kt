@@ -46,19 +46,9 @@ class Transaction(
 
     fun getType(): TransactionType = DictionaryUtils.valueOf(TransactionType::class.java, typeId)
 
-    fun getBytes(): ByteArray = ByteBuffer.allocate(Long.SIZE_BYTES + Long.SIZE_BYTES + wallet.address.toByteArray().size +
-            Long.SIZE_BYTES + participant.toByteArray().size)
-            .put(wallet.address.toByteArray())
-            .putInt(typeId)
-            .put(participant.toByteArray())
-            .putLong(amount)
-            .putLong(date)
-            .array()
-
     companion object {
         fun generateHash(address: String, typeId: Int, participantAddress: String, amount: Long, date: Long): String {
-            val bytes = ByteBuffer.allocate(Long.SIZE_BYTES + Long.SIZE_BYTES + address.toByteArray().size +
-                    Long.SIZE_BYTES + participantAddress.toByteArray().size)
+            val bytes = ByteBuffer.allocate(address.toByteArray().size + Int.SIZE_BYTES + participantAddress.toByteArray().size + Long.SIZE_BYTES + Long.SIZE_BYTES)
                     .put(address.toByteArray())
                     .putInt(typeId)
                     .put(participantAddress.toByteArray())

@@ -1,6 +1,7 @@
 package io.openfuture.state.service
 
 import io.openfuture.state.domain.dto.TransactionDto
+import io.openfuture.state.entity.State
 import io.openfuture.state.entity.Transaction
 import io.openfuture.state.entity.TransactionType
 import io.openfuture.state.entity.Wallet
@@ -25,23 +26,25 @@ class DefaultStateTrackingService(
 
         if (fromWallet != null) {
             val outputTransaction = saveTransaction(fromWallet, TransactionType.OUTPUT, tx.to, tx)
-            updateState(fromWallet.state.id, outputTransaction.amount.unaryMinus())
+            updateState(fromWallet.address, fromWallet.state.id, outputTransaction.amount.unaryMinus())
         }
 
         val toWallet = walletService.getByBlockchainAddress(tx.blockchainId, tx.to)
 
         if (toWallet != null) {
             val inputTransaction = saveTransaction(toWallet, TransactionType.INPUT, tx.from, tx)
-            updateState(toWallet.id, inputTransaction.amount)
+            updateState(toWallet.address, toWallet.id, inputTransaction.amount)
         }
 
     }
 
-    private fun updateState(stateId: Long, amount: Long) {
+    private fun updateState(walletAddress: String, stateId: Long, amount: Long) {
         val state = stateService.get(stateId)
         state.balance += amount
         state.date = Date().time
-        state.root = calculateRootHash()
+
+        val hash = State.generateHash(walletAddress, state.balance, state.date)
+        state.root = HashUtils.merkleRoot(listOf(state.root, hash))
 
         stateService.save(state)
     }
@@ -51,10 +54,6 @@ class DefaultStateTrackingService(
         val transaction = Transaction(wallet, hash, tx.hash, type.getId(), participant, tx.amount, tx.date, tx.blockHeight, tx.blockHash)
 
         return transactionService.save(transaction)
-    }
-
-    private fun calculateRootHash(): String {
-        return "hash"
     }
 
 }

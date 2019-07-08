@@ -48,7 +48,10 @@ class DefaultAccountService(
     private fun addWallets(account: Account, integrations: Set<CreateIntegrationRequest>) {
         integrations.forEach {
             val blockchain = blockchainService.get(it.blockchainId)
-            val startState = stateService.save(State(root = "start root"))
+
+            val startHash = State.generateHash(it.address)
+            val startState = stateService.save(State(root = startHash))
+
             walletService.save(Wallet(account, blockchain, it.address, startState))
         }
 
