@@ -2,6 +2,7 @@ package io.openfuture.state.service
 
 import io.openfuture.state.entity.Transaction
 import io.openfuture.state.repository.TransactionRepository
+import javassist.NotFoundException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -19,7 +20,7 @@ class DefaultTransactionService(
 
     @Transactional(readOnly = true)
     override fun get(id: Long, walletId: Long): Transaction {
-        return repository.findByIdAndWalletId(id, walletId)
+        return repository.findByIdAndWalletId(id, walletId) ?: throw NotFoundException("Transaction with id $id not found")
     }
 
     @Transactional(readOnly = true)

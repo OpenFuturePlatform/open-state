@@ -37,7 +37,7 @@ CREATE TABLE wallets
     state_id            BIGINT REFERENCES states,
     start_tracking_date BIGINT      NOT NULL,
     is_active           BOOLEAN     NOT NULL DEFAULT TRUE,
-    UNIQUE (address, blockchain_id)
+    UNIQUE (account_id, blockchain_id, address)
 );
 
 CREATE TABLE transactions

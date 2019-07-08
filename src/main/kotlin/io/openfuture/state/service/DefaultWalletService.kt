@@ -2,6 +2,7 @@ package io.openfuture.state.service
 
 import io.openfuture.state.entity.Wallet
 import io.openfuture.state.repository.WalletRepository
+import javassist.NotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -22,7 +23,7 @@ class DefaultWalletService(
 
     @Transactional(readOnly = true)
     override fun get(id: Long, accountId: Long): Wallet {
-        return repository.findByIdAndAccountId(id, accountId)
+        return repository.findByIdAndAccountId(id, accountId) ?: throw NotFoundException("Wallet with id $id not found")
     }
 
     @Transactional(readOnly = true)

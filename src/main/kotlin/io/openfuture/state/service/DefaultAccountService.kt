@@ -4,6 +4,7 @@ import io.openfuture.state.domain.request.CreateIntegrationRequest
 import io.openfuture.state.entity.Account
 import io.openfuture.state.entity.State
 import io.openfuture.state.entity.Wallet
+import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.AccountRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,12 +21,12 @@ class DefaultAccountService(
     override fun create(webHook: String, integrations: Set<CreateIntegrationRequest>) {
         val account = repository.save(Account(webHook))
 
-        addWallets(account, integrations)
+        createWallets(account, integrations)
     }
 
     @Transactional(readOnly = true)
     override fun get(id: Long): Account {
-        return repository.findById(id).get()
+        return repository.findById(id).orElseGet { throw NotFoundException("Account with id $id not found") }
     }
 
     @Transactional
@@ -40,12 +41,12 @@ class DefaultAccountService(
     @Transactional
     override fun addWallets(id: Long, integrations: Set<CreateIntegrationRequest>) {
         val account = get(id)
-        addWallets(account, integrations)
+        createWallets(account, integrations)
 
         repository.save(account)
     }
 
-    private fun addWallets(account: Account, integrations: Set<CreateIntegrationRequest>) {
+    private fun createWallets(account: Account, integrations: Set<CreateIntegrationRequest>) {
         integrations.forEach {
             val blockchain = blockchainService.get(it.blockchainId)
 
