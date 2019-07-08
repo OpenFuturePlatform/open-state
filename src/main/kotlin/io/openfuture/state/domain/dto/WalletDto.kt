@@ -8,12 +8,12 @@ data class WalletDto(
         val address: String,
         val balance: Double,
         val currency: String,
-        val lastUpdated: LocalDateTime,
-        val startTrackingDate: LocalDateTime,
+        val lastUpdated: Long,
+        val startTrackingDate: Long,
         val active: Boolean
 
-
 ) {
+
     constructor(wallet: Wallet) : this(
             wallet.id,
             wallet.address,

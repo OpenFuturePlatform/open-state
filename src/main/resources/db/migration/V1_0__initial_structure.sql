@@ -25,7 +25,7 @@ CREATE TABLE states
     id      BIGSERIAL PRIMARY KEY,
     balance FLOAT       NOT NULL DEFAULT 0,
     root    VARCHAR(64) NOT NULL,
-    date    TIMESTAMP   NOT NULL
+    date    BIGINT      NOT NULL
 );
 
 CREATE TABLE wallets
@@ -35,7 +35,7 @@ CREATE TABLE wallets
     blockchain_id       BIGINT REFERENCES blockchains,
     address             VARCHAR(64) NOT NULL,
     state_id            BIGINT REFERENCES states,
-    start_tracking_date TIMESTAMP   NOT NULL,
+    start_tracking_date BIGINT      NOT NULL,
     is_active           BOOLEAN     NOT NULL DEFAULT TRUE,
     UNIQUE (account_id, blockchain_id, address)
 );
@@ -49,7 +49,7 @@ CREATE TABLE transactions
     type_id       INT         NOT NULL,
     participant   VARCHAR(64) NOT NULL,
     amount        BIGINT      NOT NULL,
-    date          TIMESTAMP   NOT NULL,
+    date          BIGINT      NOT NULL,
     block_height  BIGINT      NOT NULL,
     block_hash    VARCHAR(64) NOT NULL,
     UNIQUE (wallet_id, hash)

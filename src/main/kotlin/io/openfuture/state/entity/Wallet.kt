@@ -1,7 +1,7 @@
 package io.openfuture.state.entity
 
 import io.openfuture.state.entity.base.BaseModel
-import java.time.LocalDateTime
+import java.util.*
 import javax.persistence.*
 
 @Entity
@@ -24,7 +24,7 @@ class Wallet(
         var state: State,
 
         @Column(name = "start_tracking_date", nullable = false)
-        var startTrackingDate: LocalDateTime = LocalDateTime.now(),
+        var startTrackingDate: Long = Date().time,
 
         @Column(name = "is_active", nullable = false)
         var isActive: Boolean = true
