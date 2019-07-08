@@ -1,0 +1,111 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+stages:
+  - test
+  - build
+  - package
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+
+###########################
+# Tests
+###########################
+tests-unit:
+  stage: test
+  image: openjdk:8-jdk
+  variables:
+    POSTGRES_HOST: "postgres"
+    POSTGRES_DB: "db"
+    POSTGRES_USER: "user"
+    POSTGRES_PASSWORD: "password"
+  services:
+    - name: postgres:10
+      alias: $POSTGRES_HOST
+  before_script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
+  script:
+    - ./gradlew check
+  cache:
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+
+###########################
+# Building
+###########################
+build-jar:
+  stage: build
+  image: openjdk:8-jdk
+  before_script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
+  script:
+    - ./gradlew assemble
+  cache:
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+  artifacts:
+    paths:
+      - build/libs/*.jar
+    expire_in: 1 week
+  only:
+    - sprint
+    # - master
+
+###########################
+# Packaging
+###########################
+package-docker:
+  stage: package
+  before_script:
+    - export DOCKERIMAGE_TAG=$CI_COMMIT_REF_SLUG-$(date +%Y%m%d-%H%M%S)-${CI_COMMIT_SHA:0:8}
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - echo "export DOCKERIMAGE_TAG=$(echo $DOCKERIMAGE_TAG)" > variables
+  script:
+    - docker build
+      --tag $CI_REGISTRY_IMAGE:$DOCKERIMAGE_TAG
+      --file docker/Dockerfile .
+    - docker push $CI_REGISTRY_IMAGE:$DOCKERIMAGE_TAG
+  artifacts:
+    paths:
+      - variables
+  dependencies:
+    - build-jar
+  only:
+    - sprint
+    # - master
+
+###########################
+# Deploy
+###########################
+.deploy-to-host-script: &deploy_to_host
+  - apk add --no-cache openssh-client
+  - apk add --no-cache py-pip py-paramiko
+  - pip install docker-compose==1.23.2
+  - eval $(ssh-agent -s)
+  - echo "$DEPLOY_KEY" | tr -d '\r' | ssh-add - > /dev/null
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - ssh-keyscan $SERVER >> ~/.ssh/known_hosts
+  - chmod 644 ~/.ssh/known_hosts
+  - export DOCKER_HOST="ssh://gitlab@$SERVER"
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  - docker-compose -f docker-compose-server.yml up -d
+
+deploy:
+  stage: deploy
+  before_script:
+    - source variables
+    - SERVER=$SPRINT_SERVER
+    - DEPLOY_KEY=$SPRINT_DEPLOY_KEY
+    - export POSTGRES_PASSWORD=$SPRINT_POSTGRES_PASSWORD
+  script: *deploy_to_host
+  dependencies:
+    - package-docker
+  only:
+    - sprint
