@@ -23,7 +23,7 @@ interface StateRepository : BaseRepository<State>
 @Repository
 interface TransactionRepository : BaseRepository<Transaction> {
 
-    fun findByIdAndWalletId(id: Long, walletId: Long): Transaction
+    fun findByIdAndWalletId(id: Long, walletId: Long): Transaction?
 
     fun findAllByWalletIdOrderByDateDesc(walletId: Long, pageable: Pageable): Page<Transaction>
 
@@ -36,7 +36,7 @@ interface WalletRepository : BaseRepository<Wallet> {
 
     fun findAllByAccountId(accountId: Long): List<Wallet>
 
-    fun findByIdAndAccountId(id: Long, accountId: Long): Wallet
+    fun findByIdAndAccountId(id: Long, accountId: Long): Wallet?
 
 }
 

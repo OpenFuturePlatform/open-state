@@ -20,14 +20,14 @@ class DefaultStateTrackingService(
 
         val fromWallet = walletService.getByBlockchainAddress(tx.blockchainId, tx.from)
 
-        if (fromWallet != null) {
+        if (null != fromWallet) {
             val outputTransaction = saveTransaction(fromWallet, TransactionType.OUTPUT, tx.to, tx)
             updateState(fromWallet.state.id, outputTransaction.amount.unaryMinus())
         }
 
         val toWallet = walletService.getByBlockchainAddress(tx.blockchainId, tx.to)
 
-        if (toWallet != null) {
+        if (null != toWallet) {
             val inputTransaction = saveTransaction(toWallet, TransactionType.INPUT, tx.from, tx)
             updateState(toWallet.id, inputTransaction.amount)
         }
