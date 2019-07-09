@@ -22,13 +22,15 @@ class WalletController(
 
     @GetMapping
     fun getAll(@PathVariable accountId: Long): List<WalletDto> {
-        val wallets = walletService.getAllByAccount(accountId)
+        val account = accountService.get(accountId)
+        val wallets = walletService.getAllByAccount(account)
         return wallets.map { WalletDto(it) }
     }
 
     @GetMapping("/{id}")
     fun get(@PathVariable accountId: Long, @PathVariable id: Long): WalletDto {
-        val wallet = walletService.get(id, accountId)
+        val account = accountService.get(accountId)
+        val wallet = walletService.get(id, account)
         return WalletDto(wallet)
     }
 

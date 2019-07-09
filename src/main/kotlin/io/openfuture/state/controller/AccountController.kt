@@ -24,13 +24,14 @@ class AccountController(
     @GetMapping("/{id}")
     fun get(@PathVariable id: Long): AccountDto {
         val account = accountService.get(id)
-        account.wallets = walletService.getAllByAccount(account.id).toMutableSet()
+        account.wallets = walletService.getAllByAccount(account).toMutableSet()
         return AccountDto(account)
     }
 
     @PutMapping
     fun update(@RequestBody request: UpdateAccountWebHookRequest): AccountDto {
         val updatedAccount = accountService.update(request.id, request.webHook)
+        updatedAccount.wallets = walletService.getAllByAccount(updatedAccount).toMutableSet()
         return AccountDto(updatedAccount)
     }
 
