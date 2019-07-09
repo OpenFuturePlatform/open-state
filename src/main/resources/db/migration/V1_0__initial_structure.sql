@@ -31,13 +31,11 @@ CREATE TABLE states
 CREATE TABLE wallets
 (
     id                  BIGSERIAL PRIMARY KEY,
-    account_id          BIGINT REFERENCES accounts,
     blockchain_id       BIGINT REFERENCES blockchains,
     address             VARCHAR(64) NOT NULL,
-    state_id            BIGINT REFERENCES states,
+    state_id            BIGINT REFERENCES states UNIQUE,
     start_tracking_date BIGINT      NOT NULL,
-    is_active           BOOLEAN     NOT NULL DEFAULT TRUE,
-    UNIQUE (account_id, blockchain_id, address)
+    UNIQUE (blockchain_id, address)
 );
 
 CREATE TABLE transactions
@@ -53,4 +51,10 @@ CREATE TABLE transactions
     block_height  BIGINT      NOT NULL,
     block_hash    VARCHAR(64) NOT NULL,
     UNIQUE (wallet_id, hash)
+);
+
+CREATE TABLE accounts2wallets
+(
+    account_id BIGINT REFERENCES accounts,
+    wallet_id  BIGINT REFERENCES wallets
 );
