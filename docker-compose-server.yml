@@ -12,7 +12,7 @@ services:
     ports:
       - 80:8080
   postgres:
-    image: postgres:9-alpine
+    image: postgres:10-alpine
     environment:
       - POSTGRES_USER=openstate
       - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
