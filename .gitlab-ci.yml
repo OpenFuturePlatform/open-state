@@ -55,7 +55,7 @@ build-jar:
     expire_in: 1 week
   only:
     - sprint
-    # - master
+    - master
 
 ###########################
 # Packaging
@@ -78,7 +78,7 @@ package-docker:
     - build-jar
   only:
     - sprint
-    # - master
+    - master
 
 ###########################
 # Deploy
@@ -96,6 +96,7 @@ package-docker:
   - export DOCKER_HOST="ssh://gitlab@$SERVER"
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   - docker-compose -f docker-compose-server.yml up -d
+  - docker image ls --filter reference=$CI_REGISTRY_IMAGE -q | tail -n +4 | xargs --no-run-if-empty docker image rm
 
 deploy-sprint:
   stage: deploy
