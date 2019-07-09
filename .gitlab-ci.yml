@@ -97,7 +97,7 @@ package-docker:
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   - docker-compose -f docker-compose-server.yml up -d
 
-deploy:
+deploy-sprint:
   stage: deploy
   before_script:
     - source variables
@@ -109,3 +109,16 @@ deploy:
     - package-docker
   only:
     - sprint
+
+deploy-master:
+  stage: deploy
+  before_script:
+    - source variables
+    - SERVER=$MASTER_SERVER
+    - DEPLOY_KEY=$MASTER_DEPLOY_KEY
+    - export POSTGRES_PASSWORD=$MASTER_POSTGRES_PASSWORD
+  script: *deploy_to_host
+  dependencies:
+    - package-docker
+  only:
+    - master
