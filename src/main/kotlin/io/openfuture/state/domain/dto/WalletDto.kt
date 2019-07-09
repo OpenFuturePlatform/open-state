@@ -9,8 +9,7 @@ data class WalletDto(
         val balance: Double,
         val currency: String,
         val lastUpdated: Long,
-        val startTrackingDate: Long,
-        val active: Boolean
+        val startTrackingDate: Long
 
 ) {
 
@@ -20,8 +19,7 @@ data class WalletDto(
             wallet.state.balance.div(10.pow(wallet.blockchain.coin.decimals)),
             wallet.blockchain.coin.short_title,
             wallet.state.date,
-            wallet.startTrackingDate,
-            wallet.isActive
+            wallet.startTrackingDate
     )
 
 }

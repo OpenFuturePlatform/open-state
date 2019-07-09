@@ -1,5 +1,6 @@
 package io.openfuture.state.controller
 
+import io.openfuture.state.domain.dto.AccountDto
 import io.openfuture.state.domain.dto.WalletDto
 import io.openfuture.state.domain.request.AddWalletsRequest
 import io.openfuture.state.service.AccountService
@@ -14,8 +15,9 @@ class WalletController(
 ) {
 
     @PostMapping
-    fun add(@PathVariable accountId: Long, @RequestBody request: AddWalletsRequest) {
-        accountService.addWallets(accountId, request.integrations)
+    fun add(@PathVariable accountId: Long, @RequestBody request: AddWalletsRequest): AccountDto {
+        val updatedAccount = accountService.addWallets(accountId, request.integrations)
+        return AccountDto(updatedAccount)
     }
 
     @GetMapping

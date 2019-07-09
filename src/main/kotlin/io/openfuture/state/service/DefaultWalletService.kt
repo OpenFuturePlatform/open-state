@@ -18,12 +18,12 @@ class DefaultWalletService(
 
     @Transactional(readOnly = true)
     override fun getAllByAccount(accountId: Long): List<Wallet> {
-        return repository.findAllByAccountId(accountId)
+        return repository.findAllByAccounts_Id(accountId)
     }
 
     @Transactional(readOnly = true)
     override fun get(id: Long, accountId: Long): Wallet {
-        return repository.findByIdAndAccountId(id, accountId) ?: throw NotFoundException("Wallet with id $id not found")
+        return repository.findByIdAndAccounts_Id(id, accountId) ?: throw NotFoundException("Wallet with id $id not found")
     }
 
     @Transactional(readOnly = true)
