@@ -8,7 +8,7 @@ import javax.persistence.*
 class Account(
 
         @Column(name = "web_hook", nullable = false)
-        var webhook: String,
+        var webHook: String,
 
         @Column(name = "is_enabled", nullable = false)
         var isEnabled: Boolean = true,

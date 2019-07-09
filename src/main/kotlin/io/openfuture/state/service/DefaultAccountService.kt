@@ -35,7 +35,7 @@ class DefaultAccountService(
     override fun update(id: Long, webHook: String): Account {
         val account = get(id)
 
-        account.webhook = webHook
+        account.webHook = webHook
         return repository.save(account)
     }
 

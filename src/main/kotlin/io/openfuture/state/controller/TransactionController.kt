@@ -3,7 +3,6 @@ package io.openfuture.state.controller
 import io.openfuture.state.domain.dto.TrackingTransactionDto
 import io.openfuture.state.domain.page.PageRequest
 import io.openfuture.state.domain.page.PageResponse
-import io.openfuture.state.entity.Transaction
 import io.openfuture.state.service.TransactionService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

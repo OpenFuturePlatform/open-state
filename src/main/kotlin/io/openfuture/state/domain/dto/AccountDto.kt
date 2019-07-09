@@ -11,7 +11,7 @@ data class AccountDto(
 
     constructor(account: Account) : this(
             account.id,
-            account.webhook,
+            account.webHook,
             account.isEnabled,
             account.wallets.size
     )

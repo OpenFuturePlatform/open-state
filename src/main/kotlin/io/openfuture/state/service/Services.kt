@@ -39,9 +39,9 @@ interface WalletService {
 
     fun getByBlockchainAddress(blockchainId: Long, address: String): Wallet?
 
-    fun getAllByAccount(accountId: Long): List<Wallet>
+    fun getAllByAccount(account: Account): List<Wallet>
 
-    fun get(id: Long, accountId: Long): Wallet
+    fun get(id: Long, account: Account): Wallet
 
 }
 
