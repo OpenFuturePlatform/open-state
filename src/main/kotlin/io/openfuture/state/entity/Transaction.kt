@@ -48,7 +48,8 @@ class Transaction(
 
     companion object {
         fun generateHash(address: String, typeId: Int, participantAddress: String, amount: Long, date: Long): String {
-            val bytes = ByteBuffer.allocate(address.toByteArray().size + Int.SIZE_BYTES + participantAddress.toByteArray().size + Long.SIZE_BYTES + Long.SIZE_BYTES)
+            val bytes = ByteBuffer.allocate(address.toByteArray().size + Int.SIZE_BYTES +
+                    participantAddress.toByteArray().size + Long.SIZE_BYTES + Long.SIZE_BYTES)
                     .put(address.toByteArray())
                     .putInt(typeId)
                     .put(participantAddress.toByteArray())

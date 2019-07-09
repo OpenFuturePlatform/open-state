@@ -1,12 +1,10 @@
 package io.openfuture.state.service
 
 import io.openfuture.state.entity.State
-import io.openfuture.state.entity.Wallet
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.StateRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
 
 @Service
 class DefaultStateService(
