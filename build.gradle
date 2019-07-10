@@ -71,7 +71,9 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories.from = files(classDirectories.files.collect {
             fileTree(dir: it,
-                    exclude: ['io/openfuture/state/entity/**'
+                    exclude: ['io/openfuture/state/entity/**',
+                            'io/openfuture/state/config',
+                            'io/openfuture/state/domain'
                     ])
         })
     }

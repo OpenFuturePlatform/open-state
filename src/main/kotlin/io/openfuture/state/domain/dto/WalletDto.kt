@@ -17,7 +17,7 @@ data class WalletDto(
             wallet.id,
             wallet.address,
             wallet.state.balance.div(10.pow(wallet.blockchain.coin.decimals)),
-            wallet.blockchain.coin.short_title,
+            wallet.blockchain.coin.shortTitle,
             wallet.state.date,
             wallet.startTrackingDate
     )
