@@ -31,4 +31,14 @@ class HashUtilsTest {
         assertThat(merkleRootHash).isNotEmpty()
     }
 
+    @Test
+    fun merkleRootShouldReturnHashStringWhenGetOneHashString() {
+        val hashString1 = "hash1"
+
+        val merkleRootHash = HashUtils.merkleRoot(listOf(hashString1))
+
+        assertThat(merkleRootHash).isNotEmpty()
+        assertThat(merkleRootHash).isEqualTo(hashString1)
+    }
+
 }
