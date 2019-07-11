@@ -1,0 +1,10 @@
+{
+  "webHook": "http://test-webhook.com",
+  "integrations": [
+    {
+      "address": "address1",
+      "blockchainId": 1
+
+    }
+  ]
+}

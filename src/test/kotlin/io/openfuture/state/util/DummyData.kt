@@ -5,7 +5,7 @@ import io.openfuture.state.entity.*
 import java.util.*
 
 fun createDummyAccount(
-        webHook: String = "http://webhook.com",
+        webHook: String = "http://test-webhook.com",
         isEnabled: Boolean = true,
         wallets: MutableSet<Wallet> = mutableSetOf(createDummyWallet())
 ) = Account(webHook, isEnabled, wallets)
