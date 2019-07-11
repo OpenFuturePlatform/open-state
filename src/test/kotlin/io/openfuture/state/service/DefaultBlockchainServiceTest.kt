@@ -1,5 +1,6 @@
 package io.openfuture.state.service
 
+import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.BlockchainRepository
 import io.openfuture.state.util.createDummyBlockchain
 import org.assertj.core.api.Assertions.assertThat
@@ -31,6 +32,15 @@ class DefaultBlockchainServiceTest {
         val result = blockchainService.get(blockchain.id)
 
         assertThat(result).isEqualTo(blockchain)
+    }
+
+    @Test(expected = NotFoundException::class)
+    fun getShouldThrowExceptionWhenBlockchainDoesNotExists() {
+        val blockchain = createDummyBlockchain().apply { id = 1 }
+
+        given(repository.findById(blockchain.id)).willReturn(Optional.empty())
+
+        blockchainService.get(blockchain.id)
     }
 
     @Test
