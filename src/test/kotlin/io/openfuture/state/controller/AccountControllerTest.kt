@@ -73,6 +73,16 @@ class AccountControllerTest {
 
     @Test
     fun update() {
+        val requestBody = readResource("updateAccountWebHookRequest.json", javaClass)
+        val account = createDummyAccount().apply { id = 1 }
+
+        given(accountService.update(account.id, "http://updated-webhook.com")).willReturn(account)
+        given(walletService.getAllByAccount(account)).willReturn(account.wallets.toList())
+
+        mockMvc.perform(put("/api/accounts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+                .andExpect(status().isOk)
     }
 
 }
