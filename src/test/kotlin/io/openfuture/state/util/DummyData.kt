@@ -1,5 +1,6 @@
 package io.openfuture.state.util
 
+import io.openfuture.state.domain.dto.TransactionDto
 import io.openfuture.state.entity.*
 import java.util.*
 
@@ -45,3 +46,14 @@ fun createDummyTransaction(
         blockHeight: Long = 1,
         blockHash: String = "block hash"
 ) = Transaction(wallet, hash, externalHash, typeId, participant, amount, date, blockHeight, blockHash)
+
+fun createDummyTransactionDto(
+        blockchainId: Long = 1,
+        hash: String = "external hash",
+        from: String = "address1",
+        to: String = "address2",
+        amount: Long = 100,
+        date: Long = Date().time,
+        blockHeight: Long = 1,
+        blockHash: String = "block hash"
+) = TransactionDto(blockchainId, hash, from, to, amount, date, blockHeight, blockHash)
