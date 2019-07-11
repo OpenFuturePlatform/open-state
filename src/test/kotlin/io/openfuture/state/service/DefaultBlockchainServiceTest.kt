@@ -4,9 +4,8 @@ import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.BlockchainRepository
 import io.openfuture.state.util.createDummyBlockchain
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
-
 import org.junit.Before
+import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.mock
 import java.util.*
