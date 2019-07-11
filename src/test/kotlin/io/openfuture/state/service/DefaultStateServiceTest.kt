@@ -35,7 +35,7 @@ class DefaultStateServiceTest {
     }
 
     @Test
-    fun getShouldReturnBlockchainWhenExists() {
+    fun getShouldReturnStateWhenExists() {
         val state = createDummyState().apply { id = 1 }
 
         given(repository.findById(state.id)).willReturn(Optional.of(state))
@@ -46,7 +46,7 @@ class DefaultStateServiceTest {
     }
 
     @Test(expected = NotFoundException::class)
-    fun getShouldThrowExceptionWhenBlockchainDoesNotExists() {
+    fun getShouldThrowExceptionWhenStateDoesNotExists() {
         val state = createDummyState().apply { id = 1 }
 
         given(repository.findById(state.id)).willReturn(Optional.empty())

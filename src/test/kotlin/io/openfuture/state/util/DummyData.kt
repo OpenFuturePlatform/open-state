@@ -33,3 +33,15 @@ fun createDummyCoin(
         shortTitle: String = "TC",
         decimals: Int = 1
 ) = Coin(title, shortTitle, decimals)
+
+fun createDummyTransaction(
+        wallet: Wallet = createDummyWallet(),
+        hash: String = "hash",
+        externalHash: String = "external hash",
+        typeId: Int = 1,
+        participant: String = "participant address",
+        amount: Long = 100,
+        date: Long = Date().time,
+        blockHeight: Long = 1,
+        blockHash: String = "block hash"
+) = Transaction(wallet, hash, externalHash, typeId, participant, amount, date, blockHeight, blockHash)
