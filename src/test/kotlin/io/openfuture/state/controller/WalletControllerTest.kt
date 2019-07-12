@@ -27,7 +27,7 @@ WalletControllerTest : BaseControllerTest() {
 
 
     @Test
-    fun add() {
+    fun addWalletsToAccountTest() {
         val requestBody = readResource("addWalletRequest.json", javaClass)
         val account = createDummyAccount().apply { id = 1 }
 
@@ -52,7 +52,7 @@ WalletControllerTest : BaseControllerTest() {
     }
 
     @Test
-    fun get() {
+    fun getWalletByIdAndAccountId() {
         val wallet = createDummyWallet().apply { id = 1 }
         val account = createDummyAccount(wallets = mutableSetOf(wallet)).apply { id = 1 }
 
