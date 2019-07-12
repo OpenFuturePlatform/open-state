@@ -1,0 +1,9 @@
+{
+  "integrations": [
+    {
+      "address": "address2",
+      "blockchainId": 1
+
+    }
+  ]
+}

@@ -13,7 +13,7 @@ class Coin(
         var title: String,
 
         @Column(name = "short_title", nullable = false)
-        var short_title: String,
+        var shortTitle: String,
 
         @Column(name = "decimals", nullable = false)
         var decimals: Int

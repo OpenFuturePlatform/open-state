@@ -14,7 +14,7 @@ data class BlockchainDto(
             blockchain.id,
             blockchain.title,
             blockchain.coin.title,
-            blockchain.coin.short_title,
+            blockchain.coin.shortTitle,
             blockchain.coin.decimals
     )
 
