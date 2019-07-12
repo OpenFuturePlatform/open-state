@@ -1,6 +1,9 @@
 package io.openfuture.state.domain.request
 
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotEmpty
+
 data class CreateAccountRequest(
-        val webHook: String,
-        val integrations: Set<CreateIntegrationRequest>
+        @field:NotBlank val webHook: String,
+        @field:NotEmpty val integrations: Set<CreateIntegrationRequest>
 )

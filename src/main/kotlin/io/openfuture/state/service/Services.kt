@@ -15,13 +15,13 @@ interface StateTrackingService {
 
 interface AccountService {
 
-    fun create(webHook: String, integrations: Set<CreateIntegrationRequest>)
+    fun save(account: Account, integrations: Set<CreateIntegrationRequest>): Account
 
     fun get(id: Long): Account
 
     fun update(id: Long, webHook: String): Account
 
-    fun addWallets(id: Long, integrations: Set<CreateIntegrationRequest>)
+    fun addWallets(id: Long, integrations: Set<CreateIntegrationRequest>): Account
 
 }
 
@@ -39,9 +39,9 @@ interface WalletService {
 
     fun getByBlockchainAddress(blockchainId: Long, address: String): Wallet?
 
-    fun getAllByAccount(accountId: Long): List<Wallet>
+    fun getAllByAccount(account: Account): List<Wallet>
 
-    fun get(id: Long, accountId: Long): Wallet
+    fun get(id: Long, account: Account): Wallet
 
 }
 

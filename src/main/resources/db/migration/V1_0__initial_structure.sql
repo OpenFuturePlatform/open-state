@@ -25,19 +25,17 @@ CREATE TABLE states
     id      BIGSERIAL PRIMARY KEY,
     balance FLOAT       NOT NULL DEFAULT 0,
     root    VARCHAR(64) NOT NULL,
-    date    TIMESTAMP   NOT NULL
+    date    BIGINT      NOT NULL
 );
 
 CREATE TABLE wallets
 (
     id                  BIGSERIAL PRIMARY KEY,
-    account_id          BIGINT REFERENCES accounts,
     blockchain_id       BIGINT REFERENCES blockchains,
     address             VARCHAR(64) NOT NULL,
-    state_id            BIGINT REFERENCES states,
-    start_tracking_date TIMESTAMP   NOT NULL,
-    is_active           BOOLEAN     NOT NULL DEFAULT TRUE,
-    UNIQUE (address, blockchain_id)
+    state_id            BIGINT REFERENCES states UNIQUE,
+    start_tracking_date BIGINT      NOT NULL,
+    UNIQUE (blockchain_id, address)
 );
 
 CREATE TABLE transactions
@@ -49,8 +47,14 @@ CREATE TABLE transactions
     type_id       INT         NOT NULL,
     participant   VARCHAR(64) NOT NULL,
     amount        BIGINT      NOT NULL,
-    date          TIMESTAMP   NOT NULL,
+    date          BIGINT      NOT NULL,
     block_height  BIGINT      NOT NULL,
     block_hash    VARCHAR(64) NOT NULL,
     UNIQUE (wallet_id, hash)
+);
+
+CREATE TABLE accounts2wallets
+(
+    account_id BIGINT REFERENCES accounts,
+    wallet_id  BIGINT REFERENCES wallets
 );

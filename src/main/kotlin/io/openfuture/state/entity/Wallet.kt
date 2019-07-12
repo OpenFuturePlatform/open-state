@@ -1,16 +1,15 @@
 package io.openfuture.state.entity
 
 import io.openfuture.state.entity.base.BaseModel
-import java.time.LocalDateTime
+import java.util.*
 import javax.persistence.*
 
 @Entity
 @Table(name = "wallets")
 class Wallet(
 
-        @ManyToOne
-        @JoinColumn(name = "account_id", nullable = false)
-        var account: Account,
+        @ManyToMany(mappedBy = "wallets")
+        var accounts: MutableSet<Account> = mutableSetOf(),
 
         @ManyToOne
         @JoinColumn(name = "blockchain_id")
@@ -24,9 +23,6 @@ class Wallet(
         var state: State,
 
         @Column(name = "start_tracking_date", nullable = false)
-        var startTrackingDate: LocalDateTime = LocalDateTime.now(),
-
-        @Column(name = "is_active", nullable = false)
-        var isActive: Boolean = true
+        var startTrackingDate: Long = Date().time
 
 ) : BaseModel()

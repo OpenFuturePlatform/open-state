@@ -1,0 +1,25 @@
+version: "2.4"
+services:
+  backend:
+    image: $CI_REGISTRY_IMAGE:$DOCKERIMAGE_TAG
+    depends_on:
+      - postgres
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=openstate
+      - POSTGRES_USER=openstate
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+    ports:
+      - 80:8080
+  postgres:
+    image: postgres:10-alpine
+    environment:
+      - POSTGRES_USER=openstate
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+    volumes:
+      - openstate_postgres:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+volumes:
+  openstate_postgres:
