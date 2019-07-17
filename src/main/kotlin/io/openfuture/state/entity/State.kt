@@ -13,7 +13,7 @@ import javax.persistence.*
 class State(
 
         @Column(name = "balance", nullable = false)
-        var balance: Double = 0.0,
+        var balance: Long = 0,
 
         @Column(name = "root", nullable = false)
         var root: String,
@@ -24,11 +24,11 @@ class State(
 ) : BaseModel() {
 
     companion object {
-        fun generateHash(walletAddress: String, balance: Double = 0.0, date: Long = Date().time): String {
+        fun generateHash(walletAddress: String, balance: Long = 0, date: Long = Date().time): String {
             val bytes = ByteBuffer.allocate(walletAddress.toByteArray().size + Long.SIZE_BYTES +
                     Long.SIZE_BYTES)
                     .put(walletAddress.toByteArray())
-                    .putDouble(balance)
+                    .putLong(balance)
                     .putLong(date)
                     .array()
 

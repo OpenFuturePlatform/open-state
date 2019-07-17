@@ -23,6 +23,9 @@ class Wallet(
         var state: State,
 
         @Column(name = "start_tracking_date", nullable = false)
-        var startTrackingDate: Long = Date().time
+        var startTrackingDate: Long = Date().time,
+
+        @Column(name = "is_active", nullable = false)
+        var isActive: Boolean = true
 
 ) : BaseModel()

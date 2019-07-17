@@ -20,14 +20,14 @@ class DefaultStateTrackingService(
     @Transactional
     override fun processTransaction(tx: TransactionDto) {
 
-        val fromWallet = walletService.getByBlockchainAddress(tx.blockchainId, tx.from)
+        val fromWallet = walletService.getActiveByBlockchainAddress(tx.blockchainId, tx.from)
 
         if (null != fromWallet) {
             val outputTransaction = saveTransaction(fromWallet, TransactionType.OUTPUT, tx.to, tx)
             updateState(fromWallet.address, fromWallet.state.id, outputTransaction.amount.unaryMinus())
         }
 
-        val toWallet = walletService.getByBlockchainAddress(tx.blockchainId, tx.to)
+        val toWallet = walletService.getActiveByBlockchainAddress(tx.blockchainId, tx.to)
 
         if (null != toWallet) {
             val inputTransaction = saveTransaction(toWallet, TransactionType.INPUT, tx.from, tx)

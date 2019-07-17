@@ -12,6 +12,7 @@ import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.verify
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
+import org.mockito.internal.verification.VerificationModeFactory.times
 import java.util.*
 
 class DefaultAccountServiceTest {
@@ -128,6 +129,56 @@ class DefaultAccountServiceTest {
 
         assertThat(result).isEqualTo(account)
         assertThat(result.wallets).contains(wallet)
+    }
+
+    @Test
+    fun addWalletsShouldAddWalletWithUpdatedStateIfWalletIsNotActive() {
+        val blockchain = createDummyBlockchain().apply { id = 1 }
+        val wallet = createDummyWallet(isActive = false)
+        val account = createDummyAccount(wallets = mutableSetOf(wallet)).apply { id = 1 }
+
+        given(repository.findById(account.id)).willReturn(Optional.of(account))
+        given(blockchainService.get(blockchain.id)).willReturn(blockchain)
+        given(walletService.getByBlockchainAddress(blockchain.id, wallet.address)).willReturn(wallet)
+        given(stateService.get(wallet.state.id)).willReturn(createDummyState())
+        given(stateService.save(any(State::class.java))).willReturn(createDummyState())
+        given(walletService.save(wallet)).willReturn(wallet)
+        given(repository.save(account)).willReturn(account)
+
+        val integration = CreateIntegrationRequest(wallet.address, blockchain.id)
+        val result = accountService.addWallets(account.id, setOf(integration))
+
+        assertThat(result).isEqualTo(account)
+        assertThat(result.wallets).contains(wallet)
+    }
+
+    @Test
+    fun deleteAccountShouldDisableAccount() {
+        val wallet = createDummyWallet()
+        val account = createDummyAccount(wallets = mutableSetOf(wallet), isEnabled = false).apply { id = 1 }
+
+        given(repository.findById(account.id)).willReturn(Optional.of(account))
+        given(repository.save(account)).willReturn(account)
+
+        val result = accountService.delete(account.id)
+
+        verify(walletService, times(1)).deleteAllByAccount(account)
+
+        assertThat(result.isEnabled).isFalse()
+    }
+
+    @Test
+    fun deleteWalletShouldRemoveGivenWallet() {
+        val wallet = createDummyWallet().apply { id = 1 }
+        val account = createDummyAccount(wallets = mutableSetOf()).apply { id = 1 }
+
+        given(repository.findById(account.id)).willReturn(Optional.of(account))
+        given(walletService.get(wallet.id, account)).willReturn(wallet)
+        given(repository.save(account)).willReturn(account)
+
+        val result = accountService.deleteWallet(account.id, wallet.id)
+
+        assertThat(result.wallets).isEmpty()
     }
 
 }

@@ -9,6 +9,7 @@ import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.AccountRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.*
 
 @Service
 class DefaultAccountService(
@@ -45,10 +46,34 @@ class DefaultAccountService(
         return save(account, integrations)
     }
 
+    @Transactional
+    override fun delete(id: Long): Account {
+        val account = get(id)
+        account.isEnabled = false
+
+        walletService.deleteAllByAccount(account)
+        account.wallets.clear()
+
+        return repository.save(account)
+    }
+
+    @Transactional
+    override fun deleteWallet(accountId: Long, walletId: Long): Account {
+        val account = get(accountId)
+        val wallet = walletService.get(walletId, account)
+
+        walletService.deleteByAccount(account, wallet)
+        account.wallets.remove(wallet)
+
+        return repository.save(account)
+    }
+
     private fun saveWallets(account: Account, integrations: Set<CreateIntegrationRequest>): List<Wallet> {
         return integrations.map {
             val blockchain = blockchainService.get(it.blockchainId)
             val wallet = createOrUpdateWallet(account, blockchain, it.address)
+
+            // get current balance
 
             walletService.save(wallet)
         }
@@ -64,8 +89,23 @@ class DefaultAccountService(
             return Wallet(mutableSetOf(account), blockchain, address, startState)
         }
 
-        persistWallet.accounts.add(account)
+        if (!persistWallet.isActive) {
+            val state = updateState(persistWallet.state.id, persistWallet.address)
+
+            persistWallet.startTrackingDate = state.date
+            persistWallet.isActive = true
+        }
+
         return persistWallet
+    }
+
+    private fun updateState(stateId: Long, walletAddress: String): State {
+        val state = stateService.get(stateId)
+        val startHash = State.generateHash(walletAddress)
+        state.root = startHash
+
+        state.date = Date().time
+        return stateService.save(state)
     }
 
 }

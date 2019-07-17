@@ -15,11 +15,12 @@ fun createDummyWallet(
         blockchain: Blockchain = createDummyBlockchain(),
         address: String = "address",
         state: State = createDummyState(),
-        startTrackingDate: Long = Date().time
-) = Wallet(accounts, blockchain, address, state, startTrackingDate)
+        startTrackingDate: Long = Date().time,
+        isActive: Boolean = true
+) = Wallet(accounts, blockchain, address, state, startTrackingDate, isActive)
 
 fun createDummyState(
-        balance: Double = 100.0,
+        balance: Long = 100,
         root: String = "test root hash",
         date: Long = Date().time
 ) = State(balance, root, date)
