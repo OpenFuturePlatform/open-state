@@ -25,8 +25,9 @@ class HashUtilsTest {
     fun merkleRootShouldReturnRootHashStringOfListOfHashStrings() {
         val hashString1 = "hash1"
         val hashString2 = "hash2"
+        val hashString3 = "hash3"
 
-        val merkleRootHash = HashUtils.merkleRoot(listOf(hashString1, hashString2))
+        val merkleRootHash = HashUtils.merkleRoot(listOf(hashString1, hashString2, hashString3))
 
         assertThat(merkleRootHash).isNotEmpty()
     }
