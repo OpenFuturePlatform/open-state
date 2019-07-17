@@ -39,7 +39,7 @@ class DefaultWalletServiceTest {
         val account = createDummyAccount()
         val wallet = createDummyWallet(mutableSetOf(account)).apply { id = 1 }
 
-        given(repository.findByIdAndAccountsContains(wallet.id, account)).willReturn(wallet)
+        given(repository.findByIdAndAccountsContainsAndIsActiveTrue(wallet.id, account)).willReturn(wallet)
 
         val result = walletService.get(wallet.id, account)
 
@@ -51,7 +51,7 @@ class DefaultWalletServiceTest {
         val account = createDummyAccount()
         val wallet = createDummyWallet(mutableSetOf(account)).apply { id = 1 }
 
-        given(repository.findByIdAndAccountsContains(wallet.id, account)).willReturn(null)
+        given(repository.findByIdAndAccountsContainsAndIsActiveTrue(wallet.id, account)).willReturn(null)
 
         walletService.get(wallet.id, account)
     }
@@ -61,7 +61,7 @@ class DefaultWalletServiceTest {
         val account = createDummyAccount()
         val wallets = listOf(createDummyWallet(mutableSetOf(account)).apply { id = 1 })
 
-        given(repository.findAllByAccountsContains(account)).willReturn(wallets)
+        given(repository.findAllByAccountsContainsAndIsActiveTrue(account)).willReturn(wallets)
 
         val result = walletService.getAllByAccount(account)
 
