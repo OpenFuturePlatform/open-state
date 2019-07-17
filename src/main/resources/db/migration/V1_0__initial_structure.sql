@@ -23,7 +23,7 @@ CREATE TABLE accounts
 CREATE TABLE states
 (
     id      BIGSERIAL PRIMARY KEY,
-    balance FLOAT       NOT NULL DEFAULT 0,
+    balance BIGINT      NOT NULL DEFAULT 0,
     root    VARCHAR(64) NOT NULL,
     date    BIGINT      NOT NULL
 );
