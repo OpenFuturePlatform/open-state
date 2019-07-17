@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
 @WebMvcTest(WalletController::class)
@@ -60,6 +61,17 @@ WalletControllerTest : BaseControllerTest() {
         given(walletService.get(wallet.id, account)).willReturn(wallet)
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/accounts/1/wallets/1"))
+                .andExpect(MockMvcResultMatchers.status().isOk)
+    }
+
+    @Test
+    fun deleteAccountWalletTest() {
+        val wallet = createDummyWallet().apply { id = 1 }
+        val account = createDummyAccount(wallets = mutableSetOf(wallet)).apply { id = 1 }
+
+        given(accountService.deleteWallet(account.id, wallet.id)).willReturn(account)
+
+        mockMvc.perform(delete("/api/accounts/${wallet.id}/wallets/${wallet.id}"))
                 .andExpect(MockMvcResultMatchers.status().isOk)
     }
 
