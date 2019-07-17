@@ -45,7 +45,7 @@ class DefaultWalletService(
         if (wallet.accounts.isNotEmpty()) return
 
         wallet.isActive = false
-        save(wallet)
+        repository.save(wallet)
     }
 
     @Transactional
