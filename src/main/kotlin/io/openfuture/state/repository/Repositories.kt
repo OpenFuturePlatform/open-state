@@ -34,9 +34,11 @@ interface WalletRepository : BaseRepository<Wallet> {
 
     fun findByBlockchainIdAndAddress(blockchainId: Long, address: String): Wallet?
 
-    fun findAllByAccountsContains(account: Account): List<Wallet>
+    fun findByBlockchainIdAndAddressAndIsActiveTrue(blockchainId: Long, address: String): Wallet?
 
-    fun findByIdAndAccountsContains(id: Long, account: Account): Wallet?
+    fun findAllByAccountsContainsAndIsActiveTrue(account: Account): List<Wallet>
+
+    fun findByIdAndAccountsContainsAndIsActiveTrue(id: Long, account: Account): Wallet?
 
 }
 

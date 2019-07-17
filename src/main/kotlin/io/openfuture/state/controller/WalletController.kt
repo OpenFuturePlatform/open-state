@@ -34,4 +34,10 @@ class WalletController(
         return WalletDto(wallet)
     }
 
+    @DeleteMapping("/{id}")
+    fun delete(@PathVariable accountId: Long, @PathVariable id: Long): AccountDto {
+        val account = accountService.deleteWallet(accountId, id)
+        return AccountDto(account)
+    }
+
 }

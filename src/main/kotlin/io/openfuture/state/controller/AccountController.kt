@@ -35,4 +35,10 @@ class AccountController(
         return AccountDto(updatedAccount)
     }
 
+    @DeleteMapping("/{id}")
+    fun delete(@PathVariable id: Long): AccountDto {
+        val deletedAccount = accountService.delete(id)
+        return AccountDto(deletedAccount)
+    }
+
 }

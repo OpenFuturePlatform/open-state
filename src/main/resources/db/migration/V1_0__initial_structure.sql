@@ -35,6 +35,7 @@ CREATE TABLE wallets
     address             VARCHAR(64) NOT NULL,
     state_id            BIGINT REFERENCES states UNIQUE,
     start_tracking_date BIGINT      NOT NULL,
+    is_active           BOOLEAN     NOT NULL DEFAULT TRUE,
     UNIQUE (blockchain_id, address)
 );
 

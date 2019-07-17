@@ -19,18 +19,43 @@ class DefaultWalletService(
 
     @Transactional(readOnly = true)
     override fun get(id: Long, account: Account): Wallet {
-        return repository.findByIdAndAccountsContains(id, account)
+        return repository.findByIdAndAccountsContainsAndIsActiveTrue(id, account)
                 ?: throw NotFoundException("Wallet with id $id not found")
     }
 
     @Transactional(readOnly = true)
     override fun getAllByAccount(account: Account): List<Wallet> {
-        return repository.findAllByAccountsContains(account)
+        return repository.findAllByAccountsContainsAndIsActiveTrue(account)
     }
 
     @Transactional(readOnly = true)
     override fun getByBlockchainAddress(blockchainId: Long, address: String): Wallet? {
         return repository.findByBlockchainIdAndAddress(blockchainId, address)
+    }
+
+    @Transactional(readOnly = true)
+    override fun getActiveByBlockchainAddress(blockchainId: Long, address: String): Wallet? {
+        return repository.findByBlockchainIdAndAddressAndIsActiveTrue(blockchainId, address)
+    }
+
+    @Transactional
+    override fun deleteByAccount(account: Account, wallet: Wallet) {
+        wallet.accounts.remove(account)
+
+        if (wallet.accounts.isNotEmpty()) return
+
+        wallet.isActive = false
+        save(wallet)
+    }
+
+    @Transactional
+    override fun deleteAllByAccount(account: Account) {
+        val wallets = getAllByAccount(account)
+        if (wallets.isEmpty()) return
+
+        wallets.forEach { wallet ->
+            deleteByAccount(account, wallet)
+        }
     }
 
 }
