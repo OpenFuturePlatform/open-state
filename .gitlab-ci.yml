@@ -23,6 +23,7 @@ tests-unit:
     POSTGRES_DB: "db"
     POSTGRES_USER: "user"
     POSTGRES_PASSWORD: "password"
+    OPEN_API_URL: "open_api_url"
   services:
     - name: postgres:10
       alias: $POSTGRES_HOST
@@ -104,6 +105,7 @@ deploy-sprint:
     - source variables
     - SERVER=$SPRINT_SERVER
     - DEPLOY_KEY=$SPRINT_DEPLOY_KEY
+    - export OPEN_API_URL=http://api.open-platform.zensoft.io
     - export POSTGRES_PASSWORD=$SPRINT_POSTGRES_PASSWORD
   script: *deploy_to_host
   dependencies:
@@ -117,6 +119,7 @@ deploy-master:
     - source variables
     - SERVER=$MASTER_SERVER
     - DEPLOY_KEY=$MASTER_DEPLOY_KEY
+    - export OPEN_API_URL=https://api.openfuture.io
     - export POSTGRES_PASSWORD=$MASTER_POSTGRES_PASSWORD
   script: *deploy_to_host
   dependencies:
