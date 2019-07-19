@@ -23,7 +23,7 @@ CREATE TABLE accounts
 CREATE TABLE states
 (
     id      BIGSERIAL PRIMARY KEY,
-    balance BIGINT      NOT NULL DEFAULT 0,
+    balance FLOAT       NOT NULL DEFAULT 0,
     root    VARCHAR(64) NOT NULL,
     date    BIGINT      NOT NULL
 );
@@ -35,7 +35,6 @@ CREATE TABLE wallets
     address             VARCHAR(64) NOT NULL,
     state_id            BIGINT REFERENCES states UNIQUE,
     start_tracking_date BIGINT      NOT NULL,
-    is_active           BOOLEAN     NOT NULL DEFAULT TRUE,
     UNIQUE (blockchain_id, address)
 );
 
