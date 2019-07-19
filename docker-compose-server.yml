@@ -9,6 +9,7 @@ services:
       - POSTGRES_DB=openstate
       - POSTGRES_USER=openstate
       - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      - OPEN_API_URL=$OPEN_API_URL
     ports:
       - 80:8080
   postgres:
