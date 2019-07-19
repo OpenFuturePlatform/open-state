@@ -5,6 +5,7 @@ import io.openfuture.state.domain.request.CreateIntegrationRequest
 import io.openfuture.state.entity.*
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.transaction.annotation.Transactional
 
 
 interface StateTrackingService {
@@ -23,6 +24,10 @@ interface AccountService {
 
     fun addWallets(id: Long, integrations: Set<CreateIntegrationRequest>): Account
 
+    fun deleteWallet(accountId: Long, walletId: Long): Account
+
+    fun delete(id: Long): Account
+
 }
 
 interface StateService {
@@ -39,9 +44,15 @@ interface WalletService {
 
     fun getByBlockchainAddress(blockchainId: Long, address: String): Wallet?
 
+    fun getActiveByBlockchainAddress(blockchainId: Long, address: String): Wallet?
+
     fun getAllByAccount(account: Account): List<Wallet>
 
     fun get(id: Long, account: Account): Wallet
+
+    fun deleteByAccount(account: Account, wallet: Wallet)
+
+    fun deleteAllByAccount(account: Account)
 
 }
 

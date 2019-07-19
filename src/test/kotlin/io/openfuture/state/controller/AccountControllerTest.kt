@@ -62,4 +62,15 @@ class AccountControllerTest : BaseControllerTest() {
                 .andExpect(status().isOk)
     }
 
+    @Test
+    fun deleteAccountTest() {
+        val accountId = 1L
+        val account = createDummyAccount(isEnabled = false).apply { id = accountId }
+
+        given(accountService.delete(accountId)).willReturn(account)
+
+        mockMvc.perform(delete("/api/accounts/$accountId"))
+                .andExpect(status().isOk)
+    }
+
 }
