@@ -1,4 +1,4 @@
-package io.openfuture.state.component
+package io.openfuture.state.webhook
 
 import io.openfuture.state.domain.dto.TrackingTransactionDto
 import io.openfuture.state.entity.Transaction

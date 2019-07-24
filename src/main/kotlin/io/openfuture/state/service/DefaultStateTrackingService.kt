@@ -1,6 +1,6 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.component.WebhookSender
+import io.openfuture.state.webhook.WebhookSender
 import io.openfuture.state.domain.dto.TransactionDto
 import io.openfuture.state.entity.State
 import io.openfuture.state.entity.Transaction
