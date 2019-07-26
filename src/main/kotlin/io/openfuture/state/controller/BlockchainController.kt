@@ -1,6 +1,6 @@
 package io.openfuture.state.controller
 
-import io.openfuture.state.domain.dto.BlockchainDto
+import io.openfuture.state.controller.domain.dto.BlockchainDto
 import io.openfuture.state.service.BlockchainService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

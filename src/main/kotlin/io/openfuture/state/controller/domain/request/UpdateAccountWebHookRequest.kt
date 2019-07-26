@@ -1,4 +1,4 @@
-package io.openfuture.state.domain.request
+package io.openfuture.state.controller.domain.request
 
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull

@@ -1,6 +1,6 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.domain.request.CreateIntegrationRequest
+import io.openfuture.state.controller.domain.request.CreateIntegrationRequest
 import io.openfuture.state.entity.State
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.AccountRepository
