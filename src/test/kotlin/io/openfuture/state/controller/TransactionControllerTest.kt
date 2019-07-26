@@ -1,6 +1,6 @@
 package io.openfuture.state.controller
 
-import io.openfuture.state.domain.page.PageRequest
+import io.openfuture.state.controller.domain.page.PageRequest
 import io.openfuture.state.service.TransactionService
 import io.openfuture.state.util.createDummyTransaction
 import io.openfuture.state.util.createDummyWallet

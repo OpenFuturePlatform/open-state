@@ -1,6 +1,6 @@
 package io.openfuture.state.webhook
 
-import io.openfuture.state.domain.dto.TrackingTransactionDto
+import io.openfuture.state.controller.domain.dto.TrackingTransactionDto
 import io.openfuture.state.entity.Transaction
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate

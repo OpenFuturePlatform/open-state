@@ -1,4 +1,4 @@
-package io.openfuture.state.domain.page
+package io.openfuture.state.controller.domain.page
 
 import org.springframework.data.domain.AbstractPageRequest
 import org.springframework.data.domain.Pageable

@@ -1,6 +1,6 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.domain.request.CreateIntegrationRequest
+import io.openfuture.state.controller.domain.request.CreateIntegrationRequest
 import io.openfuture.state.entity.Account
 import io.openfuture.state.entity.Blockchain
 import io.openfuture.state.entity.State

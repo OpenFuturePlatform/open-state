@@ -1,6 +1,6 @@
 package io.openfuture.state.controller
 
-import io.openfuture.state.domain.dto.TransactionDto
+import io.openfuture.state.controller.domain.dto.TransactionDto
 import io.openfuture.state.service.StateTrackingService
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody

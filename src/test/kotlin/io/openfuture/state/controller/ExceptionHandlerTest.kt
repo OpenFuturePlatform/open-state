@@ -1,6 +1,6 @@
 package io.openfuture.state.controller
 
-import io.openfuture.state.domain.dto.ErrorDto
+import io.openfuture.state.controller.domain.dto.ErrorDto
 import io.openfuture.state.exception.NotFoundException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

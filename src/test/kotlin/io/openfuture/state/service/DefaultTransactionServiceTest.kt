@@ -1,6 +1,6 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.domain.page.PageRequest
+import io.openfuture.state.controller.domain.page.PageRequest
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.TransactionRepository
 import io.openfuture.state.util.createDummyTransaction

@@ -1,4 +1,4 @@
-package io.openfuture.state.domain.dto
+package io.openfuture.state.controller.domain.dto
 
 class TransactionDto(
         val blockchainId: Long,

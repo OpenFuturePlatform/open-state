@@ -1,8 +1,8 @@
 package io.openfuture.state.controller
 
-import io.openfuture.state.domain.dto.AccountDto
-import io.openfuture.state.domain.dto.WalletDto
-import io.openfuture.state.domain.request.AddWalletsRequest
+import io.openfuture.state.controller.domain.dto.AccountDto
+import io.openfuture.state.controller.domain.dto.WalletDto
+import io.openfuture.state.controller.domain.request.AddWalletsRequest
 import io.openfuture.state.service.AccountService
 import io.openfuture.state.service.WalletService
 import org.springframework.web.bind.annotation.*

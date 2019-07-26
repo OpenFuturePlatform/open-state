@@ -1,8 +1,8 @@
 package io.openfuture.state.controller
 
-import io.openfuture.state.domain.dto.AccountDto
-import io.openfuture.state.domain.request.CreateAccountRequest
-import io.openfuture.state.domain.request.UpdateAccountWebHookRequest
+import io.openfuture.state.controller.domain.dto.AccountDto
+import io.openfuture.state.controller.domain.request.CreateAccountRequest
+import io.openfuture.state.controller.domain.request.UpdateAccountWebHookRequest
 import io.openfuture.state.entity.Account
 import io.openfuture.state.service.AccountService
 import io.openfuture.state.service.WalletService
