@@ -1,5 +1,6 @@
 package io.openfuture.state.service
 
+import io.openfuture.state.webhook.WebhookSender
 import io.openfuture.state.entity.State
 import io.openfuture.state.entity.Transaction
 import io.openfuture.state.util.*
@@ -15,13 +16,14 @@ class DefaultStateTrackingServiceTest {
     private val stateService = mock(StateService::class.java)
     private val walletService = mock(WalletService::class.java)
     private val transactionService = mock(TransactionService::class.java)
+    private val webhookSender = mock(WebhookSender::class.java)
 
     private lateinit var stateTrackingService: StateTrackingService
 
 
     @Before
     fun setUp() {
-        stateTrackingService = DefaultStateTrackingService(stateService, walletService, transactionService)
+        stateTrackingService = DefaultStateTrackingService(stateService, walletService, transactionService, webhookSender)
     }
 
     @Test

@@ -1,7 +1,6 @@
-package io.openfuture.state.domain.dto
+package io.openfuture.state.controller.domain.dto
 
 import io.openfuture.state.entity.Wallet
-import java.time.LocalDateTime
 
 data class WalletDto(
         val id: Long,

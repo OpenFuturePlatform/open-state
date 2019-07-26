@@ -1,6 +1,7 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.domain.dto.TransactionDto
+import io.openfuture.state.webhook.WebhookSender
+import io.openfuture.state.controller.domain.dto.TransactionDto
 import io.openfuture.state.entity.State
 import io.openfuture.state.entity.Transaction
 import io.openfuture.state.entity.TransactionType
@@ -14,7 +15,8 @@ import java.util.*
 class DefaultStateTrackingService(
         private val stateService: StateService,
         private val walletService: WalletService,
-        private val transactionService: TransactionService
+        private val transactionService: TransactionService,
+        private val webHookSender: WebhookSender
 ) : StateTrackingService {
 
     @Transactional
@@ -51,7 +53,12 @@ class DefaultStateTrackingService(
         val hash = Transaction.generateHash(wallet.address, type.getId(), participant, tx.amount, tx.date)
         val transaction = Transaction(wallet, hash, tx.hash, type.getId(), participant, tx.amount, tx.date, tx.blockHeight, tx.blockHash)
 
-        return transactionService.save(transaction)
+        val savedTransaction = transactionService.save(transaction)
+
+        //send web hook
+        webHookSender.sendWebHook(wallet.accounts.map { it.webHook }, savedTransaction)
+
+        return savedTransaction
     }
 
 }

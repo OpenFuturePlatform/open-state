@@ -1,6 +1,6 @@
 package io.openfuture.state.util
 
-import io.openfuture.state.domain.dto.TransactionDto
+import io.openfuture.state.controller.domain.dto.TransactionDto
 import io.openfuture.state.entity.*
 import java.util.*
 

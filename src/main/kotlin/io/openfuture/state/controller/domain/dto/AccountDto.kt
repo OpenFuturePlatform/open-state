@@ -1,4 +1,4 @@
-package io.openfuture.state.domain.dto
+package io.openfuture.state.controller.domain.dto
 
 import io.openfuture.state.entity.Account
 

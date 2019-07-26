@@ -1,11 +1,10 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.domain.dto.TransactionDto
-import io.openfuture.state.domain.request.CreateIntegrationRequest
+import io.openfuture.state.controller.domain.dto.TransactionDto
+import io.openfuture.state.controller.domain.request.CreateIntegrationRequest
 import io.openfuture.state.entity.*
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.transaction.annotation.Transactional
 
 
 interface StateTrackingService {
