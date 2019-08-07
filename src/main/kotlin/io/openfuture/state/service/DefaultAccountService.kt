@@ -29,7 +29,7 @@ class DefaultAccountService(
 
     @Transactional(readOnly = true)
     override fun get(id: Long): Account {
-        return repository.findById(id).orElseGet { throw NotFoundException("Account with id $id not found") }
+        return repository.findByIdAndIsEnabledTrue(id) ?: throw NotFoundException("Account with id $id not found")
     }
 
     @Transactional

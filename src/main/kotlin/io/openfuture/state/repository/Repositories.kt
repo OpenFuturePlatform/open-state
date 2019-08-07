@@ -43,4 +43,8 @@ interface WalletRepository : BaseRepository<Wallet> {
 }
 
 @Repository
-interface AccountRepository : BaseRepository<Account>
+interface AccountRepository : BaseRepository<Account> {
+
+    fun findByIdAndIsEnabledTrue(id: Long): Account?
+
+}
