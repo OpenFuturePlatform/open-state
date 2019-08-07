@@ -41,12 +41,6 @@ class DefaultAccountService(
     }
 
     @Transactional
-    override fun addWallets(id: Long, integrations: Set<CreateIntegrationRequest>): Account {
-        val account = get(id)
-        return save(account, integrations)
-    }
-
-    @Transactional
     override fun delete(id: Long): Account {
         val account = get(id)
         account.isEnabled = false
@@ -55,6 +49,12 @@ class DefaultAccountService(
         account.wallets.clear()
 
         return repository.save(account)
+    }
+
+    @Transactional
+    override fun addWallets(id: Long, integrations: Set<CreateIntegrationRequest>): Account {
+        val account = get(id)
+        return save(account, integrations)
     }
 
     @Transactional
