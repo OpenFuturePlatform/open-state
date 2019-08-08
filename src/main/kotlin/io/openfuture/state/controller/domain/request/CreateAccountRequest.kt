@@ -7,7 +7,7 @@ import javax.validation.constraints.NotEmpty
 
 data class CreateAccountRequest(
         val webHook: String,
-        @field:NotEmpty var integrations: Set<@Valid CreateIntegrationRequest>
+        @Valid @field:NotEmpty var integrations: Set<CreateIntegrationRequest>
 ) {
 
     @AssertTrue(message = "Invalid web hook url")
