@@ -72,7 +72,7 @@ class DefaultAccountServiceTest {
     fun getShouldReturnAccountWhenAccountExists() {
         val account = createDummyAccount().apply { id = 1 }
 
-        given(repository.findById(account.id)).willReturn(Optional.of(account))
+        given(repository.findByIdAndIsEnabledTrue(account.id)).willReturn(account)
 
         val result = accountService.get(account.id)
 
@@ -83,7 +83,7 @@ class DefaultAccountServiceTest {
     fun getShouldThrowNotFoundExceptionWhenAccountNotExists() {
         val account = createDummyAccount().apply { id = 1 }
 
-        given(repository.findById(account.id)).willReturn(Optional.empty())
+        given(repository.findByIdAndIsEnabledTrue(account.id)).willReturn(null)
 
         accountService.get(account.id)
     }
@@ -93,7 +93,7 @@ class DefaultAccountServiceTest {
         val webHook = "http://updated.com"
         val account = createDummyAccount(webHook = webHook).apply { id = 1 }
 
-        given(repository.findById(account.id)).willReturn(Optional.of(account))
+        given(repository.findByIdAndIsEnabledTrue(account.id)).willReturn(account)
         given(repository.save(account)).willReturn(account)
 
         val result = accountService.update(account.id, webHook)
@@ -106,7 +106,7 @@ class DefaultAccountServiceTest {
         val webHook = "http://updated.com"
         val account = createDummyAccount(webHook = webHook).apply { id = 1 }
 
-        given(repository.findById(account.id)).willReturn(Optional.empty())
+        given(repository.findByIdAndIsEnabledTrue(account.id)).willReturn(null)
 
         accountService.update(account.id, webHook)
     }
@@ -117,7 +117,7 @@ class DefaultAccountServiceTest {
         val wallet = createDummyWallet(address = "wallet address")
         val account = createDummyAccount(wallets = mutableSetOf(wallet)).apply { id = 1 }
 
-        given(repository.findById(account.id)).willReturn(Optional.of(account))
+        given(repository.findByIdAndIsEnabledTrue(account.id)).willReturn(account)
         given(blockchainService.get(blockchain.id)).willReturn(blockchain)
         given(walletService.getByBlockchainAddress(blockchain.id, wallet.address)).willReturn(null)
         given(stateService.save(any(State::class.java))).willReturn(createDummyState())
@@ -137,7 +137,7 @@ class DefaultAccountServiceTest {
         val wallet = createDummyWallet(isActive = false)
         val account = createDummyAccount(wallets = mutableSetOf(wallet)).apply { id = 1 }
 
-        given(repository.findById(account.id)).willReturn(Optional.of(account))
+        given(repository.findByIdAndIsEnabledTrue(account.id)).willReturn(account)
         given(blockchainService.get(blockchain.id)).willReturn(blockchain)
         given(walletService.getByBlockchainAddress(blockchain.id, wallet.address)).willReturn(wallet)
         given(stateService.get(wallet.state.id)).willReturn(createDummyState())
@@ -157,7 +157,7 @@ class DefaultAccountServiceTest {
         val wallet = createDummyWallet()
         val account = createDummyAccount(wallets = mutableSetOf(wallet), isEnabled = false).apply { id = 1 }
 
-        given(repository.findById(account.id)).willReturn(Optional.of(account))
+        given(repository.findByIdAndIsEnabledTrue(account.id)).willReturn(account)
         given(repository.save(account)).willReturn(account)
 
         val result = accountService.delete(account.id)
@@ -172,7 +172,7 @@ class DefaultAccountServiceTest {
         val wallet = createDummyWallet().apply { id = 1 }
         val account = createDummyAccount(wallets = mutableSetOf()).apply { id = 1 }
 
-        given(repository.findById(account.id)).willReturn(Optional.of(account))
+        given(repository.findByIdAndIsEnabledTrue(account.id)).willReturn(account)
         given(walletService.get(wallet.id, account)).willReturn(wallet)
         given(repository.save(account)).willReturn(account)
 

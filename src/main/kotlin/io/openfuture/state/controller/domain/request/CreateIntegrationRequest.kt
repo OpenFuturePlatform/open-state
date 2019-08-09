@@ -4,6 +4,6 @@ import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
 data class CreateIntegrationRequest(
-        @field:NotBlank val address: String,
-        @field:NotNull val blockchainId: Long
+        @field:NotBlank var address: String,
+        @field:NotNull var blockchainId: Long
 )

@@ -7,6 +7,7 @@ import io.openfuture.state.entity.Account
 import io.openfuture.state.service.AccountService
 import io.openfuture.state.service.WalletService
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -16,7 +17,7 @@ class AccountController(
 ) {
 
     @PostMapping
-    fun create(@RequestBody request: CreateAccountRequest): AccountDto {
+    fun create(@RequestBody @Valid request: CreateAccountRequest): AccountDto {
         val account = accountService.save(Account(request.webHook), request.integrations)
         return AccountDto(account)
     }
@@ -29,7 +30,7 @@ class AccountController(
     }
 
     @PutMapping
-    fun update(@RequestBody request: UpdateAccountWebHookRequest): AccountDto {
+    fun update(@RequestBody @Valid request: UpdateAccountWebHookRequest): AccountDto {
         val updatedAccount = accountService.update(request.id, request.webHook)
         updatedAccount.wallets = walletService.getAllByAccount(updatedAccount).toMutableSet()
         return AccountDto(updatedAccount)

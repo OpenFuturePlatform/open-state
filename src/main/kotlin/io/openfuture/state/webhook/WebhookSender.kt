@@ -10,9 +10,10 @@ class WebhookSender {
 
     fun sendWebHook(urlList: List<String>, transaction: Transaction) {
         urlList.forEach {
-            RestTemplate().postForLocation(it, TrackingTransactionDto(transaction))
+            if (it.isNotEmpty()) {
+                RestTemplate().postForLocation(it, TrackingTransactionDto(transaction))
+            }
         }
-
     }
 
 }

@@ -1,5 +1,8 @@
 # OPEN State
 
+OPEN State binds together OPEN API and OPEN Chain and provides extensibility of the whole OPEN Platform.
+OPEN State is a hybrid solution that utilizes on-chain and off-chain approaches. It allows solving interoperability issues as well as blockchain scaling.
+
 #### CI/CD process
 
 After new commit to this repository, gitlab start new pipeline based pon .gitlab-ci.yml configuration.
