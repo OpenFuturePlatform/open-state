@@ -16,13 +16,13 @@ class TransactionController(
 ) {
 
     @GetMapping
-    fun getAllTransaction(@PathVariable walletId: Long, pageRequest: PageRequest): PageResponse<TrackingTransactionDto> {
+    fun getAll(@PathVariable walletId: Long, pageRequest: PageRequest): PageResponse<TrackingTransactionDto> {
         val transactions = transactionService.getAllByWalletId(walletId, pageRequest)
         return PageResponse(transactions.map { TrackingTransactionDto(it) })
     }
 
     @GetMapping("/{txId}")
-    fun getTransaction(@PathVariable walletId: Long, @PathVariable txId: Long): TrackingTransactionDto {
+    fun get(@PathVariable walletId: Long, @PathVariable txId: Long): TrackingTransactionDto {
         val transaction = transactionService.get(txId, walletId)
         return TrackingTransactionDto(transaction)
     }

@@ -6,6 +6,7 @@ import io.openfuture.state.controller.domain.request.AddWalletsRequest
 import io.openfuture.state.service.AccountService
 import io.openfuture.state.service.WalletService
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/api/accounts/{accountId}/wallets")
@@ -15,7 +16,7 @@ class WalletController(
 ) {
 
     @PostMapping
-    fun add(@PathVariable accountId: Long, @RequestBody request: AddWalletsRequest): AccountDto {
+    fun add(@PathVariable accountId: Long, @RequestBody @Valid request: AddWalletsRequest): AccountDto {
         val updatedAccount = accountService.addWallets(accountId, request.integrations)
         return AccountDto(updatedAccount)
     }

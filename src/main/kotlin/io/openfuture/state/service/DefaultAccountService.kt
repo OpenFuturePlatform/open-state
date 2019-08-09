@@ -29,7 +29,7 @@ class DefaultAccountService(
 
     @Transactional(readOnly = true)
     override fun get(id: Long): Account {
-        return repository.findById(id).orElseGet { throw NotFoundException("Account with id $id not found") }
+        return repository.findByIdAndIsEnabledTrue(id) ?: throw NotFoundException("Account with id $id not found")
     }
 
     @Transactional
@@ -41,12 +41,6 @@ class DefaultAccountService(
     }
 
     @Transactional
-    override fun addWallets(id: Long, integrations: Set<CreateIntegrationRequest>): Account {
-        val account = get(id)
-        return save(account, integrations)
-    }
-
-    @Transactional
     override fun delete(id: Long): Account {
         val account = get(id)
         account.isEnabled = false
@@ -55,6 +49,12 @@ class DefaultAccountService(
         account.wallets.clear()
 
         return repository.save(account)
+    }
+
+    @Transactional
+    override fun addWallets(id: Long, integrations: Set<CreateIntegrationRequest>): Account {
+        val account = get(id)
+        return save(account, integrations)
     }
 
     @Transactional
@@ -71,40 +71,50 @@ class DefaultAccountService(
     private fun saveWallets(account: Account, integrations: Set<CreateIntegrationRequest>): List<Wallet> {
         return integrations.map {
             val blockchain = blockchainService.get(it.blockchainId)
-            val wallet = createOrUpdateWallet(account, blockchain, it.address)
 
-            // get current balance
-
-            walletService.save(wallet)
+            createOrUpdateWallet(account, blockchain, it.address)
         }
     }
 
     private fun createOrUpdateWallet(account: Account, blockchain: Blockchain, address: String): Wallet {
         val persistWallet = walletService.getByBlockchainAddress(blockchain.id, address)
-
-        if (null == persistWallet) {
-            val startHash = State.generateHash(address)
-            val startState = stateService.save(State(root = startHash))
-
-            return Wallet(mutableSetOf(account), blockchain, address, startState)
-        }
+                ?: return createWallet(address, account, blockchain)
 
         if (!persistWallet.isActive) {
-            val state = updateState(persistWallet.state.id, persistWallet.address)
-
-            persistWallet.startTrackingDate = state.date
-            persistWallet.isActive = true
+            return updateWallet(persistWallet)
         }
 
         return persistWallet
     }
 
+    private fun createWallet(address: String, account: Account, blockchain: Blockchain): Wallet {
+
+        // get current balance
+
+        val startState = stateService.save(State(root = State.generateHash(address)))
+
+        val wallet = Wallet(mutableSetOf(account), blockchain, address, startState)
+
+        return walletService.save(wallet)
+    }
+
+    private fun updateWallet(wallet: Wallet): Wallet {
+        val state = updateState(wallet.state.id, wallet.address)
+
+        wallet.startTrackingDate = state.date
+        wallet.isActive = true
+
+        return walletService.save(wallet)
+    }
+
     private fun updateState(stateId: Long, walletAddress: String): State {
         val state = stateService.get(stateId)
-        val startHash = State.generateHash(walletAddress)
-        state.root = startHash
 
+        state.root = State.generateHash(walletAddress)
         state.date = Date().time
+
+        // get current balance
+
         return stateService.save(state)
     }
 
