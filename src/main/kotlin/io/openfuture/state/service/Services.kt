@@ -25,6 +25,8 @@ interface AccountService {
 
     fun deleteWallet(accountId: Long, walletId: Long): Account
 
+    fun deleteWalletByAddress(accountId: Long, address: String, blockchainId: Long): Account
+
     fun delete(id: Long): Account
 
 }
