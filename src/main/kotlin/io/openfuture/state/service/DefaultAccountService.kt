@@ -68,6 +68,17 @@ class DefaultAccountService(
         return repository.save(account)
     }
 
+    @Transactional
+    override fun deleteWalletByAddress(accountId: Long, address: String, blockchainId: Long): Account {
+        val account = get(accountId)
+        val wallet = walletService.getByBlockchainAddress(blockchainId, address)
+
+        wallet?.let { walletService.deleteByAccount(account, it) }
+        account.wallets.remove(wallet)
+
+        return repository.save(account)
+    }
+
     private fun saveWallets(account: Account, integrations: Set<CreateIntegrationRequest>): List<Wallet> {
         return integrations.map {
             val blockchain = blockchainService.get(it.blockchainId)

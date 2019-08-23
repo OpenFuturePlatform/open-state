@@ -1,13 +1,11 @@
 package io.openfuture.state.controller.domain.request
 
 import org.apache.commons.validator.routines.UrlValidator
-import javax.validation.Valid
 import javax.validation.constraints.AssertTrue
-import javax.validation.constraints.NotEmpty
 
 data class CreateAccountRequest(
         val webHook: String,
-        @Valid @field:NotEmpty var integrations: Set<CreateIntegrationRequest>
+        val integrations: Set<CreateIntegrationRequest>
 ) {
 
     @AssertTrue(message = "Invalid web hook url")
