@@ -38,6 +38,11 @@ class DefaultStateTrackingService(
 
     }
 
+    @Transactional(readOnly = true)
+    override fun isTrackedAddress(address: String, blockchainId: Long): Boolean {
+        return null != walletService.getActiveByBlockchainAddress(blockchainId, address)
+    }
+
     private fun updateState(walletAddress: String, stateId: Long, amount: Long) {
         val state = stateService.get(stateId)
         state.balance += amount

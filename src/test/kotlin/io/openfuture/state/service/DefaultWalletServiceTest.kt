@@ -78,7 +78,7 @@ class DefaultWalletServiceTest {
         val blockchain = createDummyBlockchain().apply { id = 1 }
         val wallet = createDummyWallet(address = walletAddress)
 
-        given(repository.findByBlockchainIdAndAddress(blockchain.id, wallet.address)).willReturn(wallet)
+        given(repository.findByBlockchainIdAndAddressIgnoreCase(blockchain.id, wallet.address)).willReturn(wallet)
 
         val result = walletService.getByBlockchainAddress(blockchain.id, wallet.address)
 
@@ -92,7 +92,7 @@ class DefaultWalletServiceTest {
         val blockchain = createDummyBlockchain().apply { id = 1 }
         val wallet = createDummyWallet()
 
-        given(repository.findByBlockchainIdAndAddressAndIsActiveTrue(blockchain.id, wallet.address)).willReturn(wallet)
+        given(repository.findByBlockchainIdAndAddressIgnoreCaseAndIsActiveTrue(blockchain.id, wallet.address)).willReturn(wallet)
 
         val result = walletService.getActiveByBlockchainAddress(blockchain.id, wallet.address)
 

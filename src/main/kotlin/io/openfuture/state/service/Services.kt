@@ -11,6 +11,8 @@ interface StateTrackingService {
 
     fun processTransaction(tx: TransactionDto)
 
+    fun isTrackedAddress(address: String, blockchainId: Long): Boolean
+
 }
 
 interface AccountService {
