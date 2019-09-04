@@ -46,7 +46,9 @@ class Web3Wrapper(
         blockSubscriber?.dispose()
     }
 
-    private fun processBlock(block: EthBlock.Block) {
+    private fun processBlock(block: EthBlock.Block?) {
+        if(block == null) return
+
         val transactions = block.transactions
 
         transactions.forEach { txObject ->
