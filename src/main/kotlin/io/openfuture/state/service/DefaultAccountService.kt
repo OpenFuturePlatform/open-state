@@ -16,7 +16,8 @@ class DefaultAccountService(
         private val repository: AccountRepository,
         private val blockchainService: BlockchainService,
         private val walletService: WalletService,
-        private val stateService: StateService
+        private val stateService: StateService,
+        private val integrationService: IntegrationService
 ) : AccountService {
 
     @Transactional
@@ -99,10 +100,9 @@ class DefaultAccountService(
     }
 
     private fun createWallet(address: String, account: Account, blockchain: Blockchain): Wallet {
+        val balance = integrationService.getBalance(address, blockchain)
 
-        // get current balance
-
-        val startState = stateService.save(State(root = State.generateHash(address)))
+        val startState = stateService.save(State(balance, State.generateHash(address)))
 
         val wallet = Wallet(mutableSetOf(account), blockchain, address, startState)
 
@@ -110,7 +110,7 @@ class DefaultAccountService(
     }
 
     private fun updateWallet(wallet: Wallet): Wallet {
-        val state = updateState(wallet.state.id, wallet.address)
+        val state = updateState(wallet.state.id, wallet.address, wallet.blockchain)
 
         wallet.startTrackingDate = state.date
         wallet.isActive = true
@@ -118,13 +118,12 @@ class DefaultAccountService(
         return walletService.save(wallet)
     }
 
-    private fun updateState(stateId: Long, walletAddress: String): State {
+    private fun updateState(stateId: Long, walletAddress: String, blockchain: Blockchain): State {
         val state = stateService.get(stateId)
 
         state.root = State.generateHash(walletAddress)
         state.date = Date().time
-
-        // get current balance
+        state.balance = integrationService.getBalance(walletAddress, blockchain)
 
         return stateService.save(state)
     }

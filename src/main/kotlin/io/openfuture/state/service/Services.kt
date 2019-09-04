@@ -76,3 +76,9 @@ interface BlockchainService {
     fun getAll(): List<Blockchain>
 
 }
+
+interface IntegrationService {
+
+    fun getBalance(address: String, blockchain: Blockchain): Long
+
+}

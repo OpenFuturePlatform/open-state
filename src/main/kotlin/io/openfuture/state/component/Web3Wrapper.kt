@@ -23,8 +23,14 @@ class Web3Wrapper(
     private var blockSubscriber: Disposable? = null
 
 
+    fun getEthBalance(address: String): Long = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST)
+            .sendAsync()
+            .get()
+            .balance
+            .toLong()
+
     @PostConstruct
-    private fun subscribe() {
+    fun subscribe() {
         blockSubscriber = web3j.blockFlowable(true).subscribe(
                 Consumer { processBlock(it.block) },
                 onErrorSubscription()
@@ -60,13 +66,6 @@ class Web3Wrapper(
 
     private fun getTransaction(tx: EthBlock.TransactionObject, timestamp: BigInteger): TransactionDto =
             TransactionDto(1, tx.hash, tx.from, tx.to, tx.value.toLong(), timestamp.toLong(), tx.blockNumber.toLong(), tx.blockHash)
-
-    fun getNetVersion(): String = web3j.netVersion().send().netVersion
-
-    fun getEthBalance(address: String): BigInteger? = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST)
-            .sendAsync()
-            .get()
-            .balance
 
 
     companion object {
