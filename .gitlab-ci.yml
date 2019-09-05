@@ -31,7 +31,7 @@ tests-unit:
   before_script:
     - export GRADLE_USER_HOME=`pwd`/.gradle
   script:
-    - ./gradlew check
+    - ./gradlew clean check
   cache:
     paths:
       - .gradle/wrapper
