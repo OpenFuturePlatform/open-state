@@ -1,5 +1,6 @@
 package io.openfuture.state.component
 
+import io.openfuture.state.config.property.EthereumProperties
 import io.openfuture.state.controller.domain.dto.TransactionDto
 import io.openfuture.state.service.StateTrackingService
 import io.reactivex.disposables.Disposable
@@ -17,11 +18,27 @@ import javax.annotation.PreDestroy
 @Component
 class Web3Wrapper(
         private val web3j: Web3j,
+        private val properties: EthereumProperties,
         private val stateService: StateTrackingService
 ) {
 
     private var blockSubscriber: Disposable? = null
 
+
+    @PostConstruct
+    fun subscribe() {
+        if (!properties.eventSubscription) return
+
+        blockSubscriber = web3j.blockFlowable(true).subscribe(
+                Consumer { processBlock(it.block) },
+                onErrorSubscription()
+        )
+    }
+
+    @PreDestroy
+    fun destroy() {
+        unsubscribe()
+    }
 
     fun getEthBalance(address: String): Long = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST)
             .sendAsync()
@@ -29,25 +46,12 @@ class Web3Wrapper(
             .balance
             .toLong()
 
-//    @PostConstruct
-    fun subscribe() {
-        blockSubscriber = web3j.blockFlowable(true).subscribe(
-                Consumer { processBlock(it.block) },
-                onErrorSubscription()
-        )
-    }
-
-//    @PreDestroy
-    fun destroy() {
-        unsubscribe()
-    }
-
     private fun unsubscribe() {
         blockSubscriber?.dispose()
     }
 
     private fun processBlock(block: EthBlock.Block?) {
-        if(block == null) return
+        if (block == null) return
 
         val transactions = block.transactions
 

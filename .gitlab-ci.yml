@@ -24,13 +24,14 @@ tests-unit:
     POSTGRES_USER: "user"
     POSTGRES_PASSWORD: "password"
     OPEN_API_URL: "open_api_url"
+    EVENT_SUBSCRIPTION: "false"
   services:
     - name: postgres:10
       alias: $POSTGRES_HOST
   before_script:
     - export GRADLE_USER_HOME=`pwd`/.gradle
   script:
-    - ./gradlew clean check
+    - ./gradlew check
   cache:
     paths:
       - .gradle/wrapper
@@ -107,6 +108,7 @@ deploy-sprint:
     - DEPLOY_KEY=$SPRINT_DEPLOY_KEY
     - export OPEN_API_URL=http://api.open-platform.zensoft.io
     - export NETWORK_URL=$NETWORK_URL_DEV
+    - export EVENT_SUBSCRIPTION=true
     - export POSTGRES_PASSWORD=$SPRINT_POSTGRES_PASSWORD
   script: *deploy_to_host
   dependencies:
@@ -122,6 +124,7 @@ deploy-master:
     - DEPLOY_KEY=$MASTER_DEPLOY_KEY
     - export OPEN_API_URL=https://api.openfuture.io
     - export NETWORK_URL=$NETWORK_URL_PROD
+    - export EVENT_SUBSCRIPTION=true
     - export POSTGRES_PASSWORD=$MASTER_POSTGRES_PASSWORD
   script: *deploy_to_host
   dependencies:
