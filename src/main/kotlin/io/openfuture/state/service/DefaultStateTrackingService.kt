@@ -1,12 +1,12 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.webhook.WebhookSender
 import io.openfuture.state.controller.domain.dto.TransactionDto
 import io.openfuture.state.entity.State
 import io.openfuture.state.entity.Transaction
 import io.openfuture.state.entity.TransactionType
 import io.openfuture.state.entity.Wallet
 import io.openfuture.state.util.HashUtils
+import io.openfuture.state.webhook.WebhookSender
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -26,7 +26,7 @@ class DefaultStateTrackingService(
 
         if (null != fromWallet) {
             val outputTransaction = saveTransaction(fromWallet, TransactionType.OUTPUT, tx.to, tx)
-            updateState(fromWallet.address, fromWallet.state.id, outputTransaction.amount.unaryMinus())
+            updateState(fromWallet.address, fromWallet.state.id, (outputTransaction.amount + tx.fee).unaryMinus())
         }
 
         val toWallet = walletService.getActiveByBlockchainAddress(tx.blockchainId, tx.to)
@@ -55,8 +55,9 @@ class DefaultStateTrackingService(
     }
 
     private fun saveTransaction(wallet: Wallet, type: TransactionType, participant: String, tx: TransactionDto): Transaction {
-        val hash = Transaction.generateHash(wallet.address, type.getId(), participant, tx.amount, tx.date)
-        val transaction = Transaction(wallet, hash, tx.hash, type.getId(), participant, tx.amount, tx.date, tx.blockHeight, tx.blockHash)
+        val hash = Transaction.generateHash(wallet.address, type.getId(), participant, tx.amount, tx.fee, tx.date)
+        val transaction =
+                Transaction(wallet, hash, tx.hash, type.getId(), participant, tx.amount, tx.fee, tx.date, tx.blockHeight, tx.blockHash)
 
         val savedTransaction = transactionService.save(transaction)
 

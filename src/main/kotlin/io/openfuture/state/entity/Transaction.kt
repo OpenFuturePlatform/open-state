@@ -33,6 +33,9 @@ class Transaction(
         @Column(name = "amount", nullable = false)
         var amount: Long,
 
+        @Column(name = "fee", nullable = false)
+        var fee: Long,
+
         @Column(name = "date", nullable = false)
         var date: Long,
 
@@ -47,13 +50,14 @@ class Transaction(
     fun getType(): TransactionType = DictionaryUtils.valueOf(TransactionType::class.java, typeId)
 
     companion object {
-        fun generateHash(address: String, typeId: Int, participantAddress: String, amount: Long, date: Long): String {
+        fun generateHash(address: String, typeId: Int, participantAddress: String, amount: Long, fee: Long, date: Long): String {
             val bytes = ByteBuffer.allocate(address.toByteArray().size + Int.SIZE_BYTES +
-                    participantAddress.toByteArray().size + Long.SIZE_BYTES + Long.SIZE_BYTES)
+                    participantAddress.toByteArray().size + Long.SIZE_BYTES + Long.SIZE_BYTES + Long.SIZE_BYTES)
                     .put(address.toByteArray())
                     .putInt(typeId)
                     .put(participantAddress.toByteArray())
                     .putLong(amount)
+                    .putLong(fee)
                     .putLong(date)
                     .array()
 

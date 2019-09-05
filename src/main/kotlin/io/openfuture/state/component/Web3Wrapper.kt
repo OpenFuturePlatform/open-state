@@ -2,6 +2,7 @@ package io.openfuture.state.component
 
 import io.openfuture.state.config.property.EthereumProperties
 import io.openfuture.state.controller.domain.dto.TransactionDto
+import io.openfuture.state.controller.domain.dto.pow
 import io.openfuture.state.service.StateTrackingService
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Consumer
@@ -70,8 +71,11 @@ class Web3Wrapper(
         subscribe()
     }
 
-    private fun getTransaction(tx: EthBlock.TransactionObject, timestamp: BigInteger): TransactionDto =
-            TransactionDto(1, tx.hash, tx.from, tx.to, tx.value.toLong(), timestamp.toLong(), tx.blockNumber.toLong(), tx.blockHash)
+    private fun getTransaction(tx: EthBlock.TransactionObject, timestamp: BigInteger): TransactionDto {
+        return TransactionDto(1, tx.hash, tx.from, tx.to, tx.value.toLong(),
+                tx.gas.toLong() * 10.pow(10).toLong(),
+                timestamp.toLong(), tx.blockNumber.toLong(), tx.blockHash)
+    }
 
 
     companion object {
