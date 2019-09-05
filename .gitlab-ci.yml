@@ -24,7 +24,6 @@ tests-unit:
     POSTGRES_USER: "user"
     POSTGRES_PASSWORD: "password"
     OPEN_API_URL: "open_api_url"
-    NETWORK_URL: ""
   services:
     - name: postgres:10
       alias: $POSTGRES_HOST
