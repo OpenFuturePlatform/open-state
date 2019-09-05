@@ -29,7 +29,7 @@ class Web3Wrapper(
             .balance
             .toLong()
 
-    @PostConstruct
+//    @PostConstruct
     fun subscribe() {
         blockSubscriber = web3j.blockFlowable(true).subscribe(
                 Consumer { processBlock(it.block) },
@@ -37,7 +37,7 @@ class Web3Wrapper(
         )
     }
 
-    @PreDestroy
+//    @PreDestroy
     fun destroy() {
         unsubscribe()
     }
