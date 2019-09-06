@@ -21,13 +21,14 @@ class DefaultAccountServiceTest {
     private val blockchainService: BlockchainService = mock(BlockchainService::class.java)
     private val walletService: WalletService = mock(WalletService::class.java)
     private val stateService: StateService = mock(StateService::class.java)
+    private val integrationService :IntegrationService = mock(IntegrationService::class.java)
 
     private lateinit var accountService: AccountService
 
 
     @Before
     fun setUp() {
-        accountService = DefaultAccountService(repository, blockchainService, walletService, stateService)
+        accountService = DefaultAccountService(repository, blockchainService, walletService, stateService, integrationService)
     }
 
     @Test

@@ -11,6 +11,8 @@ interface StateTrackingService {
 
     fun processTransaction(tx: TransactionDto)
 
+    fun isTrackedAddress(address: String, blockchainId: Long): Boolean
+
 }
 
 interface AccountService {
@@ -72,5 +74,11 @@ interface BlockchainService {
     fun get(id: Long): Blockchain
 
     fun getAll(): List<Blockchain>
+
+}
+
+interface IntegrationService {
+
+    fun getBalance(address: String, blockchain: Blockchain): Long
 
 }

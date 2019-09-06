@@ -30,12 +30,12 @@ class DefaultWalletService(
 
     @Transactional(readOnly = true)
     override fun getByBlockchainAddress(blockchainId: Long, address: String): Wallet? {
-        return repository.findByBlockchainIdAndAddress(blockchainId, address)
+        return repository.findByBlockchainIdAndAddressIgnoreCase(blockchainId, address)
     }
 
     @Transactional(readOnly = true)
     override fun getActiveByBlockchainAddress(blockchainId: Long, address: String): Wallet? {
-        return repository.findByBlockchainIdAndAddressAndIsActiveTrue(blockchainId, address)
+        return repository.findByBlockchainIdAndAddressIgnoreCaseAndIsActiveTrue(blockchainId, address)
     }
 
     @Transactional
