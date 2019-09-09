@@ -39,7 +39,7 @@ dependencies {
 
     // Ethereum
     implementation "org.web3j:web3j-spring-boot-starter:1.6.0"
-    implementation 'org.web3j:core:4.2.0'
+    implementation 'org.web3j:core:4.5.0'
 
     // Swagger
     compile "io.springfox:springfox-swagger2:$swaggerVersion"
