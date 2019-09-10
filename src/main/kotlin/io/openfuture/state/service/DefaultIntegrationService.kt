@@ -13,8 +13,8 @@ class DefaultIntegrationService(
 
     override fun getBalance(address: String, blockchain: Blockchain): Long {
         return when (blockchain.title) {
-            IntegrationType.ETHEREUM.name -> web3Wrapper.getEthBalance(address)
-            else -> throw NotFoundException("Not supported integration ${blockchain.title}")
+            IntegrationType.ETHEREUM.title -> web3Wrapper.getEthBalance(address)
+            else -> throw NotFoundException("Not supported integration: ${blockchain.title}")
         }
     }
 

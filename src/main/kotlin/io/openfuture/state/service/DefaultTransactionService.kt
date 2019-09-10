@@ -26,7 +26,11 @@ class DefaultTransactionService(
 
     @Transactional(readOnly = true)
     override fun getAllByWalletId(walletId: Long, pageable: Pageable): Page<Transaction> {
-        return repository.findAllByWalletIdOrderByDateDesc(walletId, pageable)
+        val transactions = repository.findAllByWalletIdOrderByDateDesc(walletId, pageable)
+
+        if (transactions.isEmpty) throw NotFoundException("Transactions for wallet id $walletId not found")
+
+        return transactions
     }
 
 }
