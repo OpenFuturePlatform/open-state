@@ -1,5 +1,6 @@
 package io.openfuture.state.service
 
+import io.openfuture.state.controller.domain.dto.TrackingTransactionDto
 import io.openfuture.state.controller.domain.dto.TransactionDto
 import io.openfuture.state.entity.State
 import io.openfuture.state.entity.Transaction
@@ -62,7 +63,7 @@ class DefaultStateTrackingService(
         val savedTransaction = transactionService.save(transaction)
 
         //send web hook
-        webHookSender.sendWebHook(wallet.accounts.map { it.webHook }, savedTransaction)
+        webHookSender.sendWebHook(wallet.accounts.map { it.webHook }, TrackingTransactionDto(savedTransaction))
 
         return savedTransaction
     }

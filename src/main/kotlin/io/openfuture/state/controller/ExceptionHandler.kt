@@ -2,6 +2,7 @@ package io.openfuture.state.controller
 
 import io.openfuture.state.controller.domain.dto.ErrorDto
 import io.openfuture.state.controller.domain.dto.FieldErrorDto
+import io.openfuture.state.exception.ApiException
 import io.openfuture.state.exception.NotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -16,6 +17,12 @@ class ExceptionHandler {
     @ExceptionHandler(NotFoundException::class)
     fun handleNotFoundException(ex: NotFoundException): ErrorDto {
         return ErrorDto(HttpStatus.NOT_FOUND.value(), ex.message)
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ApiException::class)
+    fun handleApiException(ex: ApiException): ErrorDto {
+        return ErrorDto(HttpStatus.BAD_REQUEST.value(), ex.message)
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
