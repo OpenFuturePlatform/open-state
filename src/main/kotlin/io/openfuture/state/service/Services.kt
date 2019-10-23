@@ -11,6 +11,8 @@ interface StateTrackingService {
 
     fun processTransaction(tx: TransactionDto)
 
+    fun isTrackedAddress(address: String, blockchainId: Long): Boolean
+
 }
 
 interface AccountService {
@@ -24,6 +26,8 @@ interface AccountService {
     fun addWallets(id: Long, integrations: Set<CreateIntegrationRequest>): Account
 
     fun deleteWallet(accountId: Long, walletId: Long): Account
+
+    fun deleteWalletByAddress(accountId: Long, address: String, blockchainId: Long): Account
 
     fun delete(id: Long): Account
 
@@ -70,5 +74,11 @@ interface BlockchainService {
     fun get(id: Long): Blockchain
 
     fun getAll(): List<Blockchain>
+
+}
+
+interface IntegrationService {
+
+    fun getBalance(address: String, blockchain: Blockchain): Long
 
 }

@@ -6,6 +6,7 @@ class TransactionDto(
         val from: String,
         val to: String,
         val amount: Long,
+        val fee: Long,
         val date: Long,
         val blockHeight: Long,
         val blockHash: String

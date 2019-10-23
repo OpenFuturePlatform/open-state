@@ -43,10 +43,11 @@ fun createDummyTransaction(
         typeId: Int = 1,
         participant: String = "participant address",
         amount: Long = 100,
+        fee: Long = 0,
         date: Long = Date().time,
         blockHeight: Long = 1,
         blockHash: String = "block hash"
-) = Transaction(wallet, hash, externalHash, typeId, participant, amount, date, blockHeight, blockHash)
+) = Transaction(wallet, hash, externalHash, typeId, participant, amount, fee, date, blockHeight, blockHash)
 
 fun createDummyTransactionDto(
         blockchainId: Long = 1,
@@ -54,7 +55,8 @@ fun createDummyTransactionDto(
         from: String = "address1",
         to: String = "address2",
         amount: Long = 100,
+        fee: Long = 0,
         date: Long = Date().time,
         blockHeight: Long = 1,
         blockHash: String = "block hash"
-) = TransactionDto(blockchainId, hash, from, to, amount, date, blockHeight, blockHash)
+) = TransactionDto(blockchainId, hash, from, to, amount, fee, date, blockHeight, blockHash)

@@ -32,9 +32,9 @@ interface TransactionRepository : BaseRepository<Transaction> {
 @Repository
 interface WalletRepository : BaseRepository<Wallet> {
 
-    fun findByBlockchainIdAndAddress(blockchainId: Long, address: String): Wallet?
+    fun findByBlockchainIdAndAddressIgnoreCase(blockchainId: Long, address: String): Wallet?
 
-    fun findByBlockchainIdAndAddressAndIsActiveTrue(blockchainId: Long, address: String): Wallet?
+    fun findByBlockchainIdAndAddressIgnoreCaseAndIsActiveTrue(blockchainId: Long, address: String): Wallet?
 
     fun findAllByAccountsContainsAndIsActiveTrue(account: Account): List<Wallet>
 

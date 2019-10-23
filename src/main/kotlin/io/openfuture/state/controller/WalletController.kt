@@ -3,6 +3,7 @@ package io.openfuture.state.controller
 import io.openfuture.state.controller.domain.dto.AccountDto
 import io.openfuture.state.controller.domain.dto.WalletDto
 import io.openfuture.state.controller.domain.request.AddWalletsRequest
+import io.openfuture.state.controller.domain.request.DeleteWalletRequest
 import io.openfuture.state.service.AccountService
 import io.openfuture.state.service.WalletService
 import org.springframework.web.bind.annotation.*
@@ -38,6 +39,12 @@ class WalletController(
     @DeleteMapping("/{id}")
     fun delete(@PathVariable accountId: Long, @PathVariable id: Long): AccountDto {
         val account = accountService.deleteWallet(accountId, id)
+        return AccountDto(account)
+    }
+
+    @PostMapping("/delete")
+    fun deleteByAddress(@PathVariable accountId: Long, @RequestBody @Valid request: DeleteWalletRequest): AccountDto {
+        val account = accountService.deleteWalletByAddress(accountId, request.address, request.blockchainId)
         return AccountDto(account)
     }
 
