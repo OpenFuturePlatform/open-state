@@ -4,7 +4,7 @@ class TransferTransactionDto(
         val timestamp: Long,
         val fee: Long,
         val amount: Long,
-        val recipientAddress: String?,
+        val recipientAddress: String,
         val senderPublicKey: String,
         val senderAddress: String,
         val senderSignature: String,

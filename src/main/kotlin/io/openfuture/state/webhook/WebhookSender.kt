@@ -1,7 +1,7 @@
 package io.openfuture.state.webhook
 
 import io.openfuture.state.controller.domain.dto.TrackingTransactionDto
-import io.openfuture.state.openchain.dto.OpenTransferTransactionDto
+import io.openfuture.state.openchain.component.openrpc.dto.transfertransaction.TransferTransactionDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientException
@@ -14,7 +14,7 @@ class WebhookSender {
         send(urlList, transaction)
     }
 
-    fun sendWebHook(urlList: List<String>, transaction: OpenTransferTransactionDto) {
+    fun sendWebHook(urlList: List<String>, transaction: TransferTransactionDto) {
         send(urlList, transaction)
     }
 
