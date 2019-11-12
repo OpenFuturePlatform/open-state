@@ -13,8 +13,4 @@ interface OpenTrackingLogRepository : BaseRepository<OpenTrackingLog> {
 }
 
 @Repository
-interface OpenTransferTransactionRepository : BaseRepository<OpenTransferTransaction> {
-
-    fun findByHashIn(hashes: List<String>): List<OpenTransferTransaction>?
-
-}
+interface OpenTransferTransactionRepository : BaseRepository<OpenTransferTransaction>

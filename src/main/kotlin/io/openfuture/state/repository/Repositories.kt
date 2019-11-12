@@ -48,3 +48,10 @@ interface AccountRepository : BaseRepository<Account> {
     fun findByIdAndIsEnabledTrue(id: Long): Account?
 
 }
+
+@Repository
+interface ScaffoldRepository : BaseRepository<OpenScaffold> {
+
+    fun findByRecipientAddress(recipientAddress: String): OpenScaffold?
+
+}
