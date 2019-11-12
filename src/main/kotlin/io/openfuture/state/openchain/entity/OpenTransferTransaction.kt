@@ -12,25 +12,25 @@ class OpenTransferTransaction(
         @Column(name = "fee")
         var fee: Long,
 
-        @Column(name = "amount", nullable = false)
+        @Column(name = "amount")
         var amount: Long,
 
-        @Column(name = "hash", nullable = false)
+        @Column(name = "hash")
         var hash: String,
 
-        @Column(name = "sender_address", nullable = false)
+        @Column(name = "sender_address")
         var senderAddress: String,
 
-        @Column(name = "recipient_address", nullable = false)
-        var recipientAddress: String,
+        @Column(name = "recipient_address")
+        var recipientAddress: String?,
 
-        @Column(name = "block_hash", nullable = false)
+        @Column(name = "block_hash")
         var blockHash: String,
 
-        @Column(name = "date", nullable = false)
+        @Column(name = "date")
         var date: Long,
 
-        @Column(name = "web_hook", nullable = false)
-        var webHook: String
+        @Column(name = "web_hook")
+        var webHook: String?
 
 ) : BaseModel()

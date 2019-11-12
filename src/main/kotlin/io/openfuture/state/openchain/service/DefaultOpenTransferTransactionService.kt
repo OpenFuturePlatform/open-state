@@ -7,11 +7,11 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultOpenTransferTransactionService(
-        private val repository: OpenTransferTransactionRepository
+        private val openTransferTransactionRepository: OpenTransferTransactionRepository
 ) : OpenTransferTransactionService {
 
-    @Transactional(readOnly = true)
-    override fun findByHashes(hashes: List<String>): List<OpenTransferTransaction>? {
-        return repository.findByHashIn(hashes)
+    @Transactional
+    override fun save(openTransferTransaction: OpenTransferTransaction): OpenTransferTransaction {
+        return openTransferTransactionRepository.save(openTransferTransaction)
     }
 }
