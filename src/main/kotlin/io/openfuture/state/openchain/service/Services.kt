@@ -19,6 +19,6 @@ interface OpenTrackingLogService {
 
 interface OpenTransferTransactionService {
 
-    fun findByHashes(hashes: List<String>): List<OpenTransferTransaction>?
+    fun save(openTransferTransaction: OpenTransferTransaction): OpenTransferTransaction
 
 }
