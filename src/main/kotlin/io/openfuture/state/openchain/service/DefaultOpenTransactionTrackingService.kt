@@ -35,7 +35,7 @@ class DefaultOpenTransactionTrackingService(
 
     private fun saveAndSendTransferTransactionToWebhook(transferTransactionDtos: List<TransferTransactionDto>) {
         transferTransactionDtos.forEach {
-            it.recipientAddress?.let { address ->
+            it.recipientAddress.let { address ->
                 {
                     openScaffoldService.findByRecipientAddress(address)?.let { scaffold ->
                         openTransferTransactionService.save(OpenTransferTransaction(it.fee,

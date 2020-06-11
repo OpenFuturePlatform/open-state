@@ -182,4 +182,25 @@ class DefaultAccountServiceTest {
         assertThat(result.wallets).isEmpty()
     }
 
+    @Test(expected = NotFoundException::class)
+    fun getUnexistentAccount_ShouldThrowException() {
+        given(repository.findByIdAndIsEnabledTrue(1L)).willReturn(null)
+
+        accountService.get(1L)
+    }
+
+    @Test(expected = NotFoundException::class)
+    fun updateUnexistentAccount_ShouldThrowException() {
+        given(repository.findByIdAndIsEnabledTrue(1L)).willReturn(null)
+
+        accountService.update(1L, "webHook")
+    }
+
+    @Test(expected = NotFoundException::class)
+    fun deleteUnexistentAccount_ShouldThrowException() {
+        given(repository.findByIdAndIsEnabledTrue(1L)).willReturn(null)
+
+        accountService.delete(1L)
+    }
+
 }
