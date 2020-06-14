@@ -11,7 +11,6 @@ stages:
 
 variables:
   DOCKER_DRIVER: overlay2
-  DOCKER_HOST: tcp://docker:2375/
 
 ###########################
 # Tests
