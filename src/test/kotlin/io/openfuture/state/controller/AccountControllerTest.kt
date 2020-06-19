@@ -1,6 +1,7 @@
 package io.openfuture.state.controller
 
 import io.openfuture.state.entity.Account
+import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.service.AccountService
 import io.openfuture.state.service.WalletService
 import io.openfuture.state.util.any
@@ -39,6 +40,27 @@ class AccountControllerTest : BaseControllerTest() {
     }
 
     @Test
+    fun create_WhenAccountRequestAddressIsEmpty_ShouldReturnUnprocessableEntityStatus() {
+        val requestBody = """
+            {
+              "webHook": "",
+              "integrations": [
+                {
+                  "address": "",
+                  "blockchainId": 1
+            
+                }
+              ]
+            }
+        """.trimIndent()
+
+        mockMvc.perform(post("/api/accounts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+                .andExpect(status().isBadRequest)
+    }
+
+    @Test
     fun getAccountByIdTest() {
         val account = createDummyAccount().apply { id = 1 }
 
@@ -46,6 +68,15 @@ class AccountControllerTest : BaseControllerTest() {
 
         mockMvc.perform(get("/api/accounts/1"))
                 .andExpect(status().isOk)
+    }
+
+    @Test
+    fun get_WhenAccountIsNotPresented_ShouldReturnNotFoundStatus() {
+
+        given(accountService.get(any(Long::class.java))).willThrow(NotFoundException("Account with id 1 not found"))
+
+        mockMvc.perform(get("/api/accounts/1"))
+                .andExpect(status().isNotFound)
     }
 
     @Test
@@ -63,6 +94,21 @@ class AccountControllerTest : BaseControllerTest() {
     }
 
     @Test
+    fun update_WithInvalidUpdateRequest_ShouldReturnBadRequestStatus() {
+        val requestBody = """
+            {
+              "id": 1,
+              "webHook": ""
+            }
+        """.trimIndent()
+
+        mockMvc.perform(put("/api/accounts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+                .andExpect(status().isBadRequest)
+    }
+
+    @Test
     fun deleteAccountTest() {
         val accountId = 1L
         val account = createDummyAccount(isEnabled = false).apply { id = accountId }
@@ -71,6 +117,14 @@ class AccountControllerTest : BaseControllerTest() {
 
         mockMvc.perform(delete("/api/accounts/$accountId"))
                 .andExpect(status().isOk)
+    }
+
+    @Test
+    fun delete_WhenAccountIsNotPresented_ShouldReturn_NotFoundStatus() {
+        given(accountService.delete(1L)).willThrow(NotFoundException("Account with id 1 not found"))
+
+        mockMvc.perform(delete("/api/accounts/1"))
+                .andExpect(status().isNotFound)
     }
 
 }
