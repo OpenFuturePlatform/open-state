@@ -1,6 +1,7 @@
 package io.openfuture.state.service
 
 import io.openfuture.state.controller.domain.request.CreateIntegrationRequest
+import io.openfuture.state.entity.Account
 import io.openfuture.state.entity.State
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.AccountRepository
@@ -13,7 +14,6 @@ import org.mockito.BDDMockito.verify
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.internal.verification.VerificationModeFactory.times
-import java.util.*
 
 class DefaultAccountServiceTest {
 
@@ -203,4 +203,30 @@ class DefaultAccountServiceTest {
         accountService.delete(1L)
     }
 
+    @Test(expected = NotFoundException::class)
+    fun deleteWalletByAddress_ShouldThrowException_WhenAccountNotFound() {
+        given(repository.findByIdAndIsEnabledTrue(1L)).willReturn(null)
+
+        accountService.deleteWalletByAddress(1L, "",  1L)
+    }
+
+    @Test
+    fun deleteWalletByAddress_ShouldRemoveWalletFromAccount() {
+        val accountId = 2L
+        val blockChainId = 1L
+        val address = "address"
+        val wallet = createDummyWallet()
+        val account = createDummyAccount(
+                wallets = mutableSetOf(wallet)
+        )
+        val accountWithoutWallet = createDummyAccount()
+
+        given(repository.findByIdAndIsEnabledTrue(accountId)).willReturn(account)
+        given(walletService.getActiveByBlockchainAddress(blockChainId, address)).willReturn(wallet)
+        given(repository.save(account)).willReturn(accountWithoutWallet)
+
+        val actual: Account = accountService.deleteWalletByAddress(accountId, address, blockChainId)
+
+        assertThat(actual).isEqualTo(accountWithoutWallet)
+    }
 }
