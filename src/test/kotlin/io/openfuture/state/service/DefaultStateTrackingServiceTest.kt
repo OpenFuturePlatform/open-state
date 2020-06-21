@@ -1,9 +1,11 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.webhook.WebhookSender
 import io.openfuture.state.entity.State
 import io.openfuture.state.entity.Transaction
 import io.openfuture.state.util.*
+import io.openfuture.state.webhook.WebhookSender
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -52,7 +54,7 @@ class DefaultStateTrackingServiceTest {
     }
 
     @Test
-    fun processTransactionShouldIgnoreTransactionIfWalletsDoNotExists() {
+    fun processTransactionShouldIgnoreTransactionIfWalletsDoesNotExists() {
         val transactionDto = createDummyTransactionDto()
 
         given(walletService.getActiveByBlockchainAddress(transactionDto.blockchainId, transactionDto.from)).willReturn(null)
@@ -63,6 +65,30 @@ class DefaultStateTrackingServiceTest {
         verify(stateService, never()).save(any(State::class.java))
 
         stateTrackingService.processTransaction(transactionDto)
+    }
+
+    @Test
+    fun isTrackedAddress_WhenWhenWalletExists_ShouldReturnTrue() {
+        val address = "address"
+        val blockchainId = 1L
+
+        given(walletService.getActiveByBlockchainAddress(blockchainId, address)).willReturn(createDummyWallet())
+
+        val actual = stateTrackingService.isTrackedAddress(address, 1L)
+
+        assertTrue(actual)
+    }
+
+    @Test
+    fun isTrackedAddress_WhenWhenWalletIsNotExists_ShouldReturnFalse() {
+        val address = "address"
+        val blockchainId = 1L
+
+        given(walletService.getActiveByBlockchainAddress(blockchainId, address)).willReturn(null)
+
+        val actual = stateTrackingService.isTrackedAddress(address, 1L)
+
+        assertFalse(actual)
     }
 
 }
