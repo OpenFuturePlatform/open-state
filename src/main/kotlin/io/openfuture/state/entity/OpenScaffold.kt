@@ -7,7 +7,7 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "open_scaffolds")
-class OpenScaffold(
+data class OpenScaffold(
 
         @Column(name = "recipient_address", nullable = false, unique = true)
         var recipientAddress: String,

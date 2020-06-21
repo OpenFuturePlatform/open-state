@@ -12,12 +12,13 @@ stages:
 variables:
   DOCKER_DRIVER: overlay2
 
+
 ###########################
 # Tests
 ###########################
 tests-unit:
   stage: test
-  image: openjdk:8-jdk
+  image: openjdk:12-jdk
   variables:
     POSTGRES_HOST: "postgres"
     POSTGRES_DB: "db"
@@ -48,7 +49,7 @@ tests-unit:
 ###########################
 build-jar:
   stage: build
-  image: openjdk:8-jdk
+  image: openjdk:12-jdk
   before_script:
     - export GRADLE_USER_HOME=`pwd`/.gradle
   script:

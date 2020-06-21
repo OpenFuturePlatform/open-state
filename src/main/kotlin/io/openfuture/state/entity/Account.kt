@@ -5,7 +5,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "accounts")
-class Account(
+data class Account(
 
         @Column(name = "web_hook", nullable = false)
         var webHook: String,
