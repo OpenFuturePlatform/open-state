@@ -1,5 +1,6 @@
 package io.openfuture.state.controller
 
+import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.service.BlockchainService
 import io.openfuture.state.util.createDummyBlockchain
 import org.junit.Test
@@ -34,6 +35,14 @@ class BlockchainControllerTest : BaseControllerTest() {
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/blockchains/1"))
                 .andExpect(MockMvcResultMatchers.status().isOk)
+    }
+
+    @Test
+    fun get_WhenBlockchainIsNotPresent_ShouldReturnNotFoundStatusCode() {
+        given(blockchainService.get(1L)).willThrow(NotFoundException("Blockchain with id 1 not found"))
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/blockchains/1"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound)
     }
 
 }
