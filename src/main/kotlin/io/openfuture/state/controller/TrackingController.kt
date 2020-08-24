@@ -14,7 +14,7 @@ class TrackingController(
 ) {
 
     @PostMapping("/transactions")
-    fun processTransaction(@RequestBody tx: TransactionDto) {
+    suspend fun processTransaction(@RequestBody tx: TransactionDto) {
         stateTrackingService.processTransaction(tx)
     }
 

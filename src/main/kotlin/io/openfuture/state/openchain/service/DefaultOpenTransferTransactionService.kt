@@ -2,6 +2,7 @@ package io.openfuture.state.openchain.service
 
 import io.openfuture.state.openchain.entity.OpenTransferTransaction
 import io.openfuture.state.openchain.repository.OpenTransferTransactionRepository
+import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -11,7 +12,7 @@ class DefaultOpenTransferTransactionService(
 ) : OpenTransferTransactionService {
 
     @Transactional
-    override fun save(openTransferTransaction: OpenTransferTransaction): OpenTransferTransaction {
-        return openTransferTransactionRepository.save(openTransferTransaction)
+    override suspend fun save(openTransferTransaction: OpenTransferTransaction): OpenTransferTransaction {
+        return openTransferTransactionRepository.save(openTransferTransaction).awaitSingle()
     }
 }

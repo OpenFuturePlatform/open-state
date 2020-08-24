@@ -1,51 +1,28 @@
 package io.openfuture.state.entity
 
-import io.openfuture.state.entity.base.BaseModel
 import io.openfuture.state.util.DictionaryUtils
 import io.openfuture.state.util.HashUtils
-import org.apache.tomcat.util.buf.HexUtils
+import org.apache.commons.codec.binary.Hex
+import org.bson.types.ObjectId
+import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.mongodb.core.mapping.MongoId
 import java.nio.ByteBuffer
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.*
-import javax.persistence.*
 
-@Entity
-@Table(name = "transactions")
+@Document
 class Transaction(
-
-        @ManyToOne
-        @JoinColumn(name = "wallet_id")
-        var wallet: Wallet,
-
-        @Column(name = "hash", nullable = false)
+        @MongoId
+        val id: ObjectId = ObjectId(),
+        var walletAddress: String,
         var hash: String,
-
-        @Column(name = "external_hash", nullable = false)
         var externalHash: String,
-
-        @Column(name = "type_id", nullable = false)
         var typeId: Int,
-
-        @Column(name = "participant", nullable = false)
         var participant: String,
-
-        @Column(name = "amount", nullable = false)
         var amount: Long,
-
-        @Column(name = "fee", nullable = false)
         var fee: Long,
-
-        @Column(name = "date", nullable = false)
         var date: Long,
-
-        @Column(name = "block_height", nullable = false)
         var blockHeight: Long,
-
-        @Column(name = "block_hash", nullable = false)
         var blockHash: String
-
-) : BaseModel() {
+) {
 
     fun getType(): TransactionType = DictionaryUtils.valueOf(TransactionType::class.java, typeId)
 
@@ -61,7 +38,7 @@ class Transaction(
                     .putLong(date)
                     .array()
 
-            return HexUtils.toHexString(HashUtils.sha256(bytes))
+            return Hex.encodeHexString(HashUtils.sha256(bytes))
         }
 
     }

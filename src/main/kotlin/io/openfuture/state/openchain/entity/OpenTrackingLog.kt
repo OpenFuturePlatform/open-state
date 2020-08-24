@@ -1,18 +1,13 @@
 package io.openfuture.state.openchain.entity
 
-import io.openfuture.state.entity.base.BaseModel
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Table
+import org.bson.types.ObjectId
+import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.mongodb.core.mapping.MongoId
 
-@Entity
-@Table(name = "open_tracking_logs")
+@Document
 class OpenTrackingLog(
-
-        @Column(name = "`offset`", nullable = false)
+        @MongoId
+        val id: ObjectId = ObjectId(),
         var offset: Long,
-
-        @Column(name = "hash", nullable = false)
         var hash: String
-
-) : BaseModel()
+)

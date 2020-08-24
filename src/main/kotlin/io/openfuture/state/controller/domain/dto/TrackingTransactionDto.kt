@@ -3,7 +3,7 @@ package io.openfuture.state.controller.domain.dto
 import io.openfuture.state.entity.Transaction
 
 data class TrackingTransactionDto(
-        val id: Long,
+        val id: String,
         val hash: String,
         val amount: Long,
         val fee: Long,
@@ -18,11 +18,11 @@ data class TrackingTransactionDto(
 ) {
 
     constructor(tx: Transaction) : this(
-            tx.id,
+            tx.id.toString(),
             tx.hash,
             tx.amount,
             tx.fee,
-            tx.wallet.address,
+            tx.walletAddress,
             tx.getType().name,
             tx.participant,
             tx.date,

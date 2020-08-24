@@ -1,12 +1,15 @@
 package io.openfuture.state.openchain.service
 
+import io.openfuture.state.entity.OpenScaffold
 import io.openfuture.state.openchain.component.openrpc.OpenChainWrapper
 import io.openfuture.state.openchain.component.openrpc.dto.transfertransaction.TransferTransactionDto
 import io.openfuture.state.openchain.entity.OpenTransferTransaction
 import io.openfuture.state.service.OpenScaffoldService
 import io.openfuture.state.webhook.WebhookSender
+import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import kotlin.coroutines.suspendCoroutine
 
 @Service
 class DefaultOpenTransactionTrackingService(
@@ -18,7 +21,7 @@ class DefaultOpenTransactionTrackingService(
 ) : OpenTransactionTrackingService {
 
     @Transactional
-    override tailrec fun processTransferTransaction() {
+    override tailrec suspend fun processTransferTransaction() {
         val lastOpenTrackingLog = openTrackingLogService.getLastOpenTrackingLog()
         val limit = 10
         val offset = lastOpenTrackingLog?.offset ?: 0
@@ -28,29 +31,34 @@ class DefaultOpenTransactionTrackingService(
         if (newTransactions.isNotEmpty()) {
             saveAndSendTransferTransactionToWebhook(newTransactions)
 
-            openTrackingLogService.save(offset + limit, newTransactions.last().hash)
+            openTrackingLogService.save(offset = offset + limit, hash = newTransactions.last().hash)
             processTransferTransaction()
         }
     }
 
-    private fun saveAndSendTransferTransactionToWebhook(transferTransactionDtos: List<TransferTransactionDto>) {
+    private suspend fun saveAndSendTransferTransactionToWebhook(transferTransactionDtos: List<TransferTransactionDto>) {
         transferTransactionDtos.forEach {
-            it.recipientAddress?.let { address ->
+            it.recipientAddress.let { address ->
                 {
-                    openScaffoldService.findByRecipientAddress(address)?.let { scaffold ->
-                        openTransferTransactionService.save(OpenTransferTransaction(it.fee,
-                                it.amount,
-                                it.hash,
-                                it.senderAddress,
-                                address,
-                                it.blockHash,
-                                it.timestamp,
-                                scaffold.webHook))
-                        webHookSender.sendWebHook(listOf(scaffold.webHook), it)
+                    suspend {
+                        openScaffoldService.findByRecipientAddress(address)?.let { scaffold ->
+                            suspend {
+                                openTransferTransactionService.save(OpenTransferTransaction(fee = it.fee,
+                                        amount = it.amount,
+                                        hash = it.hash,
+                                        senderAddress = it.senderAddress,
+                                        recipientAddress = address,
+                                        blockHash = it.blockHash,
+                                        date = it.timestamp,
+                                        webHook = scaffold.webHook))
+                            }
+                            webHookSender.sendWebHook(listOf(scaffold.webHook), it)
+                        }
                     }
                 }
             }
         }
+
     }
 
 }

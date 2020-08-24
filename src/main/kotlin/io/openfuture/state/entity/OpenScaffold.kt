@@ -1,17 +1,11 @@
 package io.openfuture.state.entity
 
-import io.openfuture.state.entity.base.BaseModel
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Table
+import org.bson.types.ObjectId
+import org.springframework.data.mongodb.core.mapping.Document
 
-@Entity
-@Table(name = "open_scaffolds")
+@Document
 data class OpenScaffold(
-
-        @Column(name = "recipient_address", nullable = false, unique = true)
+        val id: ObjectId = ObjectId(),
         var recipientAddress: String,
-
-        @Column(name = "web_hook", nullable = false)
         var webHook: String
-) : BaseModel()
+)

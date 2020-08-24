@@ -5,20 +5,20 @@ import io.openfuture.state.openchain.entity.OpenTransferTransaction
 
 interface OpenTransactionTrackingService {
 
-    fun processTransferTransaction()
+    suspend fun processTransferTransaction()
 
 }
 
 interface OpenTrackingLogService {
 
-    fun getLastOpenTrackingLog(): OpenTrackingLog?
+    suspend fun getLastOpenTrackingLog(): OpenTrackingLog?
 
-    fun save(offset: Long, hash: String): OpenTrackingLog
+    suspend fun save(offset: Long, hash: String): OpenTrackingLog
 
 }
 
 interface OpenTransferTransactionService {
 
-    fun save(openTransferTransaction: OpenTransferTransaction): OpenTransferTransaction
+    suspend fun save(openTransferTransaction: OpenTransferTransaction): OpenTransferTransaction
 
 }

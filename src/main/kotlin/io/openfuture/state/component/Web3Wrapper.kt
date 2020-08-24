@@ -2,7 +2,6 @@ package io.openfuture.state.component
 
 import io.openfuture.state.config.property.EthereumProperties
 import io.openfuture.state.controller.domain.dto.TransactionDto
-import io.openfuture.state.controller.domain.dto.pow
 import io.openfuture.state.service.StateTrackingService
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Consumer
@@ -14,6 +13,7 @@ import org.web3j.protocol.core.methods.response.EthBlock
 import java.math.BigInteger
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
+import kotlin.math.pow
 
 
 @Component
@@ -31,7 +31,7 @@ class Web3Wrapper(
         if (!properties.eventSubscription) return
 
         blockSubscriber = web3j.blockFlowable(true).subscribe(
-                Consumer { processBlock(it.block) },
+                Consumer { suspend { processBlock(it.block) } },
                 onErrorSubscription()
         )
     }
@@ -51,7 +51,7 @@ class Web3Wrapper(
         blockSubscriber?.dispose()
     }
 
-    private fun processBlock(block: EthBlock.Block?) {
+    private suspend fun processBlock(block: EthBlock.Block?) {
         if (block == null) return
 
         val transactions = block.transactions
@@ -73,7 +73,7 @@ class Web3Wrapper(
 
     private fun getTransaction(tx: EthBlock.TransactionObject, timestamp: BigInteger): TransactionDto {
         return TransactionDto(1, tx.hash, tx.from, tx.to, tx.value.toLong(),
-                tx.gas.toLong() * 10.pow(10).toLong(),
+                tx.gas.toLong() * 10.0.pow(10.0).toLong(),
                 timestamp.toLong(), tx.blockNumber.toLong(), tx.blockHash)
     }
 

@@ -1,6 +1,6 @@
 package io.openfuture.state.util
 
-import org.apache.tomcat.util.buf.HexUtils
+import org.apache.commons.codec.binary.Hex
 import java.security.MessageDigest
 
 object HashUtils {
@@ -35,7 +35,7 @@ object HashUtils {
             treeLayout = mutableListOf()
         }
 
-        return HexUtils.toHexString(sha256(previousTreeLayout[0] + previousTreeLayout[1]))
+        return Hex.encodeHexString(sha256(previousTreeLayout[0] + previousTreeLayout[1]))
     }
 
 }

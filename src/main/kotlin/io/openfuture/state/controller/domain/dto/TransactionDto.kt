@@ -10,5 +10,4 @@ class TransactionDto(
         val date: Long,
         val blockHeight: Long,
         val blockHash: String
-
 )

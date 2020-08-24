@@ -11,6 +11,6 @@ class TransferTransactionsTrackingTask(
 
     @Scheduled(fixedDelayString = "\${open-chain.transfer-transactions-tracking-frequency}")
     fun processTransferTransactions() {
-        openTransactionTrackingService.processTransferTransaction()
+        suspend { openTransactionTrackingService.processTransferTransaction() }
     }
 }
