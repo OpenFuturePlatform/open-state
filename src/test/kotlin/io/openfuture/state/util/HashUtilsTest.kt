@@ -1,7 +1,7 @@
 package io.openfuture.state.util
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 
 class HashUtilsTest {
