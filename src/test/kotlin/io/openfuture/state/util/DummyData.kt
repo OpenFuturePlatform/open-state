@@ -1,9 +1,8 @@
 package io.openfuture.state.util
 
-import io.openfuture.state.controller.domain.dto.WalletDto
-import io.openfuture.state.controller.domain.request.SaveWalletRequest
-import io.openfuture.state.model.Transaction
-import io.openfuture.state.model.Wallet
+import io.openfuture.state.controller.WalletController
+import io.openfuture.state.domain.Transaction
+import io.openfuture.state.domain.Wallet
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
 import java.util.*
@@ -14,14 +13,7 @@ fun createDummyWallet(
         webhook: String = "webhook",
         transactions: Set<Transaction> = setOf(createDummyTransaction()),
         lastUpdateDate: LocalDateTime = LocalDateTime.now()
-) = Wallet(id, address, webhook, transactions, lastUpdateDate)
-
-fun createDummyWalletDto(
-        id: String = "id",
-        address: String = "address",
-        webhook: String = "webhook",
-        lastUpdateDate: LocalDateTime = LocalDateTime.now()
-) = WalletDto(id, address, webhook, lastUpdateDate)
+) = Wallet(address, webhook, transactions, lastUpdateDate, id)
 
 fun createDummyTransaction(
         hash: String = "hash",
@@ -35,5 +27,7 @@ fun createDummyTransaction(
         blockHash: String = "block hash"
 ) = Transaction(hash, externalHash, typeId, participant, amount, fee, date, blockHeight, blockHash)
 
-fun createDummySaveWalletRequest(address: String = "address",
-                                 webhook: String = "webhook") = SaveWalletRequest(address, webhook)
+fun createDummySaveWalletRequest(
+        address: String = "address",
+        webhook: String = "webhook"
+) = WalletController.SaveWalletRequest(address, webhook)

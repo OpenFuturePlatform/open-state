@@ -1,4 +1,4 @@
-package io.openfuture.state.model
+package io.openfuture.state.domain
 
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.index.Indexed
@@ -8,11 +8,11 @@ import java.time.LocalDateTime
 
 @Document
 data class Wallet(
-        @MongoId
-        val id: ObjectId = ObjectId(),
         @Indexed(unique = true)
         val address: String,
         val webhook: String,
-        val transactions: Set<Transaction>,
-        var lastUpdateDate: LocalDateTime
+        val transactions: Set<Transaction> = emptySet(),
+        var lastUpdateDate: LocalDateTime = LocalDateTime.now(),
+        @MongoId
+        val id: ObjectId = ObjectId(),
 )

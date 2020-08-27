@@ -1,4 +1,4 @@
-package io.openfuture.state.model
+package io.openfuture.state.domain
 
 data class Transaction(
         val hash: String,

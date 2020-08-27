@@ -10,6 +10,6 @@ abstract class ControllerTests {
     protected lateinit var webClient: WebTestClient
 
     @Autowired
-    protected lateinit var om: ObjectMapper
+    protected lateinit var objectMapper: ObjectMapper
 
 }

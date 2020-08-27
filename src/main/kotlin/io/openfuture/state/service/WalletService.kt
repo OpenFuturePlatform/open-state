@@ -1,11 +1,10 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.controller.domain.dto.WalletDto
-import io.openfuture.state.controller.domain.request.SaveWalletRequest
+import io.openfuture.state.domain.Wallet
 
 interface WalletService {
 
-    suspend fun save(request: SaveWalletRequest): WalletDto
+    suspend fun save(address: String, webhook: String): Wallet
 
-    suspend fun findByAddress(address: String): WalletDto
+    suspend fun findByAddress(address: String): Wallet
 }

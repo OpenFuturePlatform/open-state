@@ -3,13 +3,10 @@ package io.openfuture.state.service
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.given
 import io.openfuture.state.base.ServiceTests
+import io.openfuture.state.domain.Wallet
 import io.openfuture.state.exception.NotFoundException
-import io.openfuture.state.mapper.WalletMapper
-import io.openfuture.state.model.Wallet
 import io.openfuture.state.repository.WalletRepository
-import io.openfuture.state.util.createDummySaveWalletRequest
 import io.openfuture.state.util.createDummyWallet
-import io.openfuture.state.util.createDummyWalletDto
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
@@ -23,31 +20,22 @@ class WalletServiceTest : ServiceTests() {
     @Mock
     private lateinit var walletRepository: WalletRepository
 
-    @Mock
-    private lateinit var walletMapper: WalletMapper
-
     private lateinit var walletService: WalletService
 
     @BeforeEach
     fun setUp() {
-        walletService = WalletServiceImpl(
-                walletRepository = walletRepository,
-                walletMapper = walletMapper
-        )
+        walletService = DefaultWalletService(walletRepository)
     }
 
     @Test
-    fun saveReturnWalletDto() = runBlocking<Unit> {
+    fun saveShouldReturnWallet() = runBlocking<Unit> {
         val wallet = createDummyWallet()
-        val request = createDummySaveWalletRequest()
-        val walletDto = createDummyWalletDto()
 
         given(walletRepository.save(any<Wallet>())).willReturn(Mono.just(wallet))
-        given(walletMapper.toWalletDto(wallet)).willReturn(walletDto)
 
-        val result = walletService.save(request)
+        val result = walletService.save(wallet.address, wallet.webhook)
 
-        assertThat(result).isEqualTo(walletDto)
+        assertThat(result).isEqualTo(wallet)
     }
 
     @Test
@@ -63,13 +51,11 @@ class WalletServiceTest : ServiceTests() {
     @Test
     fun findByAddressShouldReturnWalletDto() = runBlocking<Unit> {
         val wallet = createDummyWallet()
-        val walletDto = createDummyWalletDto()
 
         given(walletRepository.findByAddress("address")).willReturn(Mono.just(wallet))
-        given(walletMapper.toWalletDto(wallet)).willReturn(walletDto)
 
         val result = walletService.findByAddress("address")
 
-        assertThat(result).isEqualTo(walletDto)
+        assertThat(result).isEqualTo(wallet)
     }
 }

@@ -1,7 +1,6 @@
 package io.openfuture.state.controller
 
-import io.openfuture.state.controller.domain.dto.ErrorDto
-import io.openfuture.state.controller.domain.dto.FieldErrorDto
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.openfuture.state.exception.NotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -24,5 +23,17 @@ class ExceptionHandler {
         val fieldErrors = ex.bindingResult.fieldErrors.map { FieldErrorDto(it.field, it.defaultMessage) }
         return ErrorDto(HttpStatus.BAD_REQUEST.value(), "Invalid parameters", fieldErrors)
     }
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    data class ErrorDto(
+            val status: Int,
+            val reason: String?,
+            val errors: List<FieldErrorDto> = listOf()
+    )
+
+    data class FieldErrorDto(
+            val field: String,
+            val message: String?
+    )
 
 }
