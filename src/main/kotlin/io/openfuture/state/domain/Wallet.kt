@@ -8,11 +8,9 @@ import java.time.LocalDateTime
 
 @Document
 data class Wallet(
-        @Indexed(unique = true)
-        val address: String,
+        @Indexed(unique = true) val address: String,
         val webhook: String,
         val transactions: Set<Transaction> = emptySet(),
         var lastUpdateDate: LocalDateTime = LocalDateTime.now(),
-        @MongoId
-        val id: ObjectId = ObjectId(),
+        @MongoId val id: ObjectId = ObjectId(),
 )

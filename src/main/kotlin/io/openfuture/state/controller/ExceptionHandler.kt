@@ -20,13 +20,8 @@ class ExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleException(ex: MethodArgumentNotValidException): ErrorDto {
-        val fieldErrors = ex.bindingResult.fieldErrors.map { FieldErrorDto(it.field, it.defaultMessage) }
+        val fieldErrors = ex.bindingResult.fieldErrors.map { ErrorDto.FieldErrorDto(it.field, it.defaultMessage) }
         return ErrorDto(HttpStatus.BAD_REQUEST.value(), "Invalid parameters", fieldErrors)
     }
-
-    data class FieldErrorDto(
-            val field: String,
-            val message: String?
-    )
 
 }

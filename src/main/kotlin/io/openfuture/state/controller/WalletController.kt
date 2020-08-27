@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.NotNull
 
 @RestController
@@ -14,7 +13,7 @@ import javax.validation.constraints.NotNull
 class WalletController(private val walletService: WalletService) {
 
     @PostMapping
-    suspend fun save(@RequestBody @Valid request: SaveWalletRequest): WalletDto {
+    suspend fun save(@Valid @RequestBody request: SaveWalletRequest): WalletDto {
         val wallet = walletService.save(request.address, request.webhook)
         return WalletDto(wallet)
     }
@@ -40,9 +39,7 @@ class WalletController(private val walletService: WalletService) {
     }
 
     data class SaveWalletRequest(
-            @field:NotNull @field:NotEmpty @field:NotBlank
-            val address: String,
-            @field:NotNull @field:NotEmpty @field:NotBlank
-            val webhook: String,
+            @field:NotNull @field:NotBlank val address: String,
+            @field:NotNull @field:NotBlank val webhook: String,
     )
 }
