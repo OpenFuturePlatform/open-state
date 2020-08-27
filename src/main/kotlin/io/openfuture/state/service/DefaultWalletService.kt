@@ -11,10 +11,7 @@ import org.springframework.stereotype.Service
 class DefaultWalletService(private val walletRepository: WalletRepository) : WalletService {
 
     override suspend fun save(address: String, webhook: String): Wallet {
-        val wallet = Wallet(
-                address = address,
-                webhook = webhook,
-        )
+        val wallet = Wallet(address, webhook)
         return walletRepository.save(wallet).awaitSingle()
     }
 

@@ -40,13 +40,9 @@ class WalletController(private val walletService: WalletService) {
     }
 
     data class SaveWalletRequest(
-            @field:NotNull
-            @field:NotEmpty
-            @field:NotBlank
+            @field:NotNull @field:NotEmpty @field:NotBlank
             val address: String,
-            @field:NotNull
-            @field:NotEmpty
-            @field:NotBlank
+            @field:NotNull @field:NotEmpty @field:NotBlank
             val webhook: String,
     )
 }
