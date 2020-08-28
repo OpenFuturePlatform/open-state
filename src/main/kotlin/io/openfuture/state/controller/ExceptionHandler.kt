@@ -1,7 +1,7 @@
 package io.openfuture.state.controller
 
-import io.openfuture.state.controller.domain.dto.ErrorDto
-import io.openfuture.state.controller.domain.dto.FieldErrorDto
+import io.openfuture.state.controller.dto.ErrorDto
+import io.openfuture.state.controller.dto.FieldErrorDto
 import io.openfuture.state.exception.NotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.MethodArgumentNotValidException

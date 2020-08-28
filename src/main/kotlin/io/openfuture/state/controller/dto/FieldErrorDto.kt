@@ -1,4 +1,4 @@
-package io.openfuture.state.controller.domain.dto
+package io.openfuture.state.controller.dto
 
 data class FieldErrorDto(
         val field: String,

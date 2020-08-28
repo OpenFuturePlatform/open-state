@@ -1,4 +1,4 @@
-package io.openfuture.state.controller.domain.page
+package io.openfuture.state.controller.dto
 
 import org.springframework.data.domain.Page
 
