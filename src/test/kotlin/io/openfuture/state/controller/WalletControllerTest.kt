@@ -26,21 +26,19 @@ class WalletControllerTest : ControllerTests() {
         )
         given(walletService.findByAddress("this-is-address")).willReturn(wallet)
 
-        val json = """
+        webClient.get()
+                .uri("/api/wallets/address/this-is-address")
+                .exchange()
+                .expectStatus().isOk
+                .expectBody()
+                .json("""
         {
             "id": "5f480720e5cba939f1918911",
             "address": "address",
             "webhook": "webhook",
             "lastUpdateDate": "2020-08-28T01:18:56.825261"
         }
-        """
-
-        webClient.get()
-                .uri("/api/wallets/address/this-is-address")
-                .exchange()
-                .expectStatus().isOk
-                .expectBody()
-                .json(json)
+        """.trimIndent())
     }
 
     @Test
@@ -53,22 +51,19 @@ class WalletControllerTest : ControllerTests() {
         val request = createDummySaveWalletRequest()
         given(walletService.save(request.address, request.webhook)).willReturn(wallet)
 
-        val json = """
-        {
-            "id": "5f480720e5cba939f1918911",
-            "address": "address",
-            "webhook": "webhook",
-            "lastUpdateDate": "2020-08-28T01:18:56.825261"
-        }
-        """
-
         webClient.post()
                 .uri("/api/wallets")
                 .bodyValue(request)
                 .exchange()
                 .expectStatus().isOk
                 .expectBody()
-                .json(json)
+                .json("""
+        {
+            "id": "5f480720e5cba939f1918911",
+            "address": "address",
+            "webhook": "webhook",
+            "lastUpdateDate": "2020-08-28T01:18:56.825261"
+        }
+        """.trimIndent())
     }
-
 }

@@ -28,6 +28,5 @@ class WalletRepositoryTest : MongoRepositoryTests() {
         val result = walletRepository.findByAddress("address").block()!!
         result.lastUpdateDate = now
         assertThat(result).isEqualTo(wallet)
-
     }
 }
