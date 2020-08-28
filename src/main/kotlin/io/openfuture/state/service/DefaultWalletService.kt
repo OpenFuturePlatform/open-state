@@ -16,9 +16,8 @@ class DefaultWalletService(private val walletRepository: WalletRepository) : Wal
     }
 
     override suspend fun findByAddress(address: String): Wallet {
-        val wallet = walletRepository.findByAddress(address).awaitFirstOrNull()
-        wallet ?: throw NotFoundException("Wallet not found")
-        return wallet
+        return walletRepository.findByAddress(address).awaitFirstOrNull()
+                ?: throw NotFoundException("Wallet not found")
     }
 
 }

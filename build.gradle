@@ -1,8 +1,8 @@
 plugins {
     id 'jacoco'
+    id 'idea'
     id 'org.jetbrains.kotlin.jvm' version '1.4.0'
     id 'org.jetbrains.kotlin.plugin.spring' version '1.4.0'
-    id 'org.jetbrains.kotlin.plugin.jpa' version '1.4.0'
     id 'org.jetbrains.kotlin.kapt' version '1.4.0'
     id 'org.springframework.boot' version '2.3.3.RELEASE'
 }
@@ -53,36 +53,51 @@ dependencies {
 
 }
 
+sourceSets {
+    main.kotlin.srcDirs += 'src/main/kotlin'
+    test.kotlin.srcDirs += 'src/test/kotlin'
+}
+
 // Kotlin
 compileKotlin {
     kotlinOptions {
-        freeCompilerArgs = ['-Xjsr305=strict']
-        jvmTarget = '12'
+        freeCompilerArgs = ["-Xjsr305=strict"]
+        jvmTarget = "11"
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        freeCompilerArgs = ['-Xjsr305=strict']
-        jvmTarget = '12'
+        freeCompilerArgs = ["-Xjsr305=strict"]
+        jvmTarget = "11"
     }
 }
 
 // Tests
+test {
+    useJUnitPlatform()
+
+    if (project.hasProperty('maxParallelForks')) {
+        maxParallelForks = project.maxParallelForks as int
+    }
+    if (project.hasProperty('forkEvery')) {
+        forkEvery = project.forkEvery as int
+    }
+}
 jacoco {
-    toolVersion = "0.8.3"
+    toolVersion = "0.8.5"
 }
 jacocoTestReport {
     reports {
         xml.enabled = true
         html.enabled = true
     }
+
     afterEvaluate {
         classDirectories.from = files(classDirectories.files.collect {
-            fileTree(dir: it,
-                    exclude: ['io/openfuture/state/entity/**',
-                              'io/openfuture/state/config',
-                              'io/openfuture/state/domain'
-                    ])
+            fileTree(dir: it, exclude: [
+                    'io/openfuture/state/*Application*',
+                    'io/openfuture/state/domain/**'
+            ])
         })
     }
 }

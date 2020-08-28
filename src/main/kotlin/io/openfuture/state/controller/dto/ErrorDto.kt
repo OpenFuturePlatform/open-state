@@ -7,9 +7,4 @@ data class ErrorDto(
         val status: Int,
         val reason: String?,
         val errors: List<FieldErrorDto> = listOf()
-) {
-    data class FieldErrorDto(
-            val field: String,
-            val message: String?
-    )
-}
+)

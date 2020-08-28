@@ -6,9 +6,11 @@ import io.openfuture.state.service.WalletService
 import io.openfuture.state.util.createDummySaveWalletRequest
 import io.openfuture.state.util.createDummyWallet
 import kotlinx.coroutines.runBlocking
+import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import java.time.LocalDateTime
 
 @WebFluxTest(WalletController::class, ExceptionHandler::class)
 class WalletControllerTest : ControllerTests() {
@@ -18,24 +20,47 @@ class WalletControllerTest : ControllerTests() {
 
     @Test
     fun findByAddressShouldReturnWallet() = runBlocking<Unit> {
-        val wallet = createDummyWallet()
-        val walletDto = WalletController.WalletDto(wallet)
+        val wallet = createDummyWallet(
+                id = ObjectId("5f480720e5cba939f1918911"),
+                lastUpdateDate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
+        )
         given(walletService.findByAddress("this-is-address")).willReturn(wallet)
+
+        val json = """
+        {
+            "id": "5f480720e5cba939f1918911",
+            "address": "address",
+            "webhook": "webhook",
+            "lastUpdateDate": "2020-08-28T01:18:56.825261"
+        }
+        """
 
         webClient.get()
                 .uri("/api/wallets/address/this-is-address")
                 .exchange()
                 .expectStatus().isOk
                 .expectBody()
-                .json(objectMapper.writeValueAsString(walletDto))
+                .json(json)
     }
 
     @Test
     fun saveShouldSaveAndReturnWallet() = runBlocking<Unit> {
-        val wallet = createDummyWallet()
-        val walletDto = WalletController.WalletDto(wallet)
+        val wallet = createDummyWallet(
+                id = ObjectId("5f480720e5cba939f1918911"),
+                lastUpdateDate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
+        )
+
         val request = createDummySaveWalletRequest()
         given(walletService.save(request.address, request.webhook)).willReturn(wallet)
+
+        val json = """
+        {
+            "id": "5f480720e5cba939f1918911",
+            "address": "address",
+            "webhook": "webhook",
+            "lastUpdateDate": "2020-08-28T01:18:56.825261"
+        }
+        """
 
         webClient.post()
                 .uri("/api/wallets")
@@ -43,7 +68,7 @@ class WalletControllerTest : ControllerTests() {
                 .exchange()
                 .expectStatus().isOk
                 .expectBody()
-                .json(objectMapper.writeValueAsString(walletDto))
+                .json(json)
     }
 
 }
