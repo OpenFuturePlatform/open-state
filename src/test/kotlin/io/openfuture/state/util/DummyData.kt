@@ -12,8 +12,8 @@ fun createDummyWallet(
         address: String = "address",
         webhook: String = "webhook",
         transactions: Set<Transaction> = setOf(createDummyTransaction()),
-        lastUpdateDate: LocalDateTime = LocalDateTime.now()
-) = Wallet(address, webhook, transactions, lastUpdateDate, id)
+        lastUpdate: LocalDateTime = LocalDateTime.now()
+) = Wallet(address, webhook, transactions, lastUpdate, id)
 
 fun createDummyTransaction(
         hash: String = "hash",

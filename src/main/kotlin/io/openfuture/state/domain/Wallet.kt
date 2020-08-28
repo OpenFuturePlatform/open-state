@@ -11,6 +11,6 @@ data class Wallet(
         @Indexed(unique = true) val address: String,
         val webhook: String,
         val transactions: Set<Transaction> = emptySet(),
-        var lastUpdateDate: LocalDateTime = LocalDateTime.now(),
+        var lastUpdate: LocalDateTime = LocalDateTime.now(),
         @MongoId val id: ObjectId = ObjectId(),
 )

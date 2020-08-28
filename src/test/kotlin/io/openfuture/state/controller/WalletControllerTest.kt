@@ -22,7 +22,7 @@ class WalletControllerTest : ControllerTests() {
     fun findByAddressShouldReturnWallet() = runBlocking<Unit> {
         val wallet = createDummyWallet(
                 id = ObjectId("5f480720e5cba939f1918911"),
-                lastUpdateDate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
+                lastUpdate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
         )
         given(walletService.findByAddress("this-is-address")).willReturn(wallet)
 
@@ -32,20 +32,20 @@ class WalletControllerTest : ControllerTests() {
                 .expectStatus().isOk
                 .expectBody()
                 .json("""
-        {
-            "id": "5f480720e5cba939f1918911",
-            "address": "address",
-            "webhook": "webhook",
-            "lastUpdateDate": "2020-08-28T01:18:56.825261"
-        }
-        """.trimIndent())
+                    {
+                        "id": "5f480720e5cba939f1918911",
+                        "address": "address",
+                        "webhook": "webhook",
+                        "lastUpdateDate": "2020-08-28T01:18:56.825261"
+                    }
+                """.trimIndent())
     }
 
     @Test
     fun saveShouldSaveAndReturnWallet() = runBlocking<Unit> {
         val wallet = createDummyWallet(
                 id = ObjectId("5f480720e5cba939f1918911"),
-                lastUpdateDate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
+                lastUpdate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
         )
 
         val request = createDummySaveWalletRequest()
@@ -58,12 +58,12 @@ class WalletControllerTest : ControllerTests() {
                 .expectStatus().isOk
                 .expectBody()
                 .json("""
-        {
-            "id": "5f480720e5cba939f1918911",
-            "address": "address",
-            "webhook": "webhook",
-            "lastUpdateDate": "2020-08-28T01:18:56.825261"
-        }
-        """.trimIndent())
+                    {
+                        "id": "5f480720e5cba939f1918911",
+                        "address": "address",
+                        "webhook": "webhook",
+                        "lastUpdateDate": "2020-08-28T01:18:56.825261"
+                    }
+                """.trimIndent())
     }
 }

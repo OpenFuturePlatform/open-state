@@ -12,12 +12,14 @@ import javax.validation.constraints.NotNull
 @RequestMapping("/api/wallets")
 class WalletController(private val walletService: WalletService) {
 
+    // TODO: Needs to be secured and allowed only for Open API calls
     @PostMapping
     suspend fun save(@Valid @RequestBody request: SaveWalletRequest): WalletDto {
         val wallet = walletService.save(request.address, request.webhook)
         return WalletDto(wallet)
     }
 
+    // TODO: Open Developer should also pass his/her token for the authentication.
     @GetMapping("/address/{address}")
     suspend fun findByAddress(@PathVariable address: String): WalletDto {
         val wallet = walletService.findByAddress(address)
@@ -34,7 +36,7 @@ class WalletController(private val walletService: WalletService) {
                 wallet.id.toHexString(),
                 wallet.address,
                 wallet.webhook,
-                wallet.lastUpdateDate
+                wallet.lastUpdate
         )
     }
 

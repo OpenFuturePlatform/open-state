@@ -21,12 +21,12 @@ class WalletRepositoryTest : MongoRepositoryTests() {
     @Test
     fun findByAddressShouldReturnWallet() {
         val now = LocalDateTime.now()
-        var wallet = createDummyWallet(address = "address", lastUpdateDate = now)
+        var wallet = createDummyWallet(address = "address", lastUpdate = now)
 
         wallet = walletRepository.save(wallet).block()!!
 
         val result = walletRepository.findByAddress("address").block()!!
-        result.lastUpdateDate = now
+        result.lastUpdate = now
         assertThat(result).isEqualTo(wallet)
     }
 }
