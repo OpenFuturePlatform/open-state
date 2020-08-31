@@ -10,6 +10,8 @@ import io.openfuture.state.util.createDummyWallet
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
@@ -57,5 +59,23 @@ class WalletServiceTest : ServiceTests() {
         val result = walletService.findByAddress("address")
 
         assertThat(result).isEqualTo(wallet)
+    }
+
+    @Test
+    fun existsByAddressShouldReturnTrue() = runBlocking {
+        given(walletRepository.existsByAddress("address")).willReturn(Mono.just(true))
+
+        val result = walletService.existsByAddress("address")
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun existsByAddressShouldReturnFalse() = runBlocking {
+        given(walletRepository.existsByAddress("address")).willReturn(Mono.just(false))
+
+        val result = walletService.existsByAddress("address")
+
+        assertFalse(result)
     }
 }
