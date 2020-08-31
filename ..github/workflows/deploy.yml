@@ -1,0 +1,58 @@
+# Default deploy GitHub workflow for Open State
+name: Deploy Open State
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+
+    continue-on-error: false
+    - uses: actions/checkout@v2
+
+    steps:
+      - id: execute
+        name: Execute tests
+        run: ./gradlew check
+
+
+  build:
+    name: Build project
+    runs-on: ubuntu-latest
+    needs: [test]
+
+    continue-on-error: false
+
+
+  package:
+    name: Create package
+    runs-on: ubuntu-latest
+    needs: [test, build]
+
+    continue-on-error: false
+
+
+  deploy-sprint:
+    name: Deploy project on sprint
+    runs-on: ubuntu-latest
+    needs: [test, build, package]
+
+    continue-on-error: false
+
+    env:
+      DEPLOY_HOST_DEV: 35.199.57.241
+
+
+  deploy-master:
+    name: Deploy project on master
+    runs-on: ubuntu-latest
+    needs: [test, build, package, deploy-sprint]
+
+    env:
+      DEPLOY_HOST_PROD: 35.186.175.16
