@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 data class Wallet(
         @Indexed(unique = true) val address: String,
         val webhook: String,
-        val transactions: Set<Transaction> = emptySet(),
+        val transactions: MutableSet<Transaction> = mutableSetOf(),
         var lastUpdate: LocalDateTime = LocalDateTime.now(),
         @MongoId val id: ObjectId = ObjectId(),
 )

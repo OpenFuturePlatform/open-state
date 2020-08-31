@@ -1,9 +1,10 @@
 package io.openfuture.state.domain
 
+import io.openfuture.state.model.BlockchainType
+
 data class Transaction(
+        val blockchainType: BlockchainType,
         val hash: String,
-        val externalHash: String,
-        val typeId: Int,
         val participant: String,
         val amount: Long,
         val fee: Long,

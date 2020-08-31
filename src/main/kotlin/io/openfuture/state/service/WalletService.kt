@@ -1,5 +1,6 @@
 package io.openfuture.state.service
 
+import io.openfuture.state.domain.TransactionRequest
 import io.openfuture.state.domain.Wallet
 
 interface WalletService {
@@ -7,4 +8,8 @@ interface WalletService {
     suspend fun save(address: String, webhook: String): Wallet
 
     suspend fun findByAddress(address: String): Wallet
+
+    suspend fun addTransactions(requests: Set<TransactionRequest>)
+
+    suspend fun existsByAddress(address: String): Boolean
 }

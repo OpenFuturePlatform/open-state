@@ -1,5 +1,7 @@
 package io.openfuture.state.service
 
+import io.openfuture.state.domain.Transaction
+import io.openfuture.state.domain.TransactionRequest
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.WalletRepository
@@ -20,4 +22,25 @@ class DefaultWalletService(private val walletRepository: WalletRepository) : Wal
                 ?: throw NotFoundException("Wallet not found")
     }
 
+    override suspend fun addTransactions(requests: Set<TransactionRequest>) {
+        requests.forEach {
+            val wallet = findByAddress(it.walletAddress)
+            val transaction = Transaction(
+                    blockchainType = it.blockChainType,
+                    hash = it.hash,
+                    participant = wallet.address,
+                    amount = it.amount,
+                    fee = it.fee,
+                    date = it.date,
+                    blockHeight = it.blockHeight,
+                    blockHash = it.blockHash
+            )
+            wallet.transactions.add(transaction)
+            walletRepository.save(wallet).awaitSingle()
+        }
+    }
+
+    override suspend fun existsByAddress(address: String): Boolean {
+        return walletRepository.existsByAddress(address).awaitSingle()
+    }
 }
