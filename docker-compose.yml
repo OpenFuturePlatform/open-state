@@ -1,9 +1,5 @@
-version: "2.4"
+version: "3"
 services:
-  backend:
-    image: $CI_REGISTRY_IMAGE:$DOCKERIMAGE_TAG
-    depends_on:
-      - mongo
   mongo:
     image: mongo
     restart: always
@@ -11,7 +7,7 @@ services:
       - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: open_state
-      MONGO_INITDB_ROOT_PASSWORD: $MONGO_PASSWORD
+      MONGO_INITDB_ROOT_PASSWORD: open_state
   redis:
     image: redis
     ports:
