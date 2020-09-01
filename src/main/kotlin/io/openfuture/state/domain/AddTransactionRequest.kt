@@ -1,12 +1,10 @@
 package io.openfuture.state.domain
 
-import io.openfuture.state.model.BlockchainType
 import org.web3j.protocol.core.methods.response.EthBlock
 import kotlin.math.pow
 
-class TransactionRequest(
+class AddTransactionRequest(
         val walletAddress: String,
-        val blockChainType: BlockchainType,
         val hash: String,
         val from: String,
         val to: String,
@@ -18,7 +16,6 @@ class TransactionRequest(
 ) {
     constructor(tx: EthBlock.TransactionObject, blockTimeStamp: Long, walletAddress: String) : this(
             walletAddress = walletAddress,
-            blockChainType = BlockchainType.ETHEREUM,
             hash = tx.hash,
             from = tx.from,
             to = tx.to,

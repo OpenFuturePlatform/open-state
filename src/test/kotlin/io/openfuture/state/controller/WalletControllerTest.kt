@@ -2,6 +2,7 @@ package io.openfuture.state.controller
 
 import com.nhaarman.mockitokotlin2.given
 import io.openfuture.state.base.ControllerTests
+import io.openfuture.state.model.Blockchain
 import io.openfuture.state.service.WalletService
 import io.openfuture.state.util.createDummySaveWalletRequest
 import io.openfuture.state.util.createDummyWallet
@@ -49,7 +50,7 @@ class WalletControllerTest : ControllerTests() {
         )
 
         val request = createDummySaveWalletRequest()
-        given(walletService.save(request.address, request.webhook)).willReturn(wallet)
+        given(walletService.save(request.address, request.webhook, Blockchain.ETHEREUM)).willReturn(wallet)
 
         webClient.post()
                 .uri("/api/wallets")

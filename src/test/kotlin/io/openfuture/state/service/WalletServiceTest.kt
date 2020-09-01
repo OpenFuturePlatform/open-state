@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.given
 import io.openfuture.state.base.ServiceTests
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.exception.NotFoundException
+import io.openfuture.state.model.Blockchain
 import io.openfuture.state.repository.WalletRepository
 import io.openfuture.state.util.createDummyWallet
 import kotlinx.coroutines.runBlocking
@@ -35,7 +36,7 @@ class WalletServiceTest : ServiceTests() {
 
         given(walletRepository.save(any<Wallet>())).willReturn(Mono.just(wallet))
 
-        val result = walletService.save(wallet.address, wallet.webhook)
+        val result = walletService.save(wallet.address, wallet.webhook, Blockchain.ETHEREUM)
 
         assertThat(result).isEqualTo(wallet)
     }
@@ -62,19 +63,19 @@ class WalletServiceTest : ServiceTests() {
     }
 
     @Test
-    fun existsByAddressShouldReturnTrue() = runBlocking {
-        given(walletRepository.existsByAddress("address")).willReturn(Mono.just(true))
+    fun existsByAddressAndBlockchainShouldReturnTrue() = runBlocking {
+        given(walletRepository.existsByAddressAndBlockchain("address", Blockchain.ETHEREUM)).willReturn(Mono.just(true))
 
-        val result = walletService.existsByAddress("address")
+        val result = walletService.existsByAddressAndBlockchain("address", Blockchain.ETHEREUM)
 
         assertTrue(result)
     }
 
     @Test
-    fun existsByAddressShouldReturnFalse() = runBlocking {
-        given(walletRepository.existsByAddress("address")).willReturn(Mono.just(false))
+    fun existsByAddressAndBlockchainShouldReturnFalse() = runBlocking {
+        given(walletRepository.existsByAddressAndBlockchain("address", Blockchain.ETHEREUM)).willReturn(Mono.just(false))
 
-        val result = walletService.existsByAddress("address")
+        val result = walletService.existsByAddressAndBlockchain("address", Blockchain.ETHEREUM)
 
         assertFalse(result)
     }

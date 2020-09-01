@@ -1,6 +1,6 @@
 package io.openfuture.state.model
 
-enum class BlockchainType {
+enum class Blockchain {
     ETHEREUM,
     OPEN_CHAIN
 }

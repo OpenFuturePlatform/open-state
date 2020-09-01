@@ -1,6 +1,7 @@
 package io.openfuture.state.controller
 
 import io.openfuture.state.domain.Wallet
+import io.openfuture.state.model.Blockchain
 import io.openfuture.state.service.WalletService
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
@@ -15,7 +16,7 @@ class WalletController(private val walletService: WalletService) {
     // TODO: Needs to be secured and allowed only for Open API calls
     @PostMapping
     suspend fun save(@Valid @RequestBody request: SaveWalletRequest): WalletDto {
-        val wallet = walletService.save(request.address, request.webhook)
+        val wallet = walletService.save(request.address, request.webhook, request.blockchain)
         return WalletDto(wallet)
     }
 
@@ -30,12 +31,14 @@ class WalletController(private val walletService: WalletService) {
             val id: String,
             val address: String,
             val webhook: String,
+            val blockchain: Blockchain,
             val lastUpdateDate: LocalDateTime
     ) {
         constructor(wallet: Wallet) : this(
                 wallet.id.toHexString(),
                 wallet.address,
                 wallet.webhook,
+                wallet.blockchain,
                 wallet.lastUpdate
         )
     }
@@ -43,5 +46,6 @@ class WalletController(private val walletService: WalletService) {
     data class SaveWalletRequest(
             @field:NotNull @field:NotBlank val address: String,
             @field:NotNull @field:NotBlank val webhook: String,
+            @field:NotNull val blockchain: Blockchain
     )
 }
