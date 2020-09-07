@@ -50,7 +50,7 @@ class WalletControllerTest : ControllerTests() {
         )
 
         val request = createDummySaveWalletRequest()
-        given(walletService.save(request.address, request.webhook, Blockchain.ETHEREUM)).willReturn(wallet)
+        given(walletService.save(request.address!!, request.webhook!!, Blockchain.ETHEREUM)).willReturn(wallet)
 
         webClient.post()
                 .uri("/api/wallets")

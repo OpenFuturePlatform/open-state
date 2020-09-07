@@ -20,12 +20,12 @@ class BlockchainWatcher(
     @Scheduled(fixedDelayString = "\${watcher.processor-fixed-delay}", initialDelay = 1000)
     fun processBlocks() = GlobalScope.launch {
         processors.forEach { processor ->
-            val blockchain = processor.getBlockchain()
-            val lastBlockNumber = blockchainRepository.getLastBlockNumber(blockchain)
-            var currentBlockNumber = blockchainRepository.getCurrentBlockNumber(blockchain)
             threadPoolTaskExecutor.execute {
                 runBlocking {
-                    while (lastBlockNumber > currentBlockNumber && blockchainRepository.lock(blockchain)) {
+                    val blockchain = processor.getBlockchain()
+                    val lastBlockNumber = blockchainRepository.getLastBlockNumber(blockchain)
+                    var currentBlockNumber = blockchainRepository.getCurrentBlockNumber(blockchain)
+                    while (lastBlockNumber >= currentBlockNumber && blockchainRepository.lock(blockchain)) {
                         processor.processBlock(currentBlockNumber)
                         currentBlockNumber = blockchainRepository.incrementCurrentBlockNumber(blockchain)
                         blockchainRepository.unlock(blockchain)
@@ -35,8 +35,8 @@ class BlockchainWatcher(
         }
     }
 
-    @Scheduled(fixedDelayString = "\${watcher.block-number-checker-fixed-delay}")
-    fun updateBlockNumbers() = GlobalScope.launch {
+    @Scheduled(fixedDelayString = "\${watcher.block-number-updater-fixed-delay}")
+    fun updateLastBlockNumbers() = GlobalScope.launch {
         processors.forEach { processor ->
             threadPoolTaskExecutor.execute {
                 runBlocking {
