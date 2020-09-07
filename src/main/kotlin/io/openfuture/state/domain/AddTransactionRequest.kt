@@ -15,14 +15,14 @@ class AddTransactionRequest(
         val blockHash: String
 ) {
     constructor(tx: EthBlock.TransactionObject, blockTimeStamp: Long, walletAddress: String) : this(
-            walletAddress = walletAddress,
-            hash = tx.hash,
-            from = tx.from,
-            to = tx.to,
-            amount = tx.value.toLong(),
-            fee = tx.gas.toLong() * 10.0.pow(10.0).toLong(),
-            date = blockTimeStamp,
-            blockHeight = tx.blockNumber.toLong(),
-            blockHash = tx.blockHash
+            walletAddress,
+            tx.hash,
+            tx.from,
+            tx.to,
+            tx.value.toLong(),
+            tx.gas.toLong() * 10.0.pow(10.0).toLong(),
+            blockTimeStamp,
+            tx.blockNumber.toLong(),
+            tx.blockHash
     )
 }

@@ -11,15 +11,15 @@ import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.stereotype.Service
 
 @Service
-class DefaultWalletService(private val walletRepository: WalletRepository) : WalletService {
+class DefaultWalletService(private val repository: WalletRepository) : WalletService {
 
     override suspend fun save(address: String, webhook: String, blockchain: Blockchain): Wallet {
         val wallet = Wallet(address, webhook, blockchain)
-        return walletRepository.save(wallet).awaitSingle()
+        return repository.save(wallet).awaitSingle()
     }
 
     override suspend fun findByAddress(address: String): Wallet {
-        return walletRepository.findByAddress(address).awaitFirstOrNull()
+        return repository.findByAddress(address).awaitFirstOrNull()
                 ?: throw NotFoundException("Wallet not found")
     }
 
@@ -36,11 +36,11 @@ class DefaultWalletService(private val walletRepository: WalletRepository) : Wal
                     it.blockHash
             )
             wallet.addTransaction(transaction)
-            walletRepository.save(wallet).awaitSingle()
+            repository.save(wallet).awaitSingle()
         }
     }
 
     override suspend fun existsByAddressAndBlockchain(address: String, blockchain: Blockchain): Boolean {
-        return walletRepository.existsByAddressAndBlockchain(address, blockchain).awaitSingle()
+        return repository.existsByAddressAndBlockchain(address, blockchain).awaitSingle()
     }
 }

@@ -2,16 +2,13 @@ package io.openfuture.state.watcher.ethereum
 
 import io.openfuture.state.domain.AddTransactionRequest
 import io.openfuture.state.model.Blockchain
-import io.openfuture.state.repository.OffsetRepository
 import io.openfuture.state.service.WalletService
-import io.openfuture.state.watcher.BlockProcessor
+import io.openfuture.state.watcher.BlockchainProcessor
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameter
@@ -19,29 +16,33 @@ import org.web3j.protocol.core.methods.response.EthBlock
 import java.math.BigInteger
 
 @Component
-@ConditionalOnProperty(name = ["watcher.ethereum.enabled"])
-class EthereumWatcher(
-        private val offsetRepository: OffsetRepository,
+class EthereumBlockchainProcessor(
         private val walletService: WalletService,
         private val web3j: Web3j
-) : BlockProcessor {
+) : BlockchainProcessor {
 
-    @Scheduled(fixedDelayString = "\${watcher.ethereum.fixed-delay}")
-    fun start() = runBlocking {
-        processNext()
+    override suspend fun getLastBlockNumber(): Long {
+        return web3j.ethBlockNumber()
+                .flowable()
+                .asFlow()
+                .first()
+                .blockNumber
+                .toLong()
     }
 
-    override suspend fun processNext() {
-        val blockNumber = BigInteger.valueOf(offsetRepository.getCurrent(Blockchain.ETHEREUM).awaitSingle())
-        web3j.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
+    override suspend fun processBlock(blockNumber: Long) {
+        web3j.ethGetBlockByNumber(DefaultBlockParameter.valueOf(BigInteger.valueOf(blockNumber)), true)
                 .flowable()
                 .asFlow()
                 .filter { null != it.block }
                 .collect { ethBlock ->
                     val transactions = obtainTransactions(ethBlock)
                     walletService.addTransactions(transactions)
-                    offsetRepository.increment(Blockchain.ETHEREUM).awaitSingle()
                 }
+    }
+
+    override suspend fun getBlockchain(): Blockchain {
+        return Blockchain.ETHEREUM
     }
 
     private fun obtainTransactions(ethBlock: EthBlock): List<AddTransactionRequest> {

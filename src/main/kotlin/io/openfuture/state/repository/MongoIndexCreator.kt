@@ -2,7 +2,6 @@ package io.openfuture.state.repository
 
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
-import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.convert.MongoConverter
 import org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexResolver
@@ -23,8 +22,7 @@ class MongoIndexCreator(private val mongoConverter: MongoConverter, private val 
 
             val indexOps = mongoTemplate.indexOps(clazz)
             val resolver = MongoPersistentEntityIndexResolver(mappingContext)
-            resolver.resolveIndexFor(clazz).forEach { indexOps.ensureIndex(it) }
+            resolver.resolveIndexFor(clazz).forEach { indexOps.ensureIndex(it).block() }
         }
     }
-
 }

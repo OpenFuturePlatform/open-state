@@ -16,7 +16,7 @@ class WalletController(private val walletService: WalletService) {
     // TODO: Needs to be secured and allowed only for Open API calls
     @PostMapping
     suspend fun save(@Valid @RequestBody request: SaveWalletRequest): WalletDto {
-        val wallet = walletService.save(request.address, request.webhook, request.blockchain)
+        val wallet = walletService.save(request.address!!, request.webhook!!, request.blockchain!!)
         return WalletDto(wallet)
     }
 
@@ -44,8 +44,8 @@ class WalletController(private val walletService: WalletService) {
     }
 
     data class SaveWalletRequest(
-            @field:NotNull @field:NotBlank val address: String,
-            @field:NotNull @field:NotBlank val webhook: String,
-            @field:NotNull val blockchain: Blockchain
+            @field:NotNull @field:NotBlank val address: String?,
+            @field:NotNull @field:NotBlank val webhook: String?,
+            @field:NotNull val blockchain: Blockchain?
     )
 }
