@@ -5,8 +5,8 @@ import com.nhaarman.mockitokotlin2.given
 import io.openfuture.state.base.ServiceTests
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.exception.NotFoundException
-import io.openfuture.state.model.Blockchain
 import io.openfuture.state.repository.WalletRepository
+import io.openfuture.state.util.createDummyBlockchain
 import io.openfuture.state.util.createDummyWallet
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -36,7 +36,7 @@ class WalletServiceTest : ServiceTests() {
 
         given(walletRepository.save(any<Wallet>())).willReturn(Mono.just(wallet))
 
-        val result = walletService.save(wallet.address, wallet.webhook, Blockchain.ETHEREUM)
+        val result = walletService.save(createDummyBlockchain(), wallet.address, wallet.webhook)
 
         assertThat(result).isEqualTo(wallet)
     }
@@ -63,19 +63,19 @@ class WalletServiceTest : ServiceTests() {
     }
 
     @Test
-    fun existsByAddressAndBlockchainShouldReturnTrue() = runBlocking {
-        given(walletRepository.existsByAddressAndBlockchain("address", Blockchain.ETHEREUM)).willReturn(Mono.just(true))
+    fun existsByBlockchainAndAddressShouldReturnTrue() = runBlocking {
+        given(walletRepository.existsByBlockchainAndAddress(createDummyBlockchain().getName(), "address")).willReturn(Mono.just(true))
 
-        val result = walletService.existsByAddressAndBlockchain("address", Blockchain.ETHEREUM)
+        val result = walletService.existsByBlockchainAndAddress(createDummyBlockchain(), "address")
 
         assertTrue(result)
     }
 
     @Test
-    fun existsByAddressAndBlockchainShouldReturnFalse() = runBlocking {
-        given(walletRepository.existsByAddressAndBlockchain("address", Blockchain.ETHEREUM)).willReturn(Mono.just(false))
+    fun existsByBlockchainAndAddressShouldReturnFalse() = runBlocking {
+        given(walletRepository.existsByBlockchainAndAddress(createDummyBlockchain().getName(), "address")).willReturn(Mono.just(false))
 
-        val result = walletService.existsByAddressAndBlockchain("address", Blockchain.ETHEREUM)
+        val result = walletService.existsByBlockchainAndAddress(createDummyBlockchain(), "address")
 
         assertFalse(result)
     }

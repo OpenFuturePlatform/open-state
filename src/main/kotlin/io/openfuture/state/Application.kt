@@ -1,8 +1,10 @@
 package io.openfuture.state
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.runApplication
 
+@ConfigurationPropertiesScan("io.openfuture.state.property")
 @SpringBootApplication
 class Application
 

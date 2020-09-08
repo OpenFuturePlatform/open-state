@@ -1,16 +1,16 @@
 package io.openfuture.state.service
 
+import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.domain.AddTransactionRequest
 import io.openfuture.state.domain.Wallet
-import io.openfuture.state.model.Blockchain
 
 interface WalletService {
 
-    suspend fun save(address: String, webhook: String, blockchain: Blockchain): Wallet
+    suspend fun save(blockchain: Blockchain, address: String, webhook: String): Wallet
 
     suspend fun findByAddress(address: String): Wallet
 
     suspend fun addTransactions(requests: List<AddTransactionRequest>)
 
-    suspend fun existsByAddressAndBlockchain(address: String, blockchain: Blockchain): Boolean
+    suspend fun existsByBlockchainAndAddress(blockchain: Blockchain, address: String): Boolean
 }

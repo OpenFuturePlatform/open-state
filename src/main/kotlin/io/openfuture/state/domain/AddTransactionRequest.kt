@@ -1,6 +1,7 @@
 package io.openfuture.state.domain
 
-import org.web3j.protocol.core.methods.response.EthBlock
+import io.openfuture.state.blockchain.dto.UnifiedTransaction
+import java.time.LocalDateTime
 import kotlin.math.pow
 
 class AddTransactionRequest(
@@ -10,19 +11,19 @@ class AddTransactionRequest(
         val to: String,
         val amount: Long,
         val fee: Long,
-        val date: Long,
+        val date: LocalDateTime,
         val blockHeight: Long,
         val blockHash: String
 ) {
-    constructor(tx: EthBlock.TransactionObject, blockTimeStamp: Long, walletAddress: String) : this(
+    constructor(tx: UnifiedTransaction, walletAddress: String, blockDateTime: LocalDateTime) : this(
             walletAddress,
             tx.hash,
-            tx.from,
-            tx.to,
-            tx.value.toLong(),
-            tx.gas.toLong() * 10.0.pow(10.0).toLong(),
-            blockTimeStamp,
-            tx.blockNumber.toLong(),
+            tx.from!!,
+            tx.to!!,
+            tx.amount,
+            tx.gas * 10.0.pow(10.0).toLong(),
+            blockDateTime,
+            tx.blockHeight,
             tx.blockHash
     )
 }

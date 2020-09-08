@@ -1,6 +1,5 @@
 package io.openfuture.state.domain
 
-import io.openfuture.state.model.Blockchain
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.Indexed
@@ -13,7 +12,7 @@ import java.time.LocalDateTime
 data class Wallet(
         @Indexed val address: String,
         val webhook: String,
-        val blockchain: Blockchain,
+        val blockchain: String,
         var lastUpdate: LocalDateTime = LocalDateTime.now(),
         @MongoId val id: ObjectId = ObjectId(),
         private var transactions: List<Transaction> = emptyList(),
