@@ -6,13 +6,11 @@ import io.openfuture.state.base.ServiceTests
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.WalletRepository
-import io.openfuture.state.util.createDummyBlockchain
 import io.openfuture.state.util.createDummyWallet
+import io.openfuture.state.util.createDummyBlockchain
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
@@ -60,23 +58,5 @@ class WalletServiceTest : ServiceTests() {
         val result = walletService.findByAddress("address")
 
         assertThat(result).isEqualTo(wallet)
-    }
-
-    @Test
-    fun existsByBlockchainAndAddressShouldReturnTrue() = runBlocking {
-        given(walletRepository.existsByBlockchainAndAddress(createDummyBlockchain().getName(), "address")).willReturn(Mono.just(true))
-
-        val result = walletService.existsByBlockchainAndAddress(createDummyBlockchain(), "address")
-
-        assertTrue(result)
-    }
-
-    @Test
-    fun existsByBlockchainAndAddressShouldReturnFalse() = runBlocking {
-        given(walletRepository.existsByBlockchainAndAddress(createDummyBlockchain().getName(), "address")).willReturn(Mono.just(false))
-
-        val result = walletService.existsByBlockchainAndAddress(createDummyBlockchain(), "address")
-
-        assertFalse(result)
     }
 }

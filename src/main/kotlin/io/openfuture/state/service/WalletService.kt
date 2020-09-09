@@ -1,7 +1,7 @@
 package io.openfuture.state.service
 
 import io.openfuture.state.blockchain.Blockchain
-import io.openfuture.state.domain.AddTransactionRequest
+import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.domain.Wallet
 
 interface WalletService {
@@ -10,7 +10,7 @@ interface WalletService {
 
     suspend fun findByAddress(address: String): Wallet
 
-    suspend fun addTransactions(requests: List<AddTransactionRequest>)
+    suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock)
 
     suspend fun existsByBlockchainAndAddress(blockchain: Blockchain, address: String): Boolean
 }

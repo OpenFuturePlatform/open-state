@@ -7,22 +7,29 @@ import kotlinx.coroutines.launch
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
+/**
+ * Checks every given time whether a new block arrived in blockchains each
+ * if yes then it puts new block's number to Redis as the last one
+ * Also puts to queue blockchain name to be processed by
+ * @see io.openfuture.state.watcher.BlockchainProcessor
+ */
 @Component
 class BlockchainChecker(
         private val blockchains: List<Blockchain>,
-        private val processingRedisRepository: ProcessingRedisRepository
+        private val processingRepository: ProcessingRedisRepository
 ) {
-    @Scheduled(fixedDelayString = "\${watcher.check-delay}")
-    fun updateLastBlockNumbers() = GlobalScope.launch {
+
+    @Scheduled(fixedDelayString = "#{@checkDelay}")
+    fun check() = GlobalScope.launch {
         for (blockchain in blockchains) {
             val lastFetched = blockchain.getLastBlockNumber()
-            val lastSaved = processingRedisRepository.getLast(blockchain)
+            val lastSaved = processingRepository.getLast(blockchain)
             if (lastFetched == lastSaved) {
                 continue
             }
 
-            processingRedisRepository.setLast(blockchain, lastFetched)
-            processingRedisRepository.queue(blockchain)
+            processingRepository.setLast(blockchain, lastFetched)
+            processingRepository.queue(blockchain)
         }
     }
 }

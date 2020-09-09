@@ -11,5 +11,5 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate
 @Import(RedisConfig::class, JacksonAutoConfiguration::class)
 abstract class RedisRepositoryTests {
     @Autowired
-    protected lateinit var reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>
+    protected lateinit var redisTemplate: ReactiveRedisTemplate<String, Any>
 }

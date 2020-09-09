@@ -1,54 +1,53 @@
 package io.openfuture.state.repository
 
 import io.openfuture.state.blockchain.Blockchain
-import io.openfuture.state.property.LockProperties
+import io.openfuture.state.property.WatcherProperties
 import org.springframework.data.redis.core.*
 import org.springframework.stereotype.Repository
 import java.time.Duration
 import java.time.LocalDateTime
-import javax.annotation.PostConstruct
 
 @Repository
 class ProcessingRedisRepository(
         reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>,
-        private val lockProperties: LockProperties
+        private val watcherProperties: WatcherProperties
 ) {
     private val setOperations: ReactiveSetOperations<String, Any> = reactiveRedisTemplate.opsForSet()
     private val valueOperations: ReactiveValueOperations<String, Any> = reactiveRedisTemplate.opsForValue()
 
-    suspend fun getCurrent(blockchain: Blockchain): Long {
-        return (valueOperations.getAndAwait("$blockchain:$CURRENT") as Int?)?.toLong() ?: 0
+    suspend fun getCurrent(blockchain: Blockchain): Int {
+        return valueOperations.getAndAwait("$blockchain:$CURRENT") as Int? ?: 0
     }
 
-    suspend fun getLast(blockchain: Blockchain): Long {
-        return (valueOperations.getAndAwait("$blockchain:$LAST") as Int?)?.toLong() ?: 0
+    suspend fun getLast(blockchain: Blockchain): Int {
+        return valueOperations.getAndAwait("$blockchain:$LAST") as Int? ?: 0
     }
 
-    suspend fun incCurrent(blockchain: Blockchain): Long {
-        return valueOperations.incrementAndAwait("$blockchain:$CURRENT")
+    suspend fun incCurrent(blockchain: Blockchain): Int {
+        return valueOperations.incrementAndAwait("$blockchain:$CURRENT").toInt()
     }
 
-    suspend fun setLast(blockchain: Blockchain, value: Long): Boolean {
+    suspend fun setLast(blockchain: Blockchain, value: Int): Boolean {
         return valueOperations.setAndAwait("$blockchain:$LAST", value)
     }
 
-    suspend fun lock(blockchain: Blockchain): Boolean {
-        return valueOperations.setAndAwait(
+    suspend fun lock(blockchain: Blockchain) {
+        valueOperations.setAndAwait(
                 "$LOCK:$blockchain",
                 LocalDateTime.now(),
-                Duration.ofSeconds(lockProperties.ttl)
+                Duration.ofSeconds(watcherProperties.lock!!.ttl)
         )
     }
 
-    suspend fun unlock(blockchain: Blockchain): Boolean {
-        return valueOperations.deleteAndAwait("$LOCK:$blockchain")
+    suspend fun unlock(blockchain: Blockchain) {
+        valueOperations.deleteAndAwait("$LOCK:$blockchain")
     }
 
     suspend fun lockIfAbsent(blockchain: Blockchain): Boolean {
         return valueOperations.setIfAbsentAndAwait(
                 "$LOCK:$blockchain",
                 LocalDateTime.now(),
-                Duration.ofSeconds(lockProperties.ttl)
+                Duration.ofSeconds(watcherProperties.lock!!.ttl)
         )
     }
 

@@ -2,32 +2,43 @@ package io.openfuture.state.repository
 
 import com.mongodb.internal.connection.tlschannel.util.Util.assertTrue
 import io.openfuture.state.base.RedisRepositoryTests
-import io.openfuture.state.property.LockProperties
+import io.openfuture.state.property.WatcherProperties
 import io.openfuture.state.util.createDummyBlockchain
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.redis.core.isMemberAndAwait
+import org.springframework.data.redis.core.setAndAwait
 import java.time.LocalDateTime
 
 class ProcessingRedisRepositoryTest : RedisRepositoryTests() {
 
     private lateinit var processingRedisRepository: ProcessingRedisRepository
-    private val lockProperties: LockProperties = LockProperties(60)
+    private val watcherProperties: WatcherProperties = WatcherProperties(1000, 1000, WatcherProperties.Lock(10))
 
     @BeforeEach
     fun setUp() {
-        processingRedisRepository = ProcessingRedisRepository(reactiveRedisTemplate, lockProperties)
-        reactiveRedisTemplate.execute {
+        processingRedisRepository = ProcessingRedisRepository(redisTemplate, watcherProperties)
+        redisTemplate.execute {
             it.serverCommands().flushAll()
         }.blockFirst()
     }
 
     @Test
-    fun getCurrentReturnZero() = runBlocking<Unit> {
+    fun getCurrentShouldReturnZero() = runBlocking<Unit> {
         val result = processingRedisRepository.getCurrent(createDummyBlockchain())
         assertThat(result).isEqualTo(0)
+    }
+
+    @Test
+    fun getCurrentShouldReturnProperValue() = runBlocking<Unit> {
+        val blockchain = createDummyBlockchain()
+        redisTemplate.opsForValue().setAndAwait("$blockchain:current", 11)
+
+        val result = processingRedisRepository.getCurrent(blockchain)
+        assertThat(result).isEqualTo(11)
     }
 
     @Test
@@ -37,7 +48,15 @@ class ProcessingRedisRepositoryTest : RedisRepositoryTests() {
     }
 
     @Test
-    fun setLastShouldSave() = runBlocking<Unit> {
+    fun getLastShouldReturnProperValue() = runBlocking<Unit> {
+        val blockchain = createDummyBlockchain()
+        redisTemplate.opsForValue().setAndAwait("$blockchain:last", 11)
+        val result = processingRedisRepository.getLast(blockchain)
+        assertThat(result).isEqualTo(11)
+    }
+
+    @Test
+    fun setLastShouldUpdateTtl() = runBlocking<Unit> {
         val blockchain = createDummyBlockchain()
         processingRedisRepository.setLast(blockchain, 55)
 
@@ -57,7 +76,6 @@ class ProcessingRedisRepositoryTest : RedisRepositoryTests() {
     @Test
     fun lockIfAbsentReturnTrue() = runBlocking {
         val blockchain = createDummyBlockchain()
-        reactiveRedisTemplate.opsForValue().set("lock:${blockchain}", LocalDateTime.now())
         val result = processingRedisRepository.lockIfAbsent(blockchain)
         assertTrue(result)
     }
@@ -65,24 +83,24 @@ class ProcessingRedisRepositoryTest : RedisRepositoryTests() {
     @Test
     fun lockIfAbsentReturnFalse() = runBlocking {
         val blockchain = createDummyBlockchain()
-        reactiveRedisTemplate.opsForValue().set("lock:${blockchain}", LocalDateTime.now())
+        redisTemplate.opsForValue().setAndAwait("lock:${blockchain}", LocalDateTime.now(), watcherProperties.lock!!.ttl)
         val result = processingRedisRepository.lockIfAbsent(blockchain)
-        assertTrue(result)
+        assertFalse(result)
     }
 
     @Test
-    fun queueShouldAdd() = runBlocking<Unit> {
+    fun queueShouldAdd() = runBlocking {
         val blockchain = createDummyBlockchain()
 
         processingRedisRepository.queue(blockchain)
 
-        val result = reactiveRedisTemplate.opsForSet().isMemberAndAwait("queue",blockchain.getName())
+        val result = redisTemplate.opsForSet().isMemberAndAwait("queue", blockchain.getName())
 
         assertTrue(result)
     }
 
     @Test
-    fun popShouldReturnNull() = runBlocking<Unit> {
+    fun popShouldReturnNull() = runBlocking {
         val result = processingRedisRepository.pop()
 
         assertThat(result).isNull()

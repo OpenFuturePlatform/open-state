@@ -1,8 +1,6 @@
 package io.openfuture.state.watcher
 
 import io.openfuture.state.blockchain.Blockchain
-import io.openfuture.state.blockchain.dto.UnifiedBlock
-import io.openfuture.state.domain.AddTransactionRequest
 import io.openfuture.state.repository.ProcessingRedisRepository
 import io.openfuture.state.service.WalletService
 import kotlinx.coroutines.GlobalScope
@@ -10,39 +8,38 @@ import kotlinx.coroutines.launch
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
+/**
+ * Every given time interval gets a blockchain from queue(Redis)
+ * then tries to lock processing of this blockchain
+ * the idea is to be processed only by one at a time, as there may be more than one instances
+ * if not locked it exits till next execution
+ *
+ * If successfully locked, processes up to the last known block
+ * and at each iteration increases the life of the lock for this blockchain
+ * After successful processing, releases lock for blockchain
+ */
 @Component
 class BlockchainProcessor(
         private val walletService: WalletService,
         private val blockchains: List<Blockchain>,
-        private val processingRedisRepository: ProcessingRedisRepository
+        private val processingRepository: ProcessingRedisRepository
 ) {
 
-    @Scheduled(fixedDelayString = "\${watcher.process-delay}", initialDelay = 1000)
+    @Scheduled(fixedDelayString = "#{@processDelay}", initialDelay = 1000)
     fun process() = GlobalScope.launch {
-        val blockchain = processingRedisRepository.pop()?.let { getBlockchainByName(it) } ?: return@launch
-        val locked = processingRedisRepository.lockIfAbsent(blockchain)
+        val blockchain = processingRepository.pop()?.let { getBlockchainByName(it) } ?: return@launch
+        val locked = processingRepository.lockIfAbsent(blockchain)
         if (!locked) return@launch
         do {
-            val last = processingRedisRepository.getLast(blockchain)
-            val current = processingRedisRepository.getCurrent(blockchain)
-            processBlock(blockchain.getBlock(current), blockchain)
-            processingRedisRepository.incCurrent(blockchain)
-            processingRedisRepository.lock(blockchain)
+            val last = processingRepository.getLast(blockchain)
+            val current = processingRepository.getCurrent(blockchain)
+
+            walletService.addTransactions(blockchain, blockchain.getBlock(current))
+
+            processingRepository.incCurrent(blockchain)
+            processingRepository.lock(blockchain)
         } while (last > current)
-        processingRedisRepository.unlock(blockchain)
-    }
-
-    private suspend fun processBlock(block: UnifiedBlock, blockchain: Blockchain) {
-        val fromTransactions = block.transactions
-                .filter { null != it.from }
-                .filter { walletService.existsByBlockchainAndAddress(blockchain, it.from!!) }
-                .map { AddTransactionRequest(it, it.from!!, block.date) }
-
-        val toTransactions = block.transactions
-                .filter { null != it.to }
-                .filter { walletService.existsByBlockchainAndAddress(blockchain, it.to!!) }
-                .map { AddTransactionRequest(it, it.to!!, block.date) }
-        walletService.addTransactions(fromTransactions.plus(toTransactions))
+        processingRepository.unlock(blockchain)
     }
 
     private fun getBlockchainByName(name: String): Blockchain {
