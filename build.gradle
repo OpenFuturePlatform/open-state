@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    //Spring
+    // Spring
     implementation('org.springframework.boot:spring-boot-starter-webflux')
     implementation('org.springframework.boot:spring-boot-starter-data-mongodb-reactive')
     implementation('org.springframework.boot:spring-boot-starter-data-redis-reactive')
@@ -36,7 +36,7 @@ dependencies {
     implementation('org.web3j:core:4.6.3')
     implementation('com.squareup.okhttp3:okhttp:4.8.1')
 
-    //Utils
+    // Utils
     implementation('commons-validator:commons-validator:1.7')
     implementation('org.apache.httpcomponents:httpclient:4.5.12')
 

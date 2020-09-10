@@ -6,7 +6,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.LocalDateTime
 
 class WalletRepositoryTest : MongoRepositoryTests() {
 
@@ -20,25 +19,19 @@ class WalletRepositoryTest : MongoRepositoryTests() {
 
     @Test
     fun findByAddressShouldReturnWallet() {
-        val now = LocalDateTime.now()
-        var wallet = createDummyWallet(address = "address", lastUpdate = now)
-
+        var wallet = createDummyWallet()
         wallet = walletRepository.save(wallet).block()!!
 
         val result = walletRepository.findByAddress("address").block()!!
-        result.lastUpdate = now
         assertThat(result).isEqualTo(wallet)
     }
 
     @Test
     fun findByBlockchainAndAddressShouldReturnWallet() {
-        val now = LocalDateTime.now()
-        var wallet = createDummyWallet(address = "address", lastUpdate = now, blockchain = "Ethereum")
-
+        var wallet = createDummyWallet(blockchain = "Ethereum")
         wallet = walletRepository.save(wallet).block()!!
 
         val result = walletRepository.findByBlockchainAndAddress("Ethereum", "address").block()!!
-        result.lastUpdate = now
         assertThat(result).isEqualTo(wallet)
     }
 

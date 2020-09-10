@@ -25,4 +25,10 @@ class ExceptionHandler {
         return ErrorDto(HttpStatus.BAD_REQUEST.value(), "Invalid parameters", fieldErrors)
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgumentException(ex: IllegalArgumentException): ErrorDto {
+        return ErrorDto(HttpStatus.BAD_REQUEST.value(), ex.message)
+    }
+
 }

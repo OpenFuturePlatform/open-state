@@ -4,7 +4,6 @@ import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.property.WatcherProperties
 import org.springframework.data.redis.core.*
 import org.springframework.stereotype.Repository
-import java.time.Duration
 import java.time.LocalDateTime
 
 @Repository
@@ -12,6 +11,7 @@ class ProcessingRedisRepository(
         redisTemplate: ReactiveRedisTemplate<String, Any>,
         private val watcherProperties: WatcherProperties
 ) {
+
     private val setOperations: ReactiveSetOperations<String, Any> = redisTemplate.opsForSet()
     private val valueOperations: ReactiveValueOperations<String, Any> = redisTemplate.opsForValue()
 
@@ -35,7 +35,7 @@ class ProcessingRedisRepository(
         valueOperations.setAndAwait(
                 "$LOCK:$blockchain",
                 LocalDateTime.now(),
-                Duration.ofSeconds(watcherProperties.lock!!.ttl!!)
+                watcherProperties.lockTtl
         )
     }
 
@@ -47,7 +47,7 @@ class ProcessingRedisRepository(
         return valueOperations.setIfAbsentAndAwait(
                 "$LOCK:$blockchain",
                 LocalDateTime.now(),
-                Duration.ofSeconds(watcherProperties.lock!!.ttl!!)
+                watcherProperties.lockTtl
         )
     }
 
@@ -65,4 +65,5 @@ class ProcessingRedisRepository(
         private const val LOCK = "lock"
         private const val QUEUE = "queue"
     }
+
 }

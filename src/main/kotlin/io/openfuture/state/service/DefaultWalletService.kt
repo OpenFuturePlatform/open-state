@@ -39,7 +39,6 @@ class DefaultWalletService(private val repository: WalletRepository) : WalletSer
                 unifiedTransaction.hash,
                 wallet.address,
                 unifiedTransaction.amount,
-                unifiedTransaction.fee,
                 block.date,
                 block.number,
                 block.hash

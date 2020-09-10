@@ -8,8 +8,10 @@ import org.web3j.protocol.http.HttpService
 
 @Configuration
 class EthereumConfig {
+
     @Bean
     fun web3j(ethereumProperties: EthereumProperties): Web3j {
         return Web3j.build(HttpService(ethereumProperties.nodeAddress))
     }
+
 }

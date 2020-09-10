@@ -10,6 +10,7 @@ import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.MediaType
 import java.time.LocalDateTime
 
 @WebFluxTest(WalletController::class, ExceptionHandler::class)
@@ -51,13 +52,19 @@ class WalletControllerTest : ControllerTests() {
                 lastUpdate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
         )
 
-        val request = createDummySaveWalletRequest()
-
-        given(walletService.save(blockchain, request.address!!, request.webhook!!)).willReturn(wallet)
+        given(blockchain.getName()).willReturn("EthereumBlockchain")
+        given(walletService.save(blockchain, "address", "webhook")).willReturn(wallet)
 
         webClient.post()
                 .uri("/api/wallets")
-                .bodyValue(request)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("""
+                    {
+                        "address": "address",
+                        "webhook": "webhook",
+                        "blockchain": "Ethereum"
+                    }
+                """.trimIndent())
                 .exchange()
                 .expectStatus().isOk
                 .expectBody()
@@ -71,9 +78,4 @@ class WalletControllerTest : ControllerTests() {
                 """.trimIndent())
     }
 
-    private fun createDummySaveWalletRequest(
-            address: String = "address",
-            webhook: String = "webhook",
-            blockchain: String = this.blockchain.getName()
-    ) = WalletController.SaveWalletRequest(address, webhook, blockchain)
 }

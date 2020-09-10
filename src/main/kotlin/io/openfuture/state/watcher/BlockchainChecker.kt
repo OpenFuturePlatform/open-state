@@ -4,6 +4,7 @@ import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.repository.ProcessingRedisRepository
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
@@ -28,8 +29,13 @@ class BlockchainChecker(
                 continue
             }
 
+            log.info("A new block acquired: {}, #{}", blockchain, lastFetched)
             processingRepository.setLast(blockchain, lastFetched)
             processingRepository.queue(blockchain)
         }
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(BlockchainChecker::class.java)
     }
 }

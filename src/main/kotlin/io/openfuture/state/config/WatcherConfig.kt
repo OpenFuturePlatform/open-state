@@ -8,8 +8,9 @@ import org.springframework.context.annotation.Configuration
 class WatcherConfig(private val watcherProperties: WatcherProperties) {
 
     @Bean
-    fun checkDelay(): Long = watcherProperties.checkDelay!!
+    fun checkDelay(): Long = watcherProperties.checkDelay.toMillis()
 
     @Bean
-    fun processDelay(): Long = watcherProperties.processDelay!!
+    fun processDelay(): Long = watcherProperties.processDelay.toMillis()
+
 }

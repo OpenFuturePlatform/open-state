@@ -2,6 +2,7 @@ package io.openfuture.state.service
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.given
+import com.nhaarman.mockitokotlin2.mock
 import io.openfuture.state.base.ServiceTests
 import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.domain.Wallet
@@ -13,22 +14,21 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mock
 import reactor.core.publisher.Mono
 
 class WalletServiceTest : ServiceTests() {
 
-    @Mock
-    private lateinit var walletRepository: WalletRepository
 
     private lateinit var walletService: WalletService
 
-    @Mock
-    private lateinit var blockchain: Blockchain
+    private val walletRepository: WalletRepository = mock()
+    private val blockchain: Blockchain = mock()
+
 
     @BeforeEach
     fun setUp() {
         walletService = DefaultWalletService(walletRepository)
+        given(blockchain.getName()).willReturn("MockBlockchain")
     }
 
     @Test

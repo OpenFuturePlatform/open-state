@@ -16,8 +16,7 @@ class WalletController(private val walletService: WalletService, private val blo
     // TODO: Needs to be secured and allowed only for Open API calls
     @PostMapping
     suspend fun save(@Valid @RequestBody request: SaveWalletRequest): WalletDto {
-        val blockchain = blockchains.find { it.getName().startsWith(request.blockchain!!) }
-                ?: throw IllegalArgumentException("Can not find blockchain")
+        val blockchain = findBlockchain(request.blockchain!!)
         val wallet = walletService.save(blockchain, request.address!!, request.webhook!!)
         return WalletDto(wallet)
     }
@@ -27,6 +26,15 @@ class WalletController(private val walletService: WalletService, private val blo
     suspend fun findByAddress(@PathVariable address: String): WalletDto {
         val wallet = walletService.findByAddress(address)
         return WalletDto(wallet)
+    }
+
+    private fun findBlockchain(name: String): Blockchain {
+        val nameInLowerCase = name.toLowerCase()
+        for (blockchain in blockchains) {
+            if (blockchain.getName().toLowerCase().startsWith(nameInLowerCase)) return blockchain
+        }
+
+        throw IllegalArgumentException("Can not find blockchain")
     }
 
     data class WalletDto(
