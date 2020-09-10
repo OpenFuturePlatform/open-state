@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class ProcessingConfig(private val watcherProperties: WatcherProperties) {
+class WatcherConfig(private val watcherProperties: WatcherProperties) {
 
     @Bean
     fun checkDelay(): Long = watcherProperties.checkDelay!!

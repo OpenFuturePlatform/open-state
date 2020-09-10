@@ -13,7 +13,7 @@ import org.web3j.protocol.core.methods.response.EthBlock
 import kotlin.math.pow
 
 @Component
-class Ethereum(private val web3j: Web3j) : Blockchain() {
+class EthereumBlockchain(private val web3j: Web3j) : Blockchain() {
 
     override suspend fun getLastBlockNumber(): Int {
         return web3j.ethBlockNumber()
@@ -25,7 +25,8 @@ class Ethereum(private val web3j: Web3j) : Blockchain() {
     }
 
     override suspend fun getBlock(blockNumber: Int): UnifiedBlock {
-        return web3j.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber.toBigInteger()), true)
+        val blockParameter = DefaultBlockParameter.valueOf(blockNumber.toBigInteger())
+        return web3j.ethGetBlockByNumber(blockParameter, true)
                 .flowable()
                 .asFlow()
                 .map {
@@ -40,8 +41,9 @@ class Ethereum(private val web3j: Web3j) : Blockchain() {
     private fun obtainTransactions(ethBlock: EthBlock): List<UnifiedTransaction> {
         return ethBlock.block
                 .transactions
-                .map {
-                    val tx = it.get() as EthBlock.TransactionObject
+                .map { it.get() as EthBlock.TransactionObject }
+                .filter { null != it.from && null != it.to }
+                .map { tx ->
                     UnifiedTransaction(
                             tx.hash,
                             tx.from,

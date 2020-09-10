@@ -4,7 +4,6 @@ import com.nhaarman.mockitokotlin2.given
 import io.openfuture.state.base.ControllerTests
 import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.service.WalletService
-import io.openfuture.state.util.createDummyBlockchain
 import io.openfuture.state.util.createDummyWallet
 import kotlinx.coroutines.runBlocking
 import org.bson.types.ObjectId
@@ -75,6 +74,6 @@ class WalletControllerTest : ControllerTests() {
     private fun createDummySaveWalletRequest(
             address: String = "address",
             webhook: String = "webhook",
-            blockchain: Blockchain = createDummyBlockchain()
-    ) = WalletController.SaveWalletRequest(address, webhook, blockchain.getName())
+            blockchain: String = this.blockchain.getName()
+    ) = WalletController.SaveWalletRequest(address, webhook, blockchain)
 }

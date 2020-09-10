@@ -3,11 +3,11 @@ package io.openfuture.state.service
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.given
 import io.openfuture.state.base.ServiceTests
+import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.WalletRepository
 import io.openfuture.state.util.createDummyWallet
-import io.openfuture.state.util.createDummyBlockchain
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
@@ -23,6 +23,9 @@ class WalletServiceTest : ServiceTests() {
 
     private lateinit var walletService: WalletService
 
+    @Mock
+    private lateinit var blockchain: Blockchain
+
     @BeforeEach
     fun setUp() {
         walletService = DefaultWalletService(walletRepository)
@@ -34,7 +37,7 @@ class WalletServiceTest : ServiceTests() {
 
         given(walletRepository.save(any<Wallet>())).willReturn(Mono.just(wallet))
 
-        val result = walletService.save(createDummyBlockchain(), wallet.address, wallet.webhook)
+        val result = walletService.save(blockchain, wallet.address, wallet.webhook)
 
         assertThat(result).isEqualTo(wallet)
     }

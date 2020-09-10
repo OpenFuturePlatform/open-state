@@ -10,9 +10,9 @@ import java.time.LocalDateTime
 @Document
 @CompoundIndex(name = "address_blockchain_idx", def = "{'address': 1, 'blockchain': 1}")
 data class Wallet(
+        val blockchain: String,
         @Indexed val address: String,
         val webhook: String,
-        val blockchain: String,
         var lastUpdate: LocalDateTime = LocalDateTime.now(),
         @MongoId val id: ObjectId = ObjectId(),
         private var transactions: List<Transaction> = emptyList(),

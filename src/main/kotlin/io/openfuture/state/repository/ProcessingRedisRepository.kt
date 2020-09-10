@@ -9,11 +9,11 @@ import java.time.LocalDateTime
 
 @Repository
 class ProcessingRedisRepository(
-        reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>,
+        redisTemplate: ReactiveRedisTemplate<String, Any>,
         private val watcherProperties: WatcherProperties
 ) {
-    private val setOperations: ReactiveSetOperations<String, Any> = reactiveRedisTemplate.opsForSet()
-    private val valueOperations: ReactiveValueOperations<String, Any> = reactiveRedisTemplate.opsForValue()
+    private val setOperations: ReactiveSetOperations<String, Any> = redisTemplate.opsForSet()
+    private val valueOperations: ReactiveValueOperations<String, Any> = redisTemplate.opsForValue()
 
     suspend fun getCurrent(blockchain: Blockchain): Int {
         return valueOperations.getAndAwait("$blockchain:$CURRENT") as Int? ?: 0
@@ -35,7 +35,7 @@ class ProcessingRedisRepository(
         valueOperations.setAndAwait(
                 "$LOCK:$blockchain",
                 LocalDateTime.now(),
-                Duration.ofSeconds(watcherProperties.lock!!.ttl)
+                Duration.ofSeconds(watcherProperties.lock!!.ttl!!)
         )
     }
 
@@ -47,7 +47,7 @@ class ProcessingRedisRepository(
         return valueOperations.setIfAbsentAndAwait(
                 "$LOCK:$blockchain",
                 LocalDateTime.now(),
-                Duration.ofSeconds(watcherProperties.lock!!.ttl)
+                Duration.ofSeconds(watcherProperties.lock!!.ttl!!)
         )
     }
 

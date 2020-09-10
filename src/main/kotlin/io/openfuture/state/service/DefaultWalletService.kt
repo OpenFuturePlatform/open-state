@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service
 class DefaultWalletService(private val repository: WalletRepository) : WalletService {
 
     override suspend fun save(blockchain: Blockchain, address: String, webhook: String): Wallet {
-        val wallet = Wallet(address, webhook, blockchain.getName())
+        val wallet = Wallet(blockchain.getName(), address, webhook)
         return repository.save(wallet).awaitSingle()
     }
 
@@ -32,10 +32,6 @@ class DefaultWalletService(private val repository: WalletRepository) : WalletSer
             fromWallet?.let { saveTransaction(it, block, transaction) }
             toWallet?.let { saveTransaction(it, block, transaction) }
         }
-    }
-
-    override suspend fun existsByBlockchainAndAddress(blockchain: Blockchain, address: String): Boolean {
-        return repository.existsByBlockchainAndAddress(blockchain.getName(), address).awaitSingle()
     }
 
     private suspend fun saveTransaction(wallet: Wallet, block: UnifiedBlock, unifiedTransaction: UnifiedTransaction) {

@@ -1,20 +1,17 @@
 package io.openfuture.state.util
 
-import io.openfuture.state.blockchain.Blockchain
-import io.openfuture.state.controller.WalletController
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
 import org.bson.types.ObjectId
-import org.mockito.Mockito
 import java.time.LocalDateTime
 
 fun createDummyWallet(
+        blockchain: String = "EthereumBlockchain",
         id: ObjectId = ObjectId(),
         address: String = "address",
         webhook: String = "webhook",
-        blockchain: Blockchain = createDummyBlockchain(),
         lastUpdate: LocalDateTime = LocalDateTime.now()
-) = Wallet(address, webhook, blockchain.getName(), lastUpdate, id)
+) = Wallet(blockchain, address, webhook, lastUpdate, id)
 
 fun createDummyTransaction(
         hash: String = "hash",
@@ -25,5 +22,3 @@ fun createDummyTransaction(
         blockHeight: Long = 1,
         blockHash: String = "block hash"
 ) = Transaction(hash, participant, amount, fee, date, blockHeight, blockHash)
-
-fun createDummyBlockchain() = Mockito.mock(Blockchain::class.java)

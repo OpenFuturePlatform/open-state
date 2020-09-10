@@ -11,6 +11,4 @@ interface WalletService {
     suspend fun findByAddress(address: String): Wallet
 
     suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock)
-
-    suspend fun existsByBlockchainAndAddress(blockchain: Blockchain, address: String): Boolean
 }

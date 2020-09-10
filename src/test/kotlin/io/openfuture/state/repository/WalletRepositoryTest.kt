@@ -29,4 +29,22 @@ class WalletRepositoryTest : MongoRepositoryTests() {
         result.lastUpdate = now
         assertThat(result).isEqualTo(wallet)
     }
+
+    @Test
+    fun findByBlockchainAndAddressShouldReturnWallet() {
+        val now = LocalDateTime.now()
+        var wallet = createDummyWallet(address = "address", lastUpdate = now, blockchain = "Ethereum")
+
+        wallet = walletRepository.save(wallet).block()!!
+
+        val result = walletRepository.findByBlockchainAndAddress("Ethereum", "address").block()!!
+        result.lastUpdate = now
+        assertThat(result).isEqualTo(wallet)
+    }
+
+    @Test
+    fun findByBlockchainAndAddressShouldReturnNull() {
+        val result = walletRepository.findByBlockchainAndAddress("Ethereum", "address").block()
+        assertThat(result).isNull()
+    }
 }

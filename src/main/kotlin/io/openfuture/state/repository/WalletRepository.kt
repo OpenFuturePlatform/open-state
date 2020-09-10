@@ -10,7 +10,5 @@ interface WalletRepository : ReactiveMongoRepository<Wallet, String> {
 
     fun findByAddress(address: String): Mono<Wallet>
 
-    fun existsByBlockchainAndAddress(blockchain: String, address: String): Mono<Boolean>
-
     fun findByBlockchainAndAddress(blockchain: String, address: String): Mono<Wallet>
 }

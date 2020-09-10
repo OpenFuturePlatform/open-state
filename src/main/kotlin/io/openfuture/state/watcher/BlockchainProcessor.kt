@@ -34,7 +34,8 @@ class BlockchainProcessor(
             val last = processingRepository.getLast(blockchain)
             val current = processingRepository.getCurrent(blockchain)
 
-            walletService.addTransactions(blockchain, blockchain.getBlock(current))
+            val block = blockchain.getBlock(current)
+            walletService.addTransactions(blockchain, block)
 
             processingRepository.incCurrent(blockchain)
             processingRepository.lock(blockchain)
