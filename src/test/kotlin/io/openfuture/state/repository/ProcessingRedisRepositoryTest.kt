@@ -59,7 +59,6 @@ class ProcessingRedisRepositoryTest : RedisRepositoryTests() {
 
     @Test
     fun setLastShouldUpdateTtl() = runBlocking<Unit> {
-
         processingRedisRepository.setLast(blockchain, 55)
 
         val result = processingRedisRepository.getLast(blockchain)
