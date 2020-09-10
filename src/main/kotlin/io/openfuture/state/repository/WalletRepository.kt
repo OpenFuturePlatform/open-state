@@ -9,4 +9,6 @@ import reactor.core.publisher.Mono
 interface WalletRepository : ReactiveMongoRepository<Wallet, String> {
 
     fun findByAddress(address: String): Mono<Wallet>
+
+    fun findByBlockchainAndAddress(blockchain: String, address: String): Mono<Wallet>
 }

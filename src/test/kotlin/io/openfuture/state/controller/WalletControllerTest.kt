@@ -2,14 +2,15 @@ package io.openfuture.state.controller
 
 import com.nhaarman.mockitokotlin2.given
 import io.openfuture.state.base.ControllerTests
+import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.service.WalletService
-import io.openfuture.state.util.createDummySaveWalletRequest
 import io.openfuture.state.util.createDummyWallet
 import kotlinx.coroutines.runBlocking
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.MediaType
 import java.time.LocalDateTime
 
 @WebFluxTest(WalletController::class, ExceptionHandler::class)
@@ -17,6 +18,9 @@ class WalletControllerTest : ControllerTests() {
 
     @MockBean
     private lateinit var walletService: WalletService
+
+    @MockBean
+    private lateinit var blockchain: Blockchain
 
     @Test
     fun findByAddressShouldReturnWallet() = runBlocking<Unit> {
@@ -48,12 +52,19 @@ class WalletControllerTest : ControllerTests() {
                 lastUpdate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
         )
 
-        val request = createDummySaveWalletRequest()
-        given(walletService.save(request.address, request.webhook)).willReturn(wallet)
+        given(blockchain.getName()).willReturn("EthereumBlockchain")
+        given(walletService.save(blockchain, "address", "webhook")).willReturn(wallet)
 
         webClient.post()
                 .uri("/api/wallets")
-                .bodyValue(request)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("""
+                    {
+                        "address": "address",
+                        "webhook": "webhook",
+                        "blockchain": "Ethereum"
+                    }
+                """.trimIndent())
                 .exchange()
                 .expectStatus().isOk
                 .expectBody()
@@ -66,4 +77,5 @@ class WalletControllerTest : ControllerTests() {
                     }
                 """.trimIndent())
     }
+
 }

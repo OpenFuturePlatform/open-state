@@ -1,33 +1,25 @@
 package io.openfuture.state.util
 
-import io.openfuture.state.controller.WalletController
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
 import org.bson.types.ObjectId
+import java.math.BigDecimal
 import java.time.LocalDateTime
-import java.util.*
 
 fun createDummyWallet(
-        id: ObjectId = ObjectId(),
+        blockchain: String = "EthereumBlockchain",
         address: String = "address",
         webhook: String = "webhook",
-        transactions: Set<Transaction> = setOf(createDummyTransaction()),
-        lastUpdate: LocalDateTime = LocalDateTime.now()
-) = Wallet(address, webhook, transactions, lastUpdate, id)
+        id: ObjectId = ObjectId(),
+        transactions: List<Transaction> = arrayListOf(createDummyTransaction()),
+        lastUpdate: LocalDateTime = LocalDateTime.of(2020, 10, 10, 10, 10)
+) = Wallet(blockchain, address, webhook, transactions, lastUpdate, id)
 
 fun createDummyTransaction(
         hash: String = "hash",
-        externalHash: String = "external hash",
-        typeId: Int = 1,
         participant: String = "participant address",
-        amount: Long = 100,
-        fee: Long = 0,
-        date: Long = Date().time,
+        amount: BigDecimal = BigDecimal(100),
+        date: LocalDateTime = LocalDateTime.of(2020, 9, 9, 9, 9),
         blockHeight: Long = 1,
         blockHash: String = "block hash"
-) = Transaction(hash, externalHash, typeId, participant, amount, fee, date, blockHeight, blockHash)
-
-fun createDummySaveWalletRequest(
-        address: String = "address",
-        webhook: String = "webhook"
-) = WalletController.SaveWalletRequest(address, webhook)
+) = Transaction(hash, participant, amount, date, blockHeight, blockHash)

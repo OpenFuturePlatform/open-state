@@ -1,13 +1,13 @@
 package io.openfuture.state.domain
 
+import java.math.BigDecimal
+import java.time.LocalDateTime
+
 data class Transaction(
         val hash: String,
-        val externalHash: String,
-        val typeId: Int,
         val participant: String,
-        val amount: Long,
-        val fee: Long,
-        val date: Long,
+        val amount: BigDecimal,
+        val date: LocalDateTime,
         val blockHeight: Long,
         val blockHash: String
 )
