@@ -1,0 +1,111 @@
+name: Deploy Open State
+
+on:
+  push:
+    branches: [ 2.x.x-REACTIVE ]
+  pull_request:
+    branches: [ 2.x.x-REACTIVE ]
+
+jobs:
+
+  tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+    continue-on-error: false
+
+    env:
+      MONGODB_HOST: localhost
+      MONGODB_PORT: 27017
+      MONGODB_DATABASE: open_state
+      MONGODB_USERNAME: open_state
+      MONGODB_PASSWORD: open_state
+      MONGODB_AUTH_DB: admin
+
+    services:
+      mongodb:
+        image: mongo:4.4.0
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: open_state
+          MONGO_INITDB_ROOT_PASSWORD:  open_state
+          MONGO_INITDB_DATABASE: open_state
+
+      redis:
+        image: redis:6.0.7
+        ports:
+          - 6379:6379
+
+    steps:
+
+      - id: checkout_repository
+        name: Checkout repository
+        uses: actions/checkout@v2
+
+      - id: prepare_java_sdk_11
+        name: Prepare Java SDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - id: cache_gradle_packages
+        name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+
+      - id: execute_tests
+        name: Execute tests
+        run: ./gradlew check
+
+      - id: save_test_execution_results
+        name: Save test execution results
+        uses: actions/upload-artifact@v2
+        with:
+          name: Test_Results_${{ github.sha }}
+          path: build/reports/tests/test/**
+
+      - id: execute_test_coverage_report
+        name: Execute test coverage report
+        run: ./gradlew jacocoTestReport
+
+      - id: save_test_coverage_report_results
+        name: Save test coverage report
+        uses: actions/upload-artifact@v2
+        with:
+          name: Test_Coverage_Report_${{ github.sha }}
+          path: build/reports/jacoco/test/html/**
+
+
+  build:
+    name: Build project
+    runs-on: ubuntu-latest
+    continue-on-error: false
+    needs: [tests]
+
+    steps:
+
+      - id: checkout_repository
+        name: Checkout repository
+        uses: actions/checkout@v2
+
+      - id: prepare_java_sdk_11
+        name: Prepare Java SDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - id: execute_build
+        name: Execute build p[roject
+        run: ./gradlew assemble
+
+      - id: save_build_output
+        name: Save assembles
+        uses: actions/upload-artifact@v2
+        with:
+          name: Save_Built_Assembles_${{ github.sha }}
+          path: build/libs/*.jar
+
+
