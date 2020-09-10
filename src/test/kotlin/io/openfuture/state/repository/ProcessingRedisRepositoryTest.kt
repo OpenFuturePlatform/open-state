@@ -31,6 +31,7 @@ class ProcessingRedisRepositoryTest : RedisRepositoryTests() {
             it.serverCommands().flushAll()
         }.blockFirst()
         given(blockchain.getName()).willReturn("MockBlockchain")
+        given(blockchain.toString()).willReturn(blockchain.getName())
     }
 
     @Test
