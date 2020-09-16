@@ -37,10 +37,8 @@ class EthereumBlockchain(private val web3j: Web3j) : Blockchain() {
             }
 
     private suspend fun findContractAddress(transactionHash: String) = web3j.ethGetTransactionReceipt(transactionHash)
-            .sendAsync()
-            .await()
-            .transactionReceipt
-            .get()
+            .sendAsync().await()
+            .transactionReceipt.get()
             .contractAddress
 
 }
