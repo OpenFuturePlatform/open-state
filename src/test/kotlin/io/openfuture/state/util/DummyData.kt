@@ -17,9 +17,10 @@ fun createDummyWallet(
 
 fun createDummyTransaction(
         hash: String = "hash",
-        participant: String = "participant address",
+        from: String = "from",
+        to: String = "to",
         amount: BigDecimal = BigDecimal(100),
         date: LocalDateTime = LocalDateTime.of(2020, 9, 9, 9, 9),
         blockHeight: Long = 1,
         blockHash: String = "block hash"
-) = Transaction(hash, participant, amount, date, blockHeight, blockHash)
+) = Transaction(hash, from, to, amount, date, blockHeight, blockHash)

@@ -31,9 +31,9 @@ class EthereumBlockchain(private val web3j: Web3j) : Blockchain() {
     private suspend fun obtainTransactions(ethBlock: EthBlock.Block): List<UnifiedTransaction> = ethBlock.transactions
             .map { it.get() as EthBlock.TransactionObject }
             .map { tx ->
-                val address = tx.to ?: findContractAddress(tx.hash)
+                val to = tx.to ?: findContractAddress(tx.hash)
                 val amount = Convert.fromWei(tx.value.toBigDecimal(), Convert.Unit.ETHER)
-                UnifiedTransaction(tx.hash, address, amount)
+                UnifiedTransaction(tx.hash, tx.from, to, amount)
             }
 
     private suspend fun findContractAddress(transactionHash: String) = web3j.ethGetTransactionReceipt(transactionHash)

@@ -26,7 +26,7 @@ class DefaultWalletService(private val repository: WalletRepository) : WalletSer
 
     override suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock) {
         for (transaction in block.transactions) {
-            val wallet = repository.findByBlockchainAndAddress(blockchain.getName(), transaction.address).awaitFirstOrNull()
+            val wallet = repository.findByBlockchainAndAddress(blockchain.getName(), transaction.to).awaitFirstOrNull()
 
             wallet?.let { saveTransaction(it, block, transaction) }
         }
@@ -35,7 +35,8 @@ class DefaultWalletService(private val repository: WalletRepository) : WalletSer
     private suspend fun saveTransaction(wallet: Wallet, block: UnifiedBlock, unifiedTransaction: UnifiedTransaction) {
         val transaction = Transaction(
                 unifiedTransaction.hash,
-                wallet.address,
+                unifiedTransaction.from,
+                unifiedTransaction.to,
                 unifiedTransaction.amount,
                 block.date,
                 block.number,

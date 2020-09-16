@@ -5,7 +5,8 @@ import java.time.LocalDateTime
 
 data class Transaction(
         val hash: String,
-        val participant: String,
+        val from: String,
+        val to: String,
         val amount: BigDecimal,
         val date: LocalDateTime,
         val blockHeight: Long,
