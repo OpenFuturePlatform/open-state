@@ -28,12 +28,17 @@ class EthereumBlockchain(private val web3j: Web3j) : Blockchain() {
         return UnifiedBlock(transactions, date, block.number.toLong(), block.hash)
     }
 
-    private fun obtainTransactions(ethBlock: EthBlock.Block): List<UnifiedTransaction> = ethBlock.transactions
+    private suspend fun obtainTransactions(ethBlock: EthBlock.Block): List<UnifiedTransaction> = ethBlock.transactions
             .map { it.get() as EthBlock.TransactionObject }
-            .filter { null != it.from && null != it.to }
             .map { tx ->
+                val to = tx.to ?: findContractAddress(tx.hash)
                 val amount = Convert.fromWei(tx.value.toBigDecimal(), Convert.Unit.ETHER)
-                UnifiedTransaction(tx.hash, tx.from, tx.to, amount)
+                UnifiedTransaction(tx.hash, tx.from, to, amount)
             }
+
+    private suspend fun findContractAddress(transactionHash: String) = web3j.ethGetTransactionReceipt(transactionHash)
+            .sendAsync().await()
+            .transactionReceipt.get()
+            .contractAddress
 
 }
