@@ -1,0 +1,88 @@
+name: Open State CI/CD
+
+on: [push]
+
+jobs:
+
+  tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+    continue-on-error: false
+
+    services:
+
+      mongodb:
+        image: mongo:4.4.0
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: open_state
+          MONGO_INITDB_ROOT_PASSWORD: open_state
+          MONGO_INITDB_DATABASE: open_state
+
+      redis:
+        image: redis:6.0.7
+        ports:
+          - 6379:6379
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Prepare Java SDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+
+      - name: Execute tests
+        run: ./gradlew check
+
+      - name: Save test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_results_${{ github.sha }}
+          path: build/reports/tests/test/**
+
+      - name: Execute test coverage report
+        run: ./gradlew jacocoTestReport
+
+      - name: Save test coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_coverage_results_${{ github.sha }}
+          path: build/reports/jacoco/test/html/**
+
+
+  build:
+    name: Build project
+    runs-on: ubuntu-latest
+    continue-on-error: false
+    needs: [tests]
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/2.x.x-REACTIVE'
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Prepare Java SDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Build project
+        run: ./gradlew assemble
+
+      - name: Save executables
+        uses: actions/upload-artifact@v2
+        with:
+          name: assembles_${{ github.sha }}
+          path: build/libs/*.jar
