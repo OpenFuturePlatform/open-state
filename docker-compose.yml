@@ -1,14 +1,19 @@
-version: "3"
+version: "2.4"
 services:
+  backend:
+    image: $DOCKER_IMAGE_TAG
+    depends_on:
+      - mongo
+      - redis
   mongo:
-    image: mongo
+    image: mongo:4.4.0
     restart: always
     ports:
       - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: open_state
-      MONGO_INITDB_ROOT_PASSWORD: open_state
+      MONGO_INITDB_ROOT_PASSWORD: $MONGODB_PASSWORD
   redis:
-    image: redis
+    image: redis:6.0.7
     ports:
       - 6379:6379
