@@ -12,7 +12,10 @@ import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.stereotype.Service
 
 @Service
-class DefaultWalletService(private val repository: WalletRepository) : WalletService {
+class DefaultWalletService(
+        private val repository: WalletRepository,
+        private val webhookService:  WebhookService
+) : WalletService {
 
     override suspend fun save(blockchain: Blockchain, address: String, webhook: String): Wallet {
         val wallet = Wallet(blockchain.getName(), address, webhook)
@@ -42,7 +45,9 @@ class DefaultWalletService(private val repository: WalletRepository) : WalletSer
                 block.number,
                 block.hash
         )
+
         wallet.addTransaction(transaction)
         repository.save(wallet).awaitSingle()
+        webhookService.queueWebhook(wallet, transaction)
     }
 }
