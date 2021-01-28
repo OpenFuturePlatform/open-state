@@ -78,4 +78,49 @@ class WalletControllerTest : ControllerTests() {
                 """.trimIndent())
     }
 
+    @Test
+    fun updateShouldUpdateAndReturnWallet() = runBlocking<Unit> {
+        val wallet = createDummyWallet(
+                id = ObjectId("5f480720e5cba939f1918911"),
+                webhook = "https://www.openfuture.io/",
+                lastUpdate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
+        )
+
+        given(walletService.update(wallet.id.toString(), wallet.webhook)).willReturn(wallet)
+
+        webClient.put()
+                .uri("/api/wallets/${wallet.id}")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("""
+                    {
+                        "webhook": "https://www.openfuture.io/"
+                    }
+                """.trimIndent())
+                .exchange()
+                .expectStatus().isOk
+                .expectBody()
+                .json("""
+                    {
+                        "id": "5f480720e5cba939f1918911",
+                        "address": "address",
+                        "webhook": "https://www.openfuture.io/",
+                        "lastUpdateDate": "2020-08-28T01:18:56.825261"
+                    }
+                """.trimIndent())
+    }
+
+    @Test
+    fun updateGivenInvalidWebhookShouldReturnBadRequest() = runBlocking<Unit> {
+        webClient.put()
+                .uri("/api/wallets/id")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("""
+                    {
+                        "webhook": "not valid url"
+                    }
+                """.trimIndent())
+                .exchange()
+                .expectStatus().isBadRequest
+    }
+
 }

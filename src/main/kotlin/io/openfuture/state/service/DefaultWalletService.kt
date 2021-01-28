@@ -7,6 +7,7 @@ import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.WalletRepository
+import io.openfuture.state.webhook.WebhookStatus
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.stereotype.Service
@@ -14,11 +15,18 @@ import org.springframework.stereotype.Service
 @Service
 class DefaultWalletService(
         private val repository: WalletRepository,
-        private val webhookService:  WebhookService
+        private val webhookService: WebhookService
 ) : WalletService {
 
     override suspend fun save(blockchain: Blockchain, address: String, webhook: String): Wallet {
         val wallet = Wallet(blockchain.getName(), address, webhook)
+        return repository.save(wallet).awaitSingle()
+    }
+
+    override suspend fun update(walletId: String, webhook: String): Wallet {
+        val wallet = repository.findById(walletId).awaitFirstOrNull() ?: throw NotFoundException("Wallet not found")
+        if (webhook != wallet.webhook) wallet.webhookStatus = WebhookStatus.OK
+        wallet.webhook = webhook
         return repository.save(wallet).awaitSingle()
     }
 

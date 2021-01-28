@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 data class Wallet(
         val blockchain: String,
         @Indexed val address: String,
-        val webhook: String,
+        var webhook: String,
         var webhookStatus: WebhookStatus = WebhookStatus.NOT_INVOKED,
         private var transactions: List<Transaction> = emptyList(),
         @LastModifiedDate var lastUpdate: LocalDateTime = LocalDateTime.now(),
