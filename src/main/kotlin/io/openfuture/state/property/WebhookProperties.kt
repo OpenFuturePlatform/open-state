@@ -2,18 +2,20 @@ package io.openfuture.state.property
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
+import org.springframework.boot.context.properties.NestedConfigurationProperty
 import org.springframework.validation.annotation.Validated
 import java.time.Duration
 
-@ConstructorBinding
-@ConfigurationProperties(prefix = "webhook.invokation")
 @Validated
+@ConstructorBinding
+@ConfigurationProperties(prefix = "webhook.invocation")
 data class WebhookProperties(
 
         /**
-         * Max attempts count to invoke webhook request.
+         * Retry options for webhook invocation
          */
-        val maxAttempts: Int = 10,
+        @NestedConfigurationProperty
+        val retryOptions: RetryProperties = RetryProperties(),
 
         /**
          * Delay for checking new invocations to process.

@@ -22,13 +22,14 @@ class WalletServiceTest : ServiceTests() {
     private lateinit var walletService: WalletService
 
     private val walletRepository: WalletRepository = mock()
+    private val transactionService: TransactionService = mock()
     private val blockchain: Blockchain = mock()
     private val webhookService: WebhookService = mock()
 
 
     @BeforeEach
     fun setUp() {
-        walletService = DefaultWalletService(walletRepository, webhookService)
+        walletService = DefaultWalletService(walletRepository, transactionService, webhookService)
         given(blockchain.getName()).willReturn("MockBlockchain")
     }
 
@@ -92,5 +93,5 @@ class WalletServiceTest : ServiceTests() {
             }
         }
     }
-
 }
+

@@ -7,7 +7,11 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class WebhookConfig(private val properties: WebhookProperties) {
 
-    fun maxAttempts(): Int = properties.maxAttempts
+    fun progressiveAttempts(): Int = properties.retryOptions.progressiveMaxAttempts
+
+    fun dailyAttempts(): Int = properties.retryOptions.dailyMaxAttempts
+
+    fun maxAttempts(): Int = progressiveAttempts() + dailyAttempts()
 
     @Bean
     fun webhookProcessDelay(): Long = properties.processDelay.toMillis()

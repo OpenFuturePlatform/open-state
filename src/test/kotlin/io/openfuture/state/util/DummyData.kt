@@ -2,11 +2,14 @@ package io.openfuture.state.util
 
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
-import io.openfuture.state.domain.WebhookInvocation
+import io.openfuture.state.domain.WebhookDeadQueue
+import io.openfuture.state.domain.WebhookExecution
+import io.openfuture.state.webhook.ScheduledTransaction
+import io.openfuture.state.webhook.WebhookResponse
+import io.openfuture.state.webhook.WebhookResult
 import io.openfuture.state.webhook.WebhookStatus
 import org.bson.types.ObjectId
-import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.mongodb.core.mapping.MongoId
+import org.springframework.http.HttpStatus
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -16,7 +19,7 @@ fun createDummyWallet(
         webhook: String = "webhook",
         status: WebhookStatus = WebhookStatus.NOT_INVOKED,
         id: ObjectId = ObjectId(),
-        transactions: List<Transaction> = arrayListOf(createDummyTransaction()),
+        transactions: List<Transaction> = emptyList(),
         lastUpdate: LocalDateTime = LocalDateTime.of(2020, 10, 10, 10, 10)
 ) = Wallet(blockchain, address, webhook, status, transactions, lastUpdate, id)
 
@@ -30,13 +33,31 @@ fun createDummyTransaction(
         blockHash: String = "block hash"
 ) = Transaction(hash, from, to, amount, date, blockHeight, blockHash)
 
-fun createDummyWebhookInvocation(
-        wallet: Wallet = createDummyWallet(),
-        transaction: Transaction = createDummyTransaction(),
-        url: String = "google.com",
-        attempts: Int = 0,
-        message: String? = null,
-        id: ObjectId = ObjectId(),
-        lastUpdate: LocalDateTime = LocalDateTime.of(2020, 10, 10, 10, 10),
-        status: WebhookStatus = WebhookStatus.NOT_INVOKED
-) = WebhookInvocation(wallet, transaction, url, attempts, message, id, lastUpdate, status)
+fun createDummyWebhookExecution(
+        walletAddress: String = "address",
+        transactionHash: String = "hash",
+        invocations: List<WebhookResult> = emptyList()
+) = WebhookExecution(walletAddress, transactionHash, invocations)
+
+fun createDummyScheduledTransaction(
+        hash: String = "hash",
+        attempts: Int = 1,
+        timestamp: LocalDateTime = LocalDateTime.now()
+) = ScheduledTransaction(hash, attempts, timestamp)
+
+fun createDummyWebhookDeadQueue(
+        walletAddress: String = "address",
+        transactions: List<ScheduledTransaction> = emptyList(),
+        timestamp: LocalDateTime = LocalDateTime.of(2020, 10, 10, 10, 10)
+) = WebhookDeadQueue(walletAddress, transactions, timestamp)
+
+fun createDummyPositiveWebhookResponse(
+        status: HttpStatus = HttpStatus.OK,
+        url: String = "webhook"
+) = WebhookResponse(status, url)
+
+fun createDummyNegativeWebhookResponse(
+        status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+        url: String = "webhook",
+        message: String = "Error"
+) = WebhookResponse(status, url, message)

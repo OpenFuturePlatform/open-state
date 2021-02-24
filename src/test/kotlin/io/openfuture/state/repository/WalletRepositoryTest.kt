@@ -1,6 +1,7 @@
 package io.openfuture.state.repository
 
 import io.openfuture.state.base.MongoRepositoryTests
+import io.openfuture.state.util.createDummyTransaction
 import io.openfuture.state.util.createDummyWallet
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -12,8 +13,13 @@ class WalletRepositoryTest : MongoRepositoryTests() {
     @Autowired
     private lateinit var walletRepository: WalletRepository
 
+    @Autowired
+    private lateinit var transactionRepository: TransactionRepository
+
+
     @AfterEach
     fun tearDown() {
+        transactionRepository.deleteAll().block()
         walletRepository.deleteAll().block()
     }
 
@@ -39,5 +45,17 @@ class WalletRepositoryTest : MongoRepositoryTests() {
     fun findByBlockchainAndAddressShouldReturnNull() {
         val result = walletRepository.findByBlockchainAndAddress("Ethereum", "address").block()
         assertThat(result).isNull()
+    }
+
+    @Test
+    fun saveShouldSaveWalletWithTransactions() {
+        val wallet = createDummyWallet()
+        var transaction = createDummyTransaction()
+
+        transaction = transactionRepository.save(transaction).block()!!
+        wallet.addTransaction(transaction)
+
+        val result = walletRepository.save(wallet).block()!!
+        assertThat(result).isEqualTo(wallet)
     }
 }

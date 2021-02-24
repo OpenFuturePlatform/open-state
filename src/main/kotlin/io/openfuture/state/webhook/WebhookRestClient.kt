@@ -18,11 +18,11 @@ class WebhookRestClient(private val webClient: WebClient) {
                     .exchange()
                     .awaitSingle()
 
-            WebhookResponse(response.statusCode(), response.statusCode().reasonPhrase)
+            WebhookResponse(response.statusCode(), url, response.statusCode().reasonPhrase)
         } catch (ex: UnknownHostException) {
-            WebhookResponse(HttpStatus.NOT_FOUND, "Host could not be determined")
+            WebhookResponse(HttpStatus.NOT_FOUND, url, "Host could not be determined")
         } catch (ex: Exception) {
-            WebhookResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.message)
+            WebhookResponse(HttpStatus.INTERNAL_SERVER_ERROR, url, ex.message)
         }
     }
 
@@ -35,13 +35,11 @@ class WebhookRestClient(private val webClient: WebClient) {
                     .exchange()
                     .awaitSingle()
 
-            WebhookResponse(response.statusCode(), response.statusCode().reasonPhrase)
+            WebhookResponse(response.statusCode(), url, response.statusCode().reasonPhrase)
         } catch (ex: UnknownHostException) {
-            WebhookResponse(HttpStatus.NOT_FOUND, "Host could not be determined")
+            WebhookResponse(HttpStatus.NOT_FOUND, url, "Host could not be determined")
         } catch (ex: Exception) {
-            WebhookResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.message)
+            WebhookResponse(HttpStatus.INTERNAL_SERVER_ERROR, url, ex.message)
         }
-
     }
-    
 }

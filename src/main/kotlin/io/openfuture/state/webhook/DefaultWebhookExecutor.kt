@@ -1,43 +1,91 @@
 package io.openfuture.state.webhook
 
 import io.openfuture.state.config.WebhookConfig
-import io.openfuture.state.domain.WebhookInvocation
-import io.openfuture.state.util.MathUtils
-import kotlinx.coroutines.delay
+import io.openfuture.state.domain.Transaction
+import io.openfuture.state.domain.Wallet
+import io.openfuture.state.domain.WebhookExecution
+import io.openfuture.state.service.*
+import io.openfuture.state.webhook.dto.TransactionPayload
+import io.openfuture.state.webhook.dto.WebhookPayload
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestTemplate
 
 @Service
 class DefaultWebhookExecutor(
+        private val restClient: WebhookRestClient,
+        private val walletService: WalletService,
+        private val webhookService: WebhookService,
+        private val transactionService: TransactionService,
+        private val executionService: WebhookExecutionService,
         private val webhookConfig: WebhookConfig
 ): WebhookExecutor {
 
-    override suspend fun execute(webhookInvocation: WebhookInvocation) {
-        try {
-            for (i in 1..webhookConfig.maxAttempts()) {
+    override suspend fun execute(walletAddress: String) {
+        val wallet = walletService.findByAddress(walletAddress)
+        val scheduledTransaction = webhookService.firstTransaction(wallet)
+        val transaction = transactionService.findByHash(scheduledTransaction.hash)
 
-                webhookInvocation.attempts++
-                if (executeGetRequest(webhookInvocation.url)) {
-                    webhookInvocation.status = WebhookStatus.OK
-                    return
-                }
+        val response = restClient.doPost(
+                wallet.webhook,
+                createWebhookPayload(wallet, transaction)
+        )
 
-                delay(1000 * MathUtils.fibonachi(i))
-            }
-        } catch (ex: Exception) {
-            webhookInvocation.message = ex.message
+
+        addWebhookInvocation(wallet, response, scheduledTransaction)
+        if (response.status.is2xxSuccessful) {
+            scheduleNextWebhook(wallet)
         }
-
-        webhookInvocation.apply {
-            status = WebhookStatus.FAILED
-            wallet.webhookStatus = WebhookStatus.FAILED
+        else {
+            scheduleFailedWebhook(wallet, scheduledTransaction)
         }
     }
 
-    suspend fun executeGetRequest(url: String): Boolean {
-        val restTemplate = RestTemplate()
-        val response = restTemplate.getForEntity(url, String::class.java)
+    private suspend fun scheduleNextWebhook(wallet: Wallet) {
+        walletService.save(wallet.apply {  webhookStatus = WebhookStatus.OK })
+        webhookService.scheduleNextWebhook(wallet)
+    }
 
-        return response.statusCode.is2xxSuccessful
+    private suspend fun scheduleFailedWebhook(wallet: Wallet, transaction: ScheduledTransaction) {
+        if (transaction.attempts >= webhookConfig.maxAttempts()) {
+            walletService.save(wallet.apply {  webhookStatus = WebhookStatus.FAILED })
+        }
+
+        webhookService.scheduleFailedWebhook(wallet, transaction)
+    }
+
+    private suspend fun addWebhookInvocation(wallet: Wallet, response: WebhookResponse, transaction: ScheduledTransaction) {
+        val webhookExecution = executionService
+                .findByTransactionHash(transaction.hash) ?:
+                        WebhookExecution(
+                                walletAddress = wallet.address,
+                                transactionHash = transaction.hash
+                        )
+
+        val invocation = WebhookResult(
+                status = response.status,
+                url = response.url,
+                attempt = transaction.attempts,
+                message = response.message
+        )
+
+        webhookExecution.addInvocation(invocation)
+        executionService.save(webhookExecution)
+    }
+
+    private fun createWebhookPayload(wallet: Wallet, transaction: Transaction): WebhookPayload {
+        val transactionPayload = TransactionPayload(
+                hash = transaction.hash,
+                from = transaction.from,
+                to = transaction.to,
+                amount = transaction.amount,
+                date = transaction.date,
+                blockHeight = transaction.blockHeight,
+                blockHash = transaction.blockHash
+        )
+
+        return  WebhookPayload(
+                blockchain =  wallet.blockchain,
+                walletAddress = wallet.address,
+                transactionPayload
+        )
     }
 }

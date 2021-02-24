@@ -5,6 +5,7 @@ import org.bson.types.ObjectId
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.Indexed
+import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.MongoId
 import java.time.LocalDateTime
@@ -16,7 +17,7 @@ data class Wallet(
         @Indexed val address: String,
         var webhook: String,
         var webhookStatus: WebhookStatus = WebhookStatus.NOT_INVOKED,
-        private var transactions: List<Transaction> = emptyList(),
+        @DBRef private var transactions: List<Transaction> = emptyList(),
         @LastModifiedDate var lastUpdate: LocalDateTime = LocalDateTime.now(),
         @MongoId val id: ObjectId = ObjectId(),
 ) {

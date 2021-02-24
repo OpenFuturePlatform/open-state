@@ -1,7 +1,7 @@
 package io.openfuture.state.webhook
 
 enum class WebhookStatus {
-    NOT_INVOKED,
     OK,
-    FAILED
+    FAILED,
+    NOT_INVOKED
 }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service
 @Service
 class DefaultWalletService(
         private val repository: WalletRepository,
+        private val transactionService: TransactionService,
         private val webhookService: WebhookService
 ) : WalletService {
 
@@ -23,11 +24,23 @@ class DefaultWalletService(
         return repository.save(wallet).awaitSingle()
     }
 
+    override suspend fun save(wallet: Wallet): Wallet {
+        return repository.save(wallet).awaitSingle()
+    }
+
     override suspend fun update(walletId: String, webhook: String): Wallet {
         val wallet = repository.findById(walletId).awaitFirstOrNull() ?: throw NotFoundException("Wallet not found")
-        if (webhook != wallet.webhook) wallet.webhookStatus = WebhookStatus.OK
-        wallet.webhook = webhook
-        return repository.save(wallet).awaitSingle()
+        if (webhook != wallet.webhook) {
+            wallet.let {
+                it.webhookStatus = WebhookStatus.OK
+                it.webhook = webhook
+            }
+        }
+
+        repository.save(wallet).awaitSingle()
+        webhookService.addTransactionsFrmDeadQueue(wallet)
+
+        return wallet
     }
 
     override suspend fun findByAddress(address: String): Wallet {
@@ -44,7 +57,7 @@ class DefaultWalletService(
     }
 
     private suspend fun saveTransaction(wallet: Wallet, block: UnifiedBlock, unifiedTransaction: UnifiedTransaction) {
-        val transaction = Transaction(
+        var transaction = Transaction(
                 unifiedTransaction.hash,
                 unifiedTransaction.from,
                 unifiedTransaction.to,
@@ -54,8 +67,10 @@ class DefaultWalletService(
                 block.hash
         )
 
+        transaction = transactionService.save(transaction)
         wallet.addTransaction(transaction)
         repository.save(wallet).awaitSingle()
-        webhookService.queueWebhook(wallet, transaction)
+
+        webhookService.addTransaction(wallet, transaction)
     }
 }
