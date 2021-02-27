@@ -7,6 +7,9 @@ on:
   release:
     types: [published]
 
+env:
+  IMAGE_TAG: latest
+
 jobs:
 
   tests:
@@ -109,6 +112,10 @@ jobs:
           name: assembles_${{ github.sha }}
           path: build/libs
 
+      - name: Define image tag
+        run:
+          if [[ ${{ github.ref }} == refs/heads/master || ${{ github.ref }} == refs/heads/2.x.x-REACTIVE ]]; then export IMAGE_TAG=latest; else export IMAGE_TAG=${{ github.ref }}#refs/heads/; fi;
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -127,7 +134,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: openplatform/open-state:${{ github.event.release.tag_name }}
+          tags: openplatform/open-state:${{ env.IMAGE_TAG }}
           file: docker/Dockerfile
 
 
@@ -154,10 +161,10 @@ jobs:
           chmod 644 ~/.ssh/known_hosts
           export DOCKER_HOST="ssh://gitlab@${{ secrets.SPRINT_SERVER }}"
           export MONGODB_PASSWORD="${{ secrets.SPRINT_MONGO_PASSWORD }}"
-          export DOCKER_IMAGE_TAG="openplatform/open-state:${{ github.event.release.tag_name }}"
+          export DOCKER_IMAGE_TAG="openplatform/open-state:${{ env.IMAGE_TAG }}"
           docker login -u ${{ secrets.DOCKERHUB_USER_NAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
           docker-compose -f docker-compose-server.yml up -d
-          docker image ls --filter reference=openplatform/open-state:${{ github.event.release.tag_name }} -q | tail -n +4 | xargs --no-run-if-empty docker image rm
+          docker image ls --filter reference=openplatform/open-state:${{ env.IMAGE_TAG }} -q | tail -n +4 | xargs --no-run-if-empty docker image rm
 
 
   deploy-production:
@@ -183,7 +190,7 @@ jobs:
           chmod 644 ~/.ssh/known_hosts
           export DOCKER_HOST="ssh://gitlab@${{ secrets.PROD_SERVER }}"
           export MONGODB_PASSWORD="${{ secrets.PROD_MONGO_PASSWORD }}"
-          export DOCKER_IMAGE_TAG="openplatform/open-state:${{ github.event.release.tag_name }}"
+          export DOCKER_IMAGE_TAG="openplatform/open-state:${{ env.IMAGE_TAG }}"
           docker login -u ${{ secrets.DOCKERHUB_USER_NAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
           docker-compose -f docker-compose-server.yml up -d
-          docker image ls --filter reference=openplatform/open-state:${{ github.event.release.tag_name }} -q | tail -n +4 | xargs --no-run-if-empty docker image rm
+          docker image ls --filter reference=openplatform/open-state:${{ env.IMAGE_TAG }} -q | tail -n +4 | xargs --no-run-if-empty docker image rm
