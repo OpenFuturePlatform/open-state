@@ -38,7 +38,7 @@ class DefaultWalletService(
         }
 
         repository.save(wallet).awaitSingle()
-        webhookService.addTransactionsFrmDeadQueue(wallet)
+        webhookService.addTransactionsFromDeadQueue(wallet)
 
         return wallet
     }

@@ -8,7 +8,7 @@ interface WebhookService {
 
     suspend fun addTransaction(wallet: Wallet, transaction: Transaction)
 
-    suspend fun addTransactionsFrmDeadQueue(wallet: Wallet)
+    suspend fun addTransactionsFromDeadQueue(wallet: Wallet)
 
     suspend fun scheduleNextWebhook(wallet: Wallet)
 

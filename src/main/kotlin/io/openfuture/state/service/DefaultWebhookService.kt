@@ -40,7 +40,7 @@ class DefaultWebhookService(
         }
     }
 
-    override suspend fun addTransactionsFrmDeadQueue(wallet: Wallet) {
+    override suspend fun addTransactionsFromDeadQueue(wallet: Wallet) {
         if (!deadQueueService.hasTransactions(wallet.address)) {
             return
         }

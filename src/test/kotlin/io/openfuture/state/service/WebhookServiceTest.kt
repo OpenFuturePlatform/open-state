@@ -169,7 +169,7 @@ internal class WebhookServiceTest: ServiceTests() {
         val wallet = createDummyWallet()
 
         given(deadQueueService.hasTransactions("address")).willReturn(false)
-        service.addTransactionsFrmDeadQueue(wallet)
+        service.addTransactionsFromDeadQueue(wallet)
 
         verify(deadQueueService, times(1)).hasTransactions("address")
         verify(deadQueueService, never()).getTransactions("address")
@@ -185,7 +185,7 @@ internal class WebhookServiceTest: ServiceTests() {
         given(deadQueueService.getTransactions("address")).willReturn(listOf(transaction1, transaction2))
         given(walletService.score("address")).willReturn(null)
 
-        service.addTransactionsFrmDeadQueue(wallet)
+        service.addTransactionsFromDeadQueue(wallet)
 
         verify(walletService, times(1)).add("address", transaction1)
         verify(transactionService, times(1)).addTransaction("address", transaction2)
@@ -202,7 +202,7 @@ internal class WebhookServiceTest: ServiceTests() {
         given(deadQueueService.getTransactions("address")).willReturn(listOf(transaction1, transaction2))
         given(walletService.score("address")).willReturn(1.0)
 
-        service.addTransactionsFrmDeadQueue(wallet)
+        service.addTransactionsFromDeadQueue(wallet)
 
         verify(walletService, never()).add("address", transaction1)
         verify(transactionService, times(1)).addTransaction("address", transaction1)

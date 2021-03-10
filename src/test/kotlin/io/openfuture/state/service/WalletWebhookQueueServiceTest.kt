@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.given
 import com.nhaarman.mockitokotlin2.mock
 import io.openfuture.state.base.ServiceTests
 import io.openfuture.state.repository.WalletWebhookRedisRepository
+import io.openfuture.state.util.JsonSerializer
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -16,11 +17,12 @@ internal class WalletWebhookQueueServiceTest: ServiceTests() {
 
     private lateinit var service: WalletWebhookQueueService
     private val repository: WalletWebhookRedisRepository = mock()
+    private var jsonSerializer: JsonSerializer = JsonSerializer()
 
 
     @BeforeEach
     fun setUp() {
-        service = DefaultWalletWebhookQueueService(repository)
+        service = DefaultWalletWebhookQueueService(repository, jsonSerializer)
     }
 
     @Test

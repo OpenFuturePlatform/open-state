@@ -29,7 +29,7 @@ class WebhookProcessor(
 
         val walletAddress = walletAddresses
                 .firstOrNull { webhookService.lock(it) } ?: return@launch
-        log.info("Start processing webhook for wallet {}",walletAddress)
+        log.info("Start processing webhook for wallet $walletAddress")
 
         try {
             webhookExecutor.execute(walletAddress)
@@ -37,7 +37,7 @@ class WebhookProcessor(
             log.error("Error processing webhook for wallet {}",walletAddress, e)
         }
 
-        log.info("Webhook processed for wallet {}",walletAddress)
+        log.info("Webhook processed for wallet $walletAddress")
         webhookService.unlock(walletAddress)
     }
 

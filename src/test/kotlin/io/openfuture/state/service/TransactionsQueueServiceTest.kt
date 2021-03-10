@@ -2,11 +2,10 @@ package io.openfuture.state.service
 
 import com.nhaarman.mockitokotlin2.given
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.spy
 import io.openfuture.state.base.ServiceTests
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.TransactionsRedisRepository
-import io.openfuture.state.util.JsonUtil
+import io.openfuture.state.util.JsonSerializer
 import io.openfuture.state.util.createDummyScheduledTransaction
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
@@ -20,11 +19,12 @@ internal class TransactionsQueueServiceTest: ServiceTests() {
 
     private lateinit var service: TransactionsQueueService
     private val repository: TransactionsRedisRepository = mock()
+    private val jsonSerializer: JsonSerializer = JsonSerializer()
 
 
     @BeforeEach
     fun setUp() {
-        service = DefaultTransactionsQueueService(repository)
+        service = DefaultTransactionsQueueService(repository, jsonSerializer)
     }
 
     @Test
@@ -56,7 +56,7 @@ internal class TransactionsQueueServiceTest: ServiceTests() {
     @Test
     fun firstTransactionShouldReturnProperValue() = runBlocking<Unit> {
         val transaction = createDummyScheduledTransaction()
-        val serializedTransaction = JsonUtil.toJson(transaction)
+        val serializedTransaction = jsonSerializer.toJson(transaction)
 
         given(repository.first("address")).willReturn(Mono.just(serializedTransaction))
 
@@ -81,8 +81,8 @@ internal class TransactionsQueueServiceTest: ServiceTests() {
         given(repository.count("address")).willReturn(Mono.just(2))
         given(repository.findAll("address", 0, 2))
                 .willReturn(Flux.just(
-                        JsonUtil.toJson(transaction1),
-                        JsonUtil.toJson(transaction2)
+                        jsonSerializer.toJson(transaction1),
+                        jsonSerializer.toJson(transaction2)
                 ))
 
         val result = service.findAll("address")

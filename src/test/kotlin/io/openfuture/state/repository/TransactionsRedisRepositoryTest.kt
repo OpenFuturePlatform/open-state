@@ -36,7 +36,7 @@ class TransactionsRedisRepositoryTest: RedisRepositoryTests() {
     }
 
     @Test
-    fun firstShouldReturnZero() = runBlocking<Unit> {
+    fun firstShouldReturnNull() = runBlocking<Unit> {
         val result = repository.first("address").awaitFirstOrNull()
         Assertions.assertThat(result).isNull()
     }

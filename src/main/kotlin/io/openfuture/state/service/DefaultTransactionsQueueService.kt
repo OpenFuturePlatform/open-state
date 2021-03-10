@@ -2,20 +2,20 @@ package io.openfuture.state.service
 
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.TransactionsRedisRepository
-import io.openfuture.state.util.JsonUtil
+import io.openfuture.state.util.JsonSerializer
 import io.openfuture.state.webhook.ScheduledTransaction
 import kotlinx.coroutines.reactive.awaitFirstOrDefault
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.stereotype.Service
 
 @Service
 class DefaultTransactionsQueueService(
-        private val repository: TransactionsRedisRepository
+        private val repository: TransactionsRedisRepository,
+        private val jsonSerializer: JsonSerializer
 ): TransactionsQueueService {
 
     override suspend fun addTransaction(walletAddress: String, transaction: ScheduledTransaction) {
-        repository.add(walletAddress, JsonUtil.toJson(transaction))
+        repository.add(walletAddress, jsonSerializer.toJson(transaction))
     }
 
     override suspend fun removeTransactions(walletAddress: String) {
@@ -23,7 +23,7 @@ class DefaultTransactionsQueueService(
     }
 
     override suspend fun setAt(walletAddress: String, transaction: ScheduledTransaction, index: Long) {
-        repository.setAtPosition(walletAddress, JsonUtil.toJson(transaction), index)
+        repository.setAtPosition(walletAddress, jsonSerializer.toJson(transaction), index)
     }
 
     override suspend fun hasTransactions(walletAddress: String): Boolean {
@@ -38,7 +38,7 @@ class DefaultTransactionsQueueService(
                 .awaitFirstOrNull() ?: throw NotFoundException("Transaction not found")
 
         val value = transaction as String
-        return JsonUtil.fromJson(value, ScheduledTransaction::class.java)
+        return jsonSerializer.fromJson(value, ScheduledTransaction::class.java)
     }
 
     override suspend fun findAll(walletAddress: String): List<ScheduledTransaction> {
@@ -47,7 +47,7 @@ class DefaultTransactionsQueueService(
 
         return repository.findAll(walletAddress, 0, count)
                 .map {
-                    JsonUtil.fromJson(it as String, ScheduledTransaction::class.java)
+                    jsonSerializer.fromJson(it as String, ScheduledTransaction::class.java)
                 }
                 .collectList()
                 .awaitFirstOrDefault(emptyList())
