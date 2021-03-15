@@ -10,8 +10,8 @@ class JsonSerializer {
     private val objectMapper: ObjectMapper = ObjectMapper().registerModule(JavaTimeModule())
 
 
-    fun <T> fromJson(ы: String?, valueClass: Class<T>?): T {
-        return objectMapper.readValue(ы, valueClass)
+    fun <T> fromJson(s: String, valueClass: Class<T>?): T {
+        return objectMapper.readValue(s, valueClass)
     }
 
     fun toJson(o: Any): String = objectMapper.writeValueAsString(o)
