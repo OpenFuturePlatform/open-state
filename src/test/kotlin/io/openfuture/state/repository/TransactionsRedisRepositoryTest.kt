@@ -23,94 +23,94 @@ class TransactionsRedisRepositoryTest: RedisRepositoryTests() {
 
     @Test
     fun countShouldReturnZero() = runBlocking<Unit> {
-        val result = repository.count("address").awaitSingle()
+        val result = repository.count("walletKey").awaitSingle()
         Assertions.assertThat(result).isEqualTo(0)
     }
 
     @Test
     fun countShouldReturnProperValue() = runBlocking<Unit> {
-        redisTemplate.opsForList().rightPush("address", "value").awaitSingle()
+        redisTemplate.opsForList().rightPush("walletKey", "value").awaitSingle()
 
-        val result = repository.count("address").awaitSingle()
+        val result = repository.count("walletKey").awaitSingle()
         Assertions.assertThat(result).isEqualTo(1)
     }
 
     @Test
     fun firstShouldReturnNull() = runBlocking<Unit> {
-        val result = repository.first("address").awaitFirstOrNull()
+        val result = repository.first("walletKey").awaitFirstOrNull()
         Assertions.assertThat(result).isNull()
     }
 
     @Test
     fun firstShouldReturnProperValue() = runBlocking<Unit> {
-        redisTemplate.opsForList().rightPush("address", "value").awaitSingle()
+        redisTemplate.opsForList().rightPush("walletKey", "value").awaitSingle()
 
-        val result = repository.first("address").awaitSingle()
+        val result = repository.first("walletKey").awaitSingle()
         Assertions.assertThat(result).isEqualTo("value")
     }
 
     @Test
     fun firstShouldReturnFirstValueInList() = runBlocking<Unit> {
-        redisTemplate.opsForList().rightPush("address", "value1").awaitSingle()
-        redisTemplate.opsForList().rightPush("address", "value2").awaitSingle()
-        redisTemplate.opsForList().rightPush("address", "value3").awaitSingle()
+        redisTemplate.opsForList().rightPush("walletKey", "value1").awaitSingle()
+        redisTemplate.opsForList().rightPush("walletKey", "value2").awaitSingle()
+        redisTemplate.opsForList().rightPush("walletKey", "value3").awaitSingle()
 
-        val result = repository.first("address").awaitSingle()
+        val result = repository.first("walletKey").awaitSingle()
         Assertions.assertThat(result).isEqualTo("value1")
     }
 
     @Test
     fun findAllShouldReturnEmptyList() = runBlocking<Unit> {
-        val result = repository.findAll("address", 0, 5).collectList().awaitSingle()
+        val result = repository.findAll("walletKey", 0, 5).collectList().awaitSingle()
         Assertions.assertThat(result.size).isEqualTo(0)
     }
 
     @Test
     fun findAllShouldReturnProperListOfValues() = runBlocking<Unit> {
-        redisTemplate.opsForList().rightPush("address", "value1").awaitSingle()
-        redisTemplate.opsForList().rightPush("address", "value2").awaitSingle()
-        redisTemplate.opsForList().rightPush("address", "value3").awaitSingle()
+        redisTemplate.opsForList().rightPush("walletKey", "value1").awaitSingle()
+        redisTemplate.opsForList().rightPush("walletKey", "value2").awaitSingle()
+        redisTemplate.opsForList().rightPush("walletKey", "value3").awaitSingle()
 
-        val result = repository.findAll("address", 0, 2).collectList().awaitSingle()
+        val result = repository.findAll("walletKey", 0, 2).collectList().awaitSingle()
         Assertions.assertThat(result).isEqualTo(listOf("value1", "value2", "value3"))
     }
 
     @Test
     fun addShouldAddElement() = runBlocking<Unit> {
-        repository.add("address", "value1")
+        repository.add("walletKey", "value1")
 
-        val result = redisTemplate.opsForList().range("address", 0, 1).collectList().awaitSingle()
+        val result = redisTemplate.opsForList().range("walletKey", 0, 1).collectList().awaitSingle()
         Assertions.assertThat(result).isEqualTo(listOf("value1"))
     }
 
     @Test
     fun addShouldAddElementToEnd() = runBlocking<Unit> {
-        repository.add("address", "value1")
-        repository.add("address", "value2")
+        repository.add("walletKey", "value1")
+        repository.add("walletKey", "value2")
 
-        val result = redisTemplate.opsForList().range("address", 0, 1).collectList().awaitSingle()
+        val result = redisTemplate.opsForList().range("walletKey", 0, 1).collectList().awaitSingle()
         Assertions.assertThat(result).isEqualTo(listOf("value1", "value2"))
     }
 
     @Test
     fun setAtPositionShouldAddElementInProperIndex() = runBlocking<Unit> {
-        redisTemplate.opsForList().rightPush("address", "value1").awaitSingle()
-        redisTemplate.opsForList().rightPush("address", "value2").awaitSingle()
-        redisTemplate.opsForList().rightPush("address", "value3").awaitSingle()
+        redisTemplate.opsForList().rightPush("walletKey", "value1").awaitSingle()
+        redisTemplate.opsForList().rightPush("walletKey", "value2").awaitSingle()
+        redisTemplate.opsForList().rightPush("walletKey", "value3").awaitSingle()
 
-        repository.setAtPosition("address", "value12", 1)
+        repository.setAtPosition("walletKey", "value12", 1)
 
-        val result = redisTemplate.opsForList().range("address", 1, 1).collectList().awaitSingle()
+        val result = redisTemplate.opsForList().range("walletKey", 1, 1).collectList().awaitSingle()
         Assertions.assertThat(result).isEqualTo(listOf("value12"))
     }
 
     @Test
     fun removeShouldRemoveListOfElements() = runBlocking<Unit> {
-        redisTemplate.opsForList().rightPush("address", "value1").awaitSingle()
+        redisTemplate.opsForList().rightPush("walletKey", "value1").awaitSingle()
 
-        repository.remove("address")
+        repository.remove("walletKey")
 
-        val result = redisTemplate.opsForList().size("address").awaitSingle()
+        val result = redisTemplate.opsForList().size("walletKey").awaitSingle()
         Assertions.assertThat(result).isEqualTo(0)
     }
 }

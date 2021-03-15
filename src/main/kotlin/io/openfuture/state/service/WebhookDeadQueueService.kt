@@ -5,11 +5,11 @@ import io.openfuture.state.webhook.ScheduledTransaction
 
 interface WebhookDeadQueueService {
 
-    suspend fun addTransactions(walletAddress: String, transactions: List<ScheduledTransaction>): WebhookDeadQueue
+    suspend fun addTransactions(walletKey: String, transactions: List<ScheduledTransaction>): WebhookDeadQueue
 
-    suspend fun getTransactions(walletAddress: String): List<ScheduledTransaction>
+    suspend fun getTransactions(walletKey: String): List<ScheduledTransaction>
 
-    suspend fun hasTransactions(walletAddress: String): Boolean
+    suspend fun hasTransactions(walletKey: String): Boolean
 
-    suspend fun remove(walletAddress: String)
+    suspend fun remove(walletKey: String)
 }

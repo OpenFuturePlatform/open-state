@@ -4,6 +4,7 @@ import io.openfuture.state.config.WebhookConfig
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WebhookExecution
+import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.service.*
 import io.openfuture.state.webhook.dto.TransactionPayload
 import io.openfuture.state.webhook.dto.WebhookPayload
@@ -19,8 +20,8 @@ class DefaultWebhookExecutor(
         private val webhookConfig: WebhookConfig
 ): WebhookExecutor {
 
-    override suspend fun execute(walletAddress: String) {
-        val wallet = walletService.findByAddress(walletAddress)
+    override suspend fun execute(walletKey: String) {
+        val wallet = findWallet(walletKey)
         val scheduledTransaction = webhookService.firstTransaction(wallet)
         val transaction = transactionService.findByHash(scheduledTransaction.hash)
 
@@ -56,6 +57,7 @@ class DefaultWebhookExecutor(
         val webhookExecution = executionService
                 .findByTransactionHash(transaction.hash) ?:
                         WebhookExecution(
+                                blockchain = wallet.blockchain,
                                 walletAddress = wallet.address,
                                 transactionHash = transaction.hash
                         )
@@ -87,5 +89,17 @@ class DefaultWebhookExecutor(
                 walletAddress = wallet.address,
                 transactionPayload
         )
+    }
+
+    private suspend fun findWallet(walletKey: String): Wallet {
+        val walletIdentity = walletKey.split("-")
+        if (walletIdentity.size < 2) {
+            throw NotFoundException("Wallet not found: $walletKey")
+        }
+
+        val blockchain = walletIdentity[0].trim().trim('[', ']')
+        val address = walletIdentity[1].trim().trim('[', ']')
+
+        return walletService.findByBlockchainAndAddress(blockchain, address)
     }
 }

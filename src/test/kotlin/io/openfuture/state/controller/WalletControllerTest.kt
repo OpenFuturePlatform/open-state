@@ -22,28 +22,6 @@ class WalletControllerTest : ControllerTests() {
     @MockBean
     private lateinit var blockchain: Blockchain
 
-    @Test
-    fun findByAddressShouldReturnWallet() = runBlocking<Unit> {
-        val wallet = createDummyWallet(
-                id = ObjectId("5f480720e5cba939f1918911"),
-                lastUpdate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
-        )
-        given(walletService.findByAddress("this-is-address")).willReturn(wallet)
-
-        webClient.get()
-                .uri("/api/wallets/address/this-is-address")
-                .exchange()
-                .expectStatus().isOk
-                .expectBody()
-                .json("""
-                    {
-                        "id": "5f480720e5cba939f1918911",
-                        "address": "address",
-                        "webhook": "webhook",
-                        "lastUpdateDate": "2020-08-28T01:18:56.825261"
-                    }
-                """.trimIndent())
-    }
 
     @Test
     fun saveShouldSaveAndReturnWallet() = runBlocking<Unit> {

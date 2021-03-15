@@ -28,10 +28,10 @@ internal class WebhookDeadQueueServiceTest: ServiceTests() {
 
     @Test
     fun getTransactionsShouldThrowNotFoundException() {
-        given(repository.findByWalletAddress("address")).willReturn(Mono.empty())
+        given(repository.findByWalletKey("walletKey")).willReturn(Mono.empty())
         assertThrows(NotFoundException::class.java) {
             runBlocking {
-                service.getTransactions("address")
+                service.getTransactions("walletKey")
             }
         }
     }
@@ -40,34 +40,34 @@ internal class WebhookDeadQueueServiceTest: ServiceTests() {
     fun getTransactionsShouldReturnListOfTransactions() = runBlocking<Unit> {
         val deadQueue = createDummyWebhookDeadQueue()
 
-        given(repository.findByWalletAddress("address")).willReturn(Mono.just(deadQueue))
+        given(repository.findByWalletKey("walletKey")).willReturn(Mono.just(deadQueue))
 
-        val result = service.getTransactions("address")
+        val result = service.getTransactions("walletKey")
         Assertions.assertThat(result).isEqualTo(deadQueue.getTransactions())
     }
 
     @Test
     fun addTransactionToNonExistingWalletShouldReturnProperValue() = runBlocking<Unit> {
-        val deadQueue = createDummyWebhookDeadQueue("address", emptyList())
+        val deadQueue = createDummyWebhookDeadQueue("walletKey", emptyList())
         val scheduledTransaction = createDummyScheduledTransaction()
 
-        given(repository.findByWalletAddress("address")).willReturn(Mono.empty())
+        given(repository.findByWalletKey("walletKey")).willReturn(Mono.empty())
         given(repository.save(any())).willReturn(Mono.just(deadQueue))
 
 
-        val result = service.addTransactions("address", listOf(scheduledTransaction))
+        val result = service.addTransactions("walletKey", listOf(scheduledTransaction))
         Assertions.assertThat(result).isEqualTo(deadQueue)
     }
 
     @Test
     fun addTransactionShouldReturnProperValue() = runBlocking<Unit> {
-        val deadQueue = createDummyWebhookDeadQueue("address", emptyList())
+        val deadQueue = createDummyWebhookDeadQueue("walletKey", emptyList())
         val scheduledTransaction = createDummyScheduledTransaction()
 
-        given(repository.findByWalletAddress("address")).willReturn(Mono.just(deadQueue))
+        given(repository.findByWalletKey("walletKey")).willReturn(Mono.just(deadQueue))
         given(repository.save(any())).willReturn(Mono.just(deadQueue))
 
-        val result = service.addTransactions("address", listOf(scheduledTransaction))
+        val result = service.addTransactions("walletKey", listOf(scheduledTransaction))
         Assertions.assertThat(result).isEqualTo(deadQueue)
     }
 }

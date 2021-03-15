@@ -26,4 +26,6 @@ data class Wallet(
     }
 
     fun getTransactions(): List<Transaction> = transactions
+
+    fun walletKey(): String = "[$blockchain] - [$address]"
 }

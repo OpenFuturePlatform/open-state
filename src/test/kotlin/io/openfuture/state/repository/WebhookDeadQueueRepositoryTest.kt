@@ -19,43 +19,43 @@ internal class WebhookDeadQueueRepositoryTest: MongoRepositoryTests() {
     }
 
     @Test
-    fun findByWalletAddressShouldReturnWalletDeadQueue() {
+    fun findByWalletKeyShouldReturnWalletDeadQueue() {
         var deadQueue = createDummyWebhookDeadQueue()
         deadQueue = deadQueueRepository.save(deadQueue).block()!!
 
-        val result = deadQueueRepository.findByWalletAddress("address").block()!!
+        val result = deadQueueRepository.findByWalletKey("walletKey").block()!!
         Assertions.assertThat(result).isEqualTo(deadQueue)
     }
 
     @Test
-    fun findByWalletAddressShouldReturnNull() {
-        val result = deadQueueRepository.findByWalletAddress("address").block()
+    fun findByWalletKeyShouldReturnNull() {
+        val result = deadQueueRepository.findByWalletKey("walletKey").block()
         Assertions.assertThat(result).isNull()
     }
 
     @Test
-    fun existsByWalletAddressShouldReturnFalse() {
-        val result = deadQueueRepository.existsByWalletAddress("address").block()
+    fun existsByWalletKeyShouldReturnFalse() {
+        val result = deadQueueRepository.existsByWalletKey("walletKey").block()
         Assertions.assertThat(result).isEqualTo(false)
     }
 
     @Test
-    fun existsByWalletAddressShouldReturnTrue() {
+    fun existsByWalletKeyShouldReturnTrue() {
         val deadQueue = createDummyWebhookDeadQueue()
         deadQueueRepository.save(deadQueue).block()!!
 
-        val result = deadQueueRepository.existsByWalletAddress("address").block()!!
+        val result = deadQueueRepository.existsByWalletKey("walletKey").block()!!
         Assertions.assertThat(result).isEqualTo(true)
     }
 
     @Test
-    fun deleteByWalletAddressShouldRemoveValue() {
+    fun deleteByWalletKeyShouldRemoveValue() {
         val deadQueue = createDummyWebhookDeadQueue()
         deadQueueRepository.save(deadQueue).block()!!
 
-        deadQueueRepository.deleteByWalletAddress("address").block()
+        deadQueueRepository.deleteByWalletKey("walletKey").block()
 
-        val result = deadQueueRepository.existsByWalletAddress("address").block()!!
+        val result = deadQueueRepository.existsByWalletKey("walletKey").block()!!
         Assertions.assertThat(result).isEqualTo(false)
     }
 }

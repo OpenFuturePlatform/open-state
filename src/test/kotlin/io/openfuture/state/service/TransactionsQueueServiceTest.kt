@@ -29,47 +29,47 @@ internal class TransactionsQueueServiceTest: ServiceTests() {
 
     @Test
     fun hasTransactionsShoulReturnFalse() = runBlocking<Unit> {
-        given(repository.count("address")).willReturn(Mono.just(0))
-        val result = service.hasTransactions("address")
+        given(repository.count("walletKey")).willReturn(Mono.just(0))
+        val result = service.hasTransactions("walletKey")
 
         Assertions.assertThat(result).isFalse()
     }
 
     @Test
     fun hasTransactionsShoulReturnTrue() = runBlocking<Unit> {
-        given(repository.count("address")).willReturn(Mono.just(5))
-        val result = service.hasTransactions("address")
+        given(repository.count("walletKey")).willReturn(Mono.just(5))
+        val result = service.hasTransactions("walletKey")
 
         Assertions.assertThat(result).isTrue()
     }
 
     @Test
-    fun firstTransactionShouldThrowNotFoundException() = runBlocking<Unit> {
-        given(repository.first("address")).willReturn(Mono.empty())
+    fun firstShouldThrowNotFoundException() = runBlocking<Unit> {
+        given(repository.first("walletKey")).willReturn(Mono.empty())
         assertThrows(NotFoundException::class.java) {
             runBlocking {
-                service.firstTransaction("address")
+                service.first("walletKey")
             }
         }
     }
 
     @Test
-    fun firstTransactionShouldReturnProperValue() = runBlocking<Unit> {
+    fun firstShouldReturnProperValue() = runBlocking<Unit> {
         val transaction = createDummyScheduledTransaction()
         val serializedTransaction = jsonSerializer.toJson(transaction)
 
-        given(repository.first("address")).willReturn(Mono.just(serializedTransaction))
+        given(repository.first("walletKey")).willReturn(Mono.just(serializedTransaction))
 
-        val result = service.firstTransaction("address")
+        val result = service.first("walletKey")
         Assertions.assertThat(result).isEqualTo(transaction)
     }
 
     @Test
     fun findAllShouldReturnEmptyList() = runBlocking<Unit> {
-        given(repository.count("address")).willReturn(Mono.just(0))
-        given(repository.findAll("address", 0, 0)).willReturn(Flux.empty())
+        given(repository.count("walletKey")).willReturn(Mono.just(0))
+        given(repository.findAll("walletKey", 0, 0)).willReturn(Flux.empty())
 
-        val result = service.findAll("address")
+        val result = service.findAll("walletKey")
         Assertions.assertThat(result.size).isEqualTo(0)
     }
 
@@ -78,14 +78,14 @@ internal class TransactionsQueueServiceTest: ServiceTests() {
         val transaction1 = createDummyScheduledTransaction()
         val transaction2 = createDummyScheduledTransaction()
 
-        given(repository.count("address")).willReturn(Mono.just(2))
-        given(repository.findAll("address", 0, 2))
+        given(repository.count("walletKey")).willReturn(Mono.just(2))
+        given(repository.findAll("walletKey", 0, 2))
                 .willReturn(Flux.just(
                         jsonSerializer.toJson(transaction1),
                         jsonSerializer.toJson(transaction2)
                 ))
 
-        val result = service.findAll("address")
+        val result = service.findAll("walletKey")
         Assertions.assertThat(result).isEqualTo(listOf(transaction1, transaction2))
     }
 }

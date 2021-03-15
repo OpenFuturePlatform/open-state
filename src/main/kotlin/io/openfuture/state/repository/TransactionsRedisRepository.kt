@@ -13,27 +13,27 @@ class TransactionsRedisRepository(
     private val transactions: ReactiveListOperations<String, Any> = redisTemplate.opsForList()
 
 
-    suspend fun add(key: String, transaction: String) {
-        transactions.rightPushAndAwait(key, transaction)
+    suspend fun add(walletKey: String, transaction: String) {
+        transactions.rightPushAndAwait(walletKey, transaction)
     }
 
-    suspend fun setAtPosition(key: String, transaction: String, index: Long) {
-        transactions.setAndAwait(key, index, transaction)
+    suspend fun setAtPosition(walletKey: String, transaction: String, index: Long) {
+        transactions.setAndAwait(walletKey, index, transaction)
     }
 
-    suspend fun first(key: String) : Mono<Any> {
-        return transactions.leftPop(key)
+    suspend fun first(walletKey: String) : Mono<Any> {
+        return transactions.leftPop(walletKey)
     }
 
-    suspend fun findAll(key: String, start: Long, end: Long): Flux<Any> {
-        return transactions.range(key, start, end)
+    suspend fun findAll(walletKey: String, start: Long, end: Long): Flux<Any> {
+        return transactions.range(walletKey, start, end)
     }
 
-    suspend fun count(key: String) : Mono<Long> {
-        return transactions.size(key)
+    suspend fun count(walletKey: String) : Mono<Long> {
+        return transactions.size(walletKey)
     }
 
-    suspend fun remove(key: String) {
-        transactions.deleteAndAwait(key)
+    suspend fun remove(walletKey: String) {
+        transactions.deleteAndAwait(walletKey)
     }
 }

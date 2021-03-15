@@ -13,12 +13,12 @@ class DefaultWalletWebhookQueueService(
         private val jsonSerializer: JsonSerializer
 ):  WalletWebhookQueueService {
 
-    override suspend fun add(walletAddress: String, transaction: ScheduledTransaction) {
-        repository.add(walletAddress, jsonSerializer.toJson(transaction), LocalDateTime.now())
+    override suspend fun add(walletKey: String, transaction: ScheduledTransaction) {
+        repository.add(walletKey, jsonSerializer.toJson(transaction), LocalDateTime.now())
     }
 
-    override suspend fun remove(walletAddress: String) {
-        repository.remove(walletAddress)
+    override suspend fun remove(walletKey: String) {
+        repository.remove(walletKey)
     }
 
     override suspend fun walletsScheduledTo(timeStamp: LocalDateTime): List<String> {
@@ -29,19 +29,19 @@ class DefaultWalletWebhookQueueService(
                 .awaitSingle()
     }
 
-    override suspend fun score(walletAddress: String): Double? {
-        return repository.walletScore(walletAddress).awaitSingle()
+    override suspend fun score(walletKey: String): Double? {
+        return repository.walletScore(walletKey).awaitSingle()
     }
 
-    override suspend fun incrementScore(walletAddress: String, diff: Double) {
-        repository.incrementScore(walletAddress, diff)
+    override suspend fun incrementScore(walletKey: String, diff: Double) {
+        repository.incrementScore(walletKey, diff)
     }
 
-    override suspend fun lock(walletAddress: String): Boolean {
-        return repository.lock(walletAddress)
+    override suspend fun lock(walletKey: String): Boolean {
+        return repository.lock(walletKey)
     }
 
-    override suspend fun unlock(walletAddress: String) {
-        repository.unlock(walletAddress)
+    override suspend fun unlock(walletKey: String) {
+        repository.unlock(walletKey)
     }
 }

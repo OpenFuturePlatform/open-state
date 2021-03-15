@@ -13,26 +13,26 @@ class DefaultWebhookDeadQueueService(
         private val repository: WebhookDeadQueueRepository
 ): WebhookDeadQueueService {
 
-    override suspend fun addTransactions(walletAddress: String, transactions: List<ScheduledTransaction>): WebhookDeadQueue {
-        val deadQueue = repository.findByWalletAddress(walletAddress)
-                .awaitFirstOrNull() ?: WebhookDeadQueue(walletAddress)
+    override suspend fun addTransactions(walletKey: String, transactions: List<ScheduledTransaction>): WebhookDeadQueue {
+        val deadQueue = repository.findByWalletKey(walletKey)
+                .awaitFirstOrNull() ?: WebhookDeadQueue(walletKey)
 
         deadQueue.addTransactions(transactions)
         return repository.save(deadQueue).awaitSingle()
     }
 
-    override suspend fun getTransactions(walletAddress: String): List<ScheduledTransaction> {
-        val deadQueue = repository.findByWalletAddress(walletAddress)
-                .awaitFirstOrNull() ?: throw NotFoundException("Wallet dead queue not found: $walletAddress")
+    override suspend fun getTransactions(walletKey: String): List<ScheduledTransaction> {
+        val deadQueue = repository.findByWalletKey(walletKey)
+                .awaitFirstOrNull() ?: throw NotFoundException("Wallet dead queue not found: $walletKey")
 
         return deadQueue.getTransactions()
     }
 
-    override suspend fun hasTransactions(walletAddress: String): Boolean {
-        return repository.existsByWalletAddress(walletAddress).awaitSingle()
+    override suspend fun hasTransactions(walletKey: String): Boolean {
+        return repository.existsByWalletKey(walletKey).awaitSingle()
     }
 
-    override suspend fun remove(walletAddress: String) {
-        repository.deleteByWalletAddress(walletAddress).awaitSingle()
+    override suspend fun remove(walletKey: String) {
+        repository.deleteByWalletKey(walletKey).awaitSingle()
     }
 }

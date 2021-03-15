@@ -34,10 +34,11 @@ fun createDummyTransaction(
 ) = Transaction(hash, from, to, amount, date, blockHeight, blockHash)
 
 fun createDummyWebhookExecution(
+        blockchain: String = "blockchain",
         walletAddress: String = "address",
         transactionHash: String = "hash",
         invocations: List<WebhookResult> = emptyList()
-) = WebhookExecution(walletAddress, transactionHash, invocations)
+) = WebhookExecution(blockchain, walletAddress, transactionHash, invocations)
 
 fun createDummyScheduledTransaction(
         hash: String = "hash",
@@ -46,7 +47,7 @@ fun createDummyScheduledTransaction(
 ) = ScheduledTransaction(hash, attempts, timestamp)
 
 fun createDummyWebhookDeadQueue(
-        walletAddress: String = "address",
+        walletAddress: String = "walletKey",
         transactions: List<ScheduledTransaction> = emptyList(),
         timestamp: LocalDateTime = LocalDateTime.of(2020, 10, 10, 10, 10)
 ) = WebhookDeadQueue(walletAddress, transactions, timestamp)

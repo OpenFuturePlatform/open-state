@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 
 @Document
 data class WebhookDeadQueue(
-        val walletAddress: String,
+        @Indexed val walletKey: String,
         @Indexed private val transactions: List<ScheduledTransaction> = emptyList(),
         val timestamp: LocalDateTime = LocalDateTime.now(),
         @MongoId val id: ObjectId = ObjectId()

@@ -25,5 +25,5 @@ data class WebhookProperties(
         /**
          * Lock TTL for wallet's webhook
          */
-        val lockTtl: Duration = Duration.ofSeconds(60)
+        val lockTtl: Duration = Duration.ofSeconds(300)
 )

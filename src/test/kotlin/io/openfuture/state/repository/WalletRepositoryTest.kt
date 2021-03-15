@@ -24,15 +24,6 @@ class WalletRepositoryTest : MongoRepositoryTests() {
     }
 
     @Test
-    fun findByAddressShouldReturnWallet() {
-        var wallet = createDummyWallet()
-        wallet = walletRepository.save(wallet).block()!!
-
-        val result = walletRepository.findByAddress("address").block()!!
-        assertThat(result).isEqualTo(wallet)
-    }
-
-    @Test
     fun findByBlockchainAndAddressShouldReturnWallet() {
         var wallet = createDummyWallet(blockchain = "Ethereum")
         wallet = walletRepository.save(wallet).block()!!

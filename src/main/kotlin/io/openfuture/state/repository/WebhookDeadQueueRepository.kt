@@ -8,9 +8,9 @@ import reactor.core.publisher.Mono
 @Repository
 interface WebhookDeadQueueRepository : ReactiveMongoRepository<WebhookDeadQueue, String> {
 
-    fun findByWalletAddress(walletAddress: String): Mono<WebhookDeadQueue>
+    fun findByWalletKey(walletKey: String): Mono<WebhookDeadQueue>
 
-    fun existsByWalletAddress(walletAddress: String): Mono<Boolean>
+    fun existsByWalletKey(walletKey: String): Mono<Boolean>
 
-    fun deleteByWalletAddress(walletAddress: String): Mono<Void>
+    fun deleteByWalletKey(walletKey: String): Mono<Void>
 }

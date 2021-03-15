@@ -28,13 +28,6 @@ class WalletController(private val walletService: WalletService, private val blo
         return WalletDto(wallet)
     }
 
-    // TODO: Open Developer should also pass his/her token for the authentication.
-    @GetMapping("/address/{address}")
-    suspend fun findByAddress(@PathVariable address: String): WalletDto {
-        val wallet = walletService.findByAddress(address)
-        return WalletDto(wallet)
-    }
-
     private fun findBlockchain(name: String): Blockchain {
         val nameInLowerCase = name.toLowerCase()
         for (blockchain in blockchains) {

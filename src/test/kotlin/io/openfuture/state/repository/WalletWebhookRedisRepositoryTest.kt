@@ -31,34 +31,34 @@ internal class WalletWebhookRedisRepositoryTest : RedisRepositoryTests() {
 
     @Test
     fun walletScoreShouldReturnNull() = runBlocking<Unit> {
-        val result = repository.walletScore("address").block()
+        val result = repository.walletScore("walletKey").block()
         Assertions.assertThat(result).isNull()
     }
 
     @Test
     fun walletScoreShouldReturnProperValue() = runBlocking<Unit> {
-        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "address", 1.0).block()
+        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletKey", 1.0).block()
 
-        val result = repository.walletScore("address").block()
+        val result = repository.walletScore("walletKey").block()
         Assertions.assertThat(result).isEqualTo(1.0)
     }
 
     @Test
     fun incrementScoreShouldChangeScoreValue() = runBlocking<Unit> {
-        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "address", 1.0).block()
+        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletKey", 1.0).block()
 
-        repository.incrementScore("address", 3.0)
-        val result = redisTemplate.opsForZSet().score(WALLETS_QUEUE, "address").block()
+        repository.incrementScore("walletKey", 3.0)
+        val result = redisTemplate.opsForZSet().score(WALLETS_QUEUE, "walletKey").block()
 
         Assertions.assertThat(result).isEqualTo(4.0)
     }
 
     @Test
     fun removeShouldRemoveValueFromSet() = runBlocking<Unit> {
-        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "address", 1.0).block()
+        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletKey", 1.0).block()
 
-        repository.remove("address")
-        val result = redisTemplate.opsForZSet().score(WALLETS_QUEUE, "address").block()
+        repository.remove("walletKey")
+        val result = redisTemplate.opsForZSet().score(WALLETS_QUEUE, "walletKey").block()
 
         Assertions.assertThat(result).isNull()
     }
@@ -67,8 +67,8 @@ internal class WalletWebhookRedisRepositoryTest : RedisRepositoryTests() {
     fun addShouldRAddItemToZSet() = runBlocking<Unit> {
         val timestamp = LocalDateTime.now()
 
-        repository.add("address", "transaction", timestamp)
-        val result = redisTemplate.opsForZSet().score(WALLETS_QUEUE, "address").block()
+        repository.add("walletKey", "transaction", timestamp)
+        val result = redisTemplate.opsForZSet().score(WALLETS_QUEUE, "walletKey").block()
 
         Assertions.assertThat(result).isEqualTo(timestamp.toEpochMilli().toDouble())
     }
@@ -77,8 +77,8 @@ internal class WalletWebhookRedisRepositoryTest : RedisRepositoryTests() {
     fun addShouldRAddItemToList() = runBlocking<Unit> {
         val timestamp = LocalDateTime.now()
 
-        repository.add("address", "transaction", timestamp)
-        val result = redisTemplate.opsForList().range("address", 0, 1).collectList().block()
+        repository.add("walletKey", "transaction", timestamp)
+        val result = redisTemplate.opsForList().range("walletKey", 0, 1).collectList().block()
 
         Assertions.assertThat(result).isEqualTo(listOf("transaction"))
     }
@@ -87,9 +87,9 @@ internal class WalletWebhookRedisRepositoryTest : RedisRepositoryTests() {
     fun walletsScheduledToShouldReturnEmptyList() = runBlocking<Unit> {
         val timestamp = LocalDateTime.now()
 
-        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "address1", timestamp.minusDays(1).toEpochMilli().toDouble()).block()
-        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "address2", timestamp.toEpochMilli().toDouble()).block()
-        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "address3", timestamp.plusDays(1) .toEpochMilli().toDouble()).block()
+        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletKey1", timestamp.minusDays(1).toEpochMilli().toDouble()).block()
+        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletKey2", timestamp.toEpochMilli().toDouble()).block()
+        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletKey3", timestamp.plusDays(1) .toEpochMilli().toDouble()).block()
 
         val result = repository.walletsScheduledTo(timestamp.minusDays(2)).collectList().awaitSingle()
 
@@ -100,49 +100,49 @@ internal class WalletWebhookRedisRepositoryTest : RedisRepositoryTests() {
     fun walletsScheduledToShouldReturnProperValues() = runBlocking<Unit> {
         val timestamp = LocalDateTime.now()
 
-        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "address1", timestamp.minusDays(1).toEpochMilli().toDouble()).block()
-        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "address2", timestamp.toEpochMilli().toDouble()).block()
-        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "address3", timestamp.plusDays(1) .toEpochMilli().toDouble()).block()
+        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletKey1", timestamp.minusDays(1).toEpochMilli().toDouble()).block()
+        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletKey2", timestamp.toEpochMilli().toDouble()).block()
+        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletKey3", timestamp.plusDays(1) .toEpochMilli().toDouble()).block()
 
         val result = repository.walletsScheduledTo(timestamp).collectList().awaitSingle()
-        Assertions.assertThat(result).isEqualTo(listOf("address1", "address2"))
+        Assertions.assertThat(result).isEqualTo(listOf("walletKey1", "walletKey2"))
     }
 
     @Test
     fun walletsScheduledToShouldReturnAllValues() = runBlocking<Unit> {
         val timestamp = LocalDateTime.now()
 
-        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "address1", timestamp.minusDays(1).toEpochMilli().toDouble()).block()
-        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "address2", timestamp.toEpochMilli().toDouble()).block()
-        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "address3", timestamp.plusDays(1).toEpochMilli().toDouble()).block()
+        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletKey1", timestamp.minusDays(1).toEpochMilli().toDouble()).block()
+        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletKey2", timestamp.toEpochMilli().toDouble()).block()
+        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletKey3", timestamp.plusDays(1).toEpochMilli().toDouble()).block()
 
         val result = repository.walletsScheduledTo(timestamp.plusDays(3)).collectList().awaitSingle()
-        Assertions.assertThat(result).isEqualTo(listOf("address1", "address2", "address3"))
+        Assertions.assertThat(result).isEqualTo(listOf("walletKey1", "walletKey2", "walletKey3"))
     }
 
     @Test
     fun lockReturnTrue() = runBlocking {
-        val result = repository.lock("address")
+        val result = repository.lock("walletKey")
         Util.assertTrue(result)
     }
 
     @Test
     fun lockReturnFalse(): Unit = runBlocking {
-        redisTemplate.opsForValue().setAndAwait("LOCK:address", "address", properties.lockTtl)
+        redisTemplate.opsForValue().setAndAwait("LOCK:walletKey", "walletKey", properties.lockTtl)
 
-        val result = repository.lock("address")
+        val result = repository.lock("walletKey")
         Assertions.assertThat(result).isFalse()
     }
 
     @Test
     fun lockShouldExpire(): Unit = runBlocking {
-        repository.lock("address")
-        val exists = redisTemplate.hasKeyAndAwait("LOCK:address")
+        repository.lock("walletKey")
+        val exists = redisTemplate.hasKeyAndAwait("LOCK:walletKey")
         Assertions.assertThat(exists).isTrue
 
         delay(properties.lockTtl.toMillis())
 
-        val existsAfterTtl = redisTemplate.hasKeyAndAwait("lock:address")
+        val existsAfterTtl = redisTemplate.hasKeyAndAwait("lock:walletKey")
         Assertions.assertThat(existsAfterTtl).isFalse()
     }
 

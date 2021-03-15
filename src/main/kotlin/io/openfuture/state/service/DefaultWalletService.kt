@@ -28,6 +28,12 @@ class DefaultWalletService(
         return repository.save(wallet).awaitSingle()
     }
 
+    override suspend fun findByBlockchainAndAddress(blockchain: String, address: String): Wallet {
+        return repository.findByBlockchainAndAddress(blockchain, address)
+                .awaitFirstOrNull() ?:
+                throw NotFoundException("Wallet not found: $blockchain - $address")
+    }
+
     override suspend fun update(walletId: String, webhook: String): Wallet {
         val wallet = repository.findById(walletId).awaitFirstOrNull() ?: throw NotFoundException("Wallet not found")
         if (webhook != wallet.webhook) {
@@ -41,11 +47,6 @@ class DefaultWalletService(
         webhookService.addTransactionsFromDeadQueue(wallet)
 
         return wallet
-    }
-
-    override suspend fun findByAddress(address: String): Wallet {
-        return repository.findByAddress(address).awaitFirstOrNull()
-                ?: throw NotFoundException("Wallet not found")
     }
 
     override suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock) {

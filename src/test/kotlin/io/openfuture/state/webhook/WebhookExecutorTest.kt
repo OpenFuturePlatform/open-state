@@ -38,13 +38,13 @@ internal class WebhookExecutorTest: ServiceTests() {
         val positiveResponse = createDummyPositiveWebhookResponse()
         val execution = createDummyWebhookExecution()
 
-        given(walletService.findByAddress("address")).willReturn(wallet)
+        given(walletService.findByBlockchainAndAddress("EthereumBlockchain", "address")).willReturn(wallet)
         given(transactionService.findByHash("hash")).willReturn(transaction)
         given(webhookService.firstTransaction(wallet)).willReturn(scheduledTransaction)
         given(restClient.doPost(eq("webhook"), any())).willReturn(positiveResponse)
         given(executionService.findByTransactionHash("hash")).willReturn(execution)
 
-        service.execute("address")
+        service.execute("[EthereumBlockchain] - [address]")
 
         verify(executionService, times(1)).findByTransactionHash("hash")
         verify(executionService, times(1)).save(any())
@@ -59,13 +59,13 @@ internal class WebhookExecutorTest: ServiceTests() {
         val scheduledTransaction = createDummyScheduledTransaction()
         val positiveResponse = createDummyPositiveWebhookResponse()
 
-        given(walletService.findByAddress("address")).willReturn(wallet)
+        given(walletService.findByBlockchainAndAddress("EthereumBlockchain", "address")).willReturn(wallet)
         given(transactionService.findByHash("hash")).willReturn(transaction)
         given(webhookService.firstTransaction(wallet)).willReturn(scheduledTransaction)
         given(restClient.doPost(eq("webhook"), any())).willReturn(positiveResponse)
         given(executionService.findByTransactionHash("hash")).willReturn(null)
 
-        service.execute("address")
+        service.execute("[EthereumBlockchain] - [address]")
 
         verify(executionService, times(1)).findByTransactionHash("hash")
         verify(executionService, times(1)).save(any())
@@ -81,13 +81,13 @@ internal class WebhookExecutorTest: ServiceTests() {
         val negativeReasons = createDummyNegativeWebhookResponse()
         val execution = createDummyWebhookExecution()
 
-        given(walletService.findByAddress("address")).willReturn(wallet)
+        given(walletService.findByBlockchainAndAddress("EthereumBlockchain", "address")).willReturn(wallet)
         given(transactionService.findByHash("hash")).willReturn(transaction)
         given(webhookService.firstTransaction(wallet)).willReturn(scheduledTransaction)
         given(restClient.doPost(eq("webhook"), any())).willReturn(negativeReasons)
         given(executionService.findByTransactionHash("hash")).willReturn(execution)
 
-        service.execute("address")
+        service.execute("[EthereumBlockchain] - [address]")
 
         verify(executionService, times(1)).findByTransactionHash("hash")
         verify(executionService, times(1)).save(any())
@@ -102,13 +102,13 @@ internal class WebhookExecutorTest: ServiceTests() {
         val negativeReasons = createDummyNegativeWebhookResponse()
         val execution = createDummyWebhookExecution()
 
-        given(walletService.findByAddress("address")).willReturn(wallet)
+        given(walletService.findByBlockchainAndAddress("EthereumBlockchain", "address")).willReturn(wallet)
         given(transactionService.findByHash("hash")).willReturn(transaction)
         given(webhookService.firstTransaction(wallet)).willReturn(scheduledTransaction)
         given(restClient.doPost(eq("webhook"), any())).willReturn(negativeReasons)
         given(executionService.findByTransactionHash("hash")).willReturn(execution)
 
-        service.execute("address")
+        service.execute("[EthereumBlockchain] - [address]")
 
         verify(executionService, times(1)).findByTransactionHash("hash")
         verify(walletService, times(1)).save(wallet.apply { webhookStatus = WebhookStatus.FAILED })

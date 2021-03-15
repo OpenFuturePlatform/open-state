@@ -14,38 +14,38 @@ class DefaultTransactionsQueueService(
         private val jsonSerializer: JsonSerializer
 ): TransactionsQueueService {
 
-    override suspend fun addTransaction(walletAddress: String, transaction: ScheduledTransaction) {
-        repository.add(walletAddress, jsonSerializer.toJson(transaction))
+    override suspend fun add(walletKey: String, transaction: ScheduledTransaction) {
+        repository.add(walletKey, jsonSerializer.toJson(transaction))
     }
 
-    override suspend fun removeTransactions(walletAddress: String) {
-        repository.remove(walletAddress)
+    override suspend fun remove(walletKey: String) {
+        repository.remove(walletKey)
     }
 
-    override suspend fun setAt(walletAddress: String, transaction: ScheduledTransaction, index: Long) {
-        repository.setAtPosition(walletAddress, jsonSerializer.toJson(transaction), index)
+    override suspend fun setAt(walletKey: String, transaction: ScheduledTransaction, index: Long) {
+        repository.setAtPosition(walletKey, jsonSerializer.toJson(transaction), index)
     }
 
-    override suspend fun hasTransactions(walletAddress: String): Boolean {
-        val count = repository.count(walletAddress)
+    override suspend fun hasTransactions(walletKey: String): Boolean {
+        val count = repository.count(walletKey)
                 .awaitFirstOrDefault(0)
 
         return count > 0
     }
 
-    override suspend fun firstTransaction(walletAddress: String): ScheduledTransaction {
-        val transaction = repository.first(walletAddress)
+    override suspend fun first(walletKey: String): ScheduledTransaction {
+        val transaction = repository.first(walletKey)
                 .awaitFirstOrNull() ?: throw NotFoundException("Transaction not found")
 
         val value = transaction as String
         return jsonSerializer.fromJson(value, ScheduledTransaction::class.java)
     }
 
-    override suspend fun findAll(walletAddress: String): List<ScheduledTransaction> {
-        val count = repository.count(walletAddress)
+    override suspend fun findAll(walletKey: String): List<ScheduledTransaction> {
+        val count = repository.count(walletKey)
                 .awaitFirstOrDefault(0)
 
-        return repository.findAll(walletAddress, 0, count)
+        return repository.findAll(walletKey, 0, count)
                 .map {
                     jsonSerializer.fromJson(it as String, ScheduledTransaction::class.java)
                 }

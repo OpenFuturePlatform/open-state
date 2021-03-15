@@ -19,12 +19,12 @@ class DefaultWebhookService(
         private val transactionService: TransactionsQueueService,
         private val deadQueueService: WebhookDeadQueueService,
         private val webhookConfig: WebhookConfig
-) : WebhookService {
+): WebhookService {
 
     override suspend fun addTransaction(wallet: Wallet, transaction: Transaction) {
         if (wallet.webhookStatus == WebhookStatus.FAILED) {
             deadQueueService.addTransactions(
-                    wallet.address,
+                    wallet.walletKey(),
                     listOf(ScheduledTransaction(transaction.hash))
             )
 
@@ -32,31 +32,31 @@ class DefaultWebhookService(
         }
 
         val scheduledTransaction = ScheduledTransaction(transaction.hash)
-        val score = walletService.score(wallet.address)
+        val score = walletService.score(wallet.walletKey())
         if (score == null) {
-            walletService.add(wallet.address, scheduledTransaction)
+            walletService.add(wallet.walletKey(), scheduledTransaction)
         } else {
-            transactionService.addTransaction(wallet.address, scheduledTransaction)
+            transactionService.add(wallet.walletKey(), scheduledTransaction)
         }
     }
 
     override suspend fun addTransactionsFromDeadQueue(wallet: Wallet) {
-        if (!deadQueueService.hasTransactions(wallet.address)) {
+        if (!deadQueueService.hasTransactions(wallet.walletKey())) {
             return
         }
 
-        val deadTransactions = deadQueueService.getTransactions(wallet.address)
-        val score = walletService.score(wallet.address)
+        val deadTransactions = deadQueueService.getTransactions(wallet.walletKey())
+        val score = walletService.score(wallet.walletKey())
         if (score == null) {
-            walletService.add(wallet.address, deadTransactions[0])
+            walletService.add(wallet.walletKey(), deadTransactions[0])
         }
 
         val skip = if (score == null) 1L else 0L
         for (transaction in deadTransactions.stream().skip(skip).toList()) {
-            transactionService.addTransaction(wallet.address, transaction)
+            transactionService.add(wallet.walletKey(), transaction)
         }
 
-        deadQueueService.remove(wallet.address)
+        deadQueueService.remove(wallet.walletKey())
     }
 
     override suspend fun scheduleNextWebhook(wallet: Wallet) {
@@ -64,43 +64,43 @@ class DefaultWebhookService(
             return
         }
 
-        if (transactionService.hasTransactions(wallet.address)) {
-            val score = walletService.score(wallet.address)
+        if (transactionService.hasTransactions(wallet.walletKey())) {
+            val score = walletService.score(wallet.walletKey())
                     ?: throw NotFoundException("Wallet not found")
 
             val nextTransaction = firstTransaction(wallet)
             val scoreDiff = nextTransaction.timestamp.toEpochMilli().toDouble() - score
 
-            walletService.incrementScore(wallet.address, scoreDiff)
+            walletService.incrementScore(wallet.walletKey(), scoreDiff)
             transactionService.setAt(
-                    wallet.address,
+                    wallet.walletKey(),
                     nextTransaction,
                     0
             )
         }
         else {
-            cancelSchedule(wallet.address)
+            cancelSchedule(wallet.walletKey())
         }
     }
 
     override suspend fun scheduleFailedWebhook(wallet: Wallet, transaction: ScheduledTransaction) {
         if (transaction.attempts >= webhookConfig.maxAttempts()) {
-            val transactions = transactionService.findAll(wallet.address)
+            val transactions = transactionService.findAll(wallet.walletKey())
 
             val deadTransactions = mutableListOf(transaction)
             deadTransactions.addAll(transactions)
 
-            deadQueueService.addTransactions(wallet.address, deadTransactions)
+            deadQueueService.addTransactions(wallet.walletKey(), deadTransactions)
 
-            cancelSchedule(wallet.address)
+            cancelSchedule(wallet.walletKey())
             return
         }
 
         walletService.incrementScore(
-                wallet.address,
+                wallet.walletKey(),
                 buildInvocationDelay(transaction.attempts)
         )
-        transactionService.setAt(wallet.address, transaction.apply { attempts++ }, 0)
+        transactionService.setAt(wallet.walletKey(), transaction.apply { attempts++ }, 0)
     }
 
     override suspend fun scheduledWallets(): List<String> {
@@ -108,20 +108,20 @@ class DefaultWebhookService(
     }
 
     override suspend fun firstTransaction(wallet: Wallet): ScheduledTransaction {
-        return transactionService.firstTransaction(wallet.address)
+        return transactionService.first(wallet.walletKey())
     }
 
-    override suspend fun lock(walletAddress: String): Boolean {
-        return walletService.lock(walletAddress)
+    override suspend fun lock(walletKey: String): Boolean {
+        return walletService.lock(walletKey)
     }
 
-    override suspend fun unlock(walletAddress: String) {
-        walletService.unlock(walletAddress)
+    override suspend fun unlock(walletKey: String) {
+        walletService.unlock(walletKey)
     }
 
-    private suspend fun cancelSchedule(walletAddress: String) {
-        walletService.remove(walletAddress)
-        transactionService.removeTransactions(walletAddress)
+    private suspend fun cancelSchedule(walletKey: String) {
+        walletService.remove(walletKey)
+        transactionService.remove(walletKey)
     }
 
     private fun buildInvocationDelay(attempt: Int): Double {

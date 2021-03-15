@@ -21,16 +21,16 @@ class WalletWebhookRedisRepository(
     private val locks: ReactiveValueOperations<String, Any> = redisTemplate.opsForValue()
 
 
-    suspend fun add(walletAddress: String, transaction: String, timestamp: LocalDateTime) {
+    suspend fun add(walletKey: String, transaction: String, timestamp: LocalDateTime) {
         val result = redisTemplate.execute { connection ->
             val walletAdd = connection.zSetCommands().zAdd(
                     redisTemplate.serialize(WALLETS_QUEUE),
                     timestamp.toEpochMilli().toDouble(),
-                    redisTemplate.serialize(walletAddress)
+                    redisTemplate.serialize(walletKey)
             )
 
             val transactionAdd = connection.listCommands().rPush(
-                    redisTemplate.serialize(walletAddress),
+                    redisTemplate.serialize(walletKey),
                     listOf(redisTemplate.serialize(transaction))
             )
 
@@ -40,32 +40,32 @@ class WalletWebhookRedisRepository(
         result.awaitLast()
     }
 
-    suspend fun walletScore(walletAddress: String): Mono<Double> {
-        return wallets.score(WALLETS_QUEUE, walletAddress)
+    suspend fun walletScore(walletKey: String): Mono<Double> {
+        return wallets.score(WALLETS_QUEUE, walletKey)
     }
 
-    suspend fun incrementScore(walletAddress: String, scoreDiff: Double) {
+    suspend fun incrementScore(walletKey: String, scoreDiff: Double) {
         wallets.incrementScoreAndAwait(
                 WALLETS_QUEUE,
-                walletAddress,
+                walletKey,
                 scoreDiff
         )
     }
 
-    suspend fun remove(walletAddress: String) {
-       wallets.removeAndAwait(WALLETS_QUEUE, walletAddress)
+    suspend fun remove(walletKey: String) {
+       wallets.removeAndAwait(WALLETS_QUEUE, walletKey)
     }
 
-    suspend fun lock(walletAddress: String): Boolean {
+    suspend fun lock(walletKey: String): Boolean {
         return locks.setIfAbsentAndAwait(
-                "LOCK:${walletAddress}",
-                walletAddress,
+                "LOCK:${walletKey}",
+                walletKey,
                 webhookProperties.lockTtl
         )
     }
 
-    suspend fun unlock(walletAddress: String) {
-        locks.deleteAndAwait("LOCK:${walletAddress}")
+    suspend fun unlock(walletKey: String) {
+        locks.deleteAndAwait("LOCK:${walletKey}")
     }
 
     suspend fun walletsScheduledTo(toDate: LocalDateTime): Flux1<String> {

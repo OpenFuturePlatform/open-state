@@ -45,22 +45,22 @@ class WalletServiceTest : ServiceTests() {
     }
 
     @Test
-    fun findByAddressShouldThrowNotFoundException() {
-        given(walletRepository.findByAddress("address")).willReturn(Mono.empty())
+    fun findByBlockchainAndAddressShouldThrowNotFoundException() {
+        given(walletRepository.findByBlockchainAndAddress("blockchain", "address")).willReturn(Mono.empty())
         Assertions.assertThrows(NotFoundException::class.java) {
             runBlocking {
-                walletService.findByAddress("address")
+                walletService.findByBlockchainAndAddress("blockchain", "address")
             }
         }
     }
 
     @Test
-    fun findByAddressShouldReturnWalletDto() = runBlocking<Unit> {
+    fun findByBlockchainAndAddressShouldReturnWalletDto() = runBlocking<Unit> {
         val wallet = createDummyWallet()
 
-        given(walletRepository.findByAddress("address")).willReturn(Mono.just(wallet))
+        given(walletRepository.findByBlockchainAndAddress("EthereumBlockchain", "address")).willReturn(Mono.just(wallet))
 
-        val result = walletService.findByAddress("address")
+        val result = walletService.findByBlockchainAndAddress("EthereumBlockchain", "address")
 
         assertThat(result).isEqualTo(wallet)
     }

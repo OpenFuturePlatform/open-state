@@ -37,9 +37,9 @@ internal class WebhookServiceTest: ServiceTests() {
 
         service.addTransaction(wallet, transaction)
 
-        verify(deadQueueService, times(1),).addTransactions(eq("address"), any())
-        verify(walletService, never(),).score("address")
-        verify(transactionService, never(),).addTransaction(eq("address"), any())
+        verify(deadQueueService, times(1),).addTransactions(eq("[chain] - [address]"), any())
+        verify(walletService, never(),).score("[chain] - [address]")
+        verify(transactionService, never(),).add(eq("[chain] - [address]"), any())
     }
 
     @Test
@@ -47,11 +47,11 @@ internal class WebhookServiceTest: ServiceTests() {
         val transaction = createDummyTransaction("hash")
         val wallet = createDummyWallet("chain", "address")
 
-        given(walletService.score("address")).willReturn(null)
+        given(walletService.score("[chain] - [address]")).willReturn(null)
         service.addTransaction(wallet, transaction)
 
-        verify(walletService, times(1),).score("address")
-        verify(walletService, times(1),).add(eq("address"), any())
+        verify(walletService, times(1),).score("[chain] - [address]")
+        verify(walletService, times(1),).add(eq("[chain] - [address]"), any())
     }
 
     @Test
@@ -59,12 +59,12 @@ internal class WebhookServiceTest: ServiceTests() {
         val transaction = createDummyTransaction("hash")
         val wallet = createDummyWallet("chain", "address")
 
-        given(walletService.score("address")).willReturn(12.0)
+        given(walletService.score("[chain] - [address]")).willReturn(12.0)
         service.addTransaction(wallet, transaction)
 
-        verify(walletService, times(1),).score("address")
-        verify(walletService, never(),).add(eq("address"), any())
-        verify(transactionService, times(1),).addTransaction(eq("address"), any())
+        verify(walletService, times(1),).score("[chain] - [address]")
+        verify(walletService, never(),).add(eq("[chain] - [address]"), any())
+        verify(transactionService, times(1),).add(eq("[chain] - [address]"), any())
     }
 
     @Test
@@ -80,13 +80,13 @@ internal class WebhookServiceTest: ServiceTests() {
     fun scheduleNextWebhookShouldCancelWalletSchedule() = runBlocking<Unit> {
         val wallet = createDummyWallet()
 
-        given(transactionService.hasTransactions("address")).willReturn(false)
+        given(transactionService.hasTransactions("[EthereumBlockchain] - [address]")).willReturn(false)
         service.scheduleNextWebhook(wallet)
 
-        verify(transactionService, times(1)).hasTransactions("address")
-        verify(walletService, never()).score("address")
-        verify(walletService, times(1)).remove("address")
-        verify(transactionService, times(1)).removeTransactions("address")
+        verify(transactionService, times(1)).hasTransactions("[EthereumBlockchain] - [address]")
+        verify(walletService, never()).score("[EthereumBlockchain] - [address]")
+        verify(walletService, times(1)).remove("[EthereumBlockchain] - [address]")
+        verify(transactionService, times(1)).remove("[EthereumBlockchain] - [address]")
     }
 
     @Test
@@ -94,17 +94,17 @@ internal class WebhookServiceTest: ServiceTests() {
         val wallet = createDummyWallet()
         val transaction = createDummyScheduledTransaction()
 
-        given(transactionService.hasTransactions("address")).willReturn(true)
-        given(walletService.score("address")).willReturn(10000.0)
-        given(transactionService.firstTransaction("address")).willReturn(transaction)
+        given(transactionService.hasTransactions("[EthereumBlockchain] - [address]")).willReturn(true)
+        given(walletService.score("[EthereumBlockchain] - [address]")).willReturn(10000.0)
+        given(transactionService.first("[EthereumBlockchain] - [address]")).willReturn(transaction)
 
         service.scheduleNextWebhook(wallet)
 
-        verify(transactionService, times(1)).hasTransactions("address")
-       verify(walletService, times(1)).score("address")
+        verify(transactionService, times(1)).hasTransactions("[EthereumBlockchain] - [address]")
+       verify(walletService, times(1)).score("[EthereumBlockchain] - [address]")
         verify(walletService, times(1))
-                .incrementScore("address", transaction.timestamp.toEpochMilli().toDouble() - 10000.0)
-        verify(transactionService, times(1)).setAt("address", transaction, 0)
+                .incrementScore("[EthereumBlockchain] - [address]", transaction.timestamp.toEpochMilli().toDouble() - 10000.0)
+        verify(transactionService, times(1)).setAt("[EthereumBlockchain] - [address]", transaction, 0)
     }
 
     @Test
@@ -112,8 +112,8 @@ internal class WebhookServiceTest: ServiceTests() {
         val wallet = createDummyWallet()
         val transaction = createDummyScheduledTransaction()
 
-        given(transactionService.hasTransactions("address")).willReturn(true)
-        given(walletService.score("address")).willReturn(null)
+        given(transactionService.hasTransactions("[EthereumBlockchain] - [address]")).willReturn(true)
+        given(walletService.score("[EthereumBlockchain] - [address]")).willReturn(null)
 
         org.junit.jupiter.api.Assertions.assertThrows(NotFoundException::class.java) {
             runBlocking {
@@ -131,12 +131,12 @@ internal class WebhookServiceTest: ServiceTests() {
 
         service.scheduleFailedWebhook(wallet, transaction)
 
-        verify(walletService, times(1)).incrementScore("address", 3000.0)
-        verify(transactionService, times(1)).setAt("address", result, 0)
+        verify(walletService, times(1)).incrementScore("[EthereumBlockchain] - [address]", 3000.0)
+        verify(transactionService, times(1)).setAt("[EthereumBlockchain] - [address]", result, 0)
     }
 
     @Test
-    fun scheduleFailedWebhookShouldReScheduleWalletUsingDaylyDelay() = runBlocking<Unit> {
+    fun scheduleFailedWebhookShouldReScheduleWalletUsingDailyDelay() = runBlocking<Unit> {
         val wallet = createDummyWallet()
         val timestamp = LocalDateTime.now()
         val transaction = createDummyScheduledTransaction("hash", 12, timestamp)
@@ -144,8 +144,8 @@ internal class WebhookServiceTest: ServiceTests() {
 
         service.scheduleFailedWebhook(wallet, transaction)
 
-        verify(walletService, times(1)).incrementScore("address", Duration.ofDays(1).toMillis().toDouble())
-        verify(transactionService, times(1)).setAt("address", result, 0)
+        verify(walletService, times(1)).incrementScore("[EthereumBlockchain] - [address]", Duration.ofDays(1).toMillis().toDouble())
+        verify(transactionService, times(1)).setAt("[EthereumBlockchain] - [address]", result, 0)
     }
 
     @Test
@@ -155,24 +155,24 @@ internal class WebhookServiceTest: ServiceTests() {
         val transaction1 = createDummyScheduledTransaction()
         val transaction2 = createDummyScheduledTransaction()
 
-        given(transactionService.findAll("address")).willReturn(listOf(transaction1, transaction2))
+        given(transactionService.findAll("[EthereumBlockchain] - [address]")).willReturn(listOf(transaction1, transaction2))
         service.scheduleFailedWebhook(wallet, transaction)
 
-        verify(transactionService, times(1)).findAll("address")
-        verify(deadQueueService, times(1)).addTransactions("address", listOf(transaction, transaction1, transaction2))
-        verify(walletService, times(1)).remove("address")
-        verify(transactionService, times(1)).removeTransactions("address")
+        verify(transactionService, times(1)).findAll("[EthereumBlockchain] - [address]")
+        verify(deadQueueService, times(1)).addTransactions("[EthereumBlockchain] - [address]", listOf(transaction, transaction1, transaction2))
+        verify(walletService, times(1)).remove("[EthereumBlockchain] - [address]")
+        verify(transactionService, times(1)).remove("[EthereumBlockchain] - [address]")
     }
 
     @Test
     fun addTransactionsFrmDeadQueueShouldReturnNoTransactions() = runBlocking<Unit> {
         val wallet = createDummyWallet()
 
-        given(deadQueueService.hasTransactions("address")).willReturn(false)
+        given(deadQueueService.hasTransactions("[EthereumBlockchain] - [address]")).willReturn(false)
         service.addTransactionsFromDeadQueue(wallet)
 
-        verify(deadQueueService, times(1)).hasTransactions("address")
-        verify(deadQueueService, never()).getTransactions("address")
+        verify(deadQueueService, times(1)).hasTransactions("[EthereumBlockchain] - [address]")
+        verify(deadQueueService, never()).getTransactions("[EthereumBlockchain] - [address]")
     }
 
     @Test
@@ -181,15 +181,15 @@ internal class WebhookServiceTest: ServiceTests() {
         val transaction1 = createDummyScheduledTransaction()
         val transaction2 = createDummyScheduledTransaction()
 
-        given(deadQueueService.hasTransactions("address")).willReturn(true)
-        given(deadQueueService.getTransactions("address")).willReturn(listOf(transaction1, transaction2))
-        given(walletService.score("address")).willReturn(null)
+        given(deadQueueService.hasTransactions("[EthereumBlockchain] - [address]")).willReturn(true)
+        given(deadQueueService.getTransactions("[EthereumBlockchain] - [address]")).willReturn(listOf(transaction1, transaction2))
+        given(walletService.score("[EthereumBlockchain] - [address]")).willReturn(null)
 
         service.addTransactionsFromDeadQueue(wallet)
 
-        verify(walletService, times(1)).add("address", transaction1)
-        verify(transactionService, times(1)).addTransaction("address", transaction2)
-        verify(deadQueueService, times(1)).remove("address")
+        verify(walletService, times(1)).add("[EthereumBlockchain] - [address]", transaction1)
+        verify(transactionService, times(1)).add("[EthereumBlockchain] - [address]", transaction2)
+        verify(deadQueueService, times(1)).remove("[EthereumBlockchain] - [address]")
     }
 
     @Test
@@ -198,15 +198,15 @@ internal class WebhookServiceTest: ServiceTests() {
         val transaction1 = createDummyScheduledTransaction("hash1")
         val transaction2 = createDummyScheduledTransaction("hash2")
 
-        given(deadQueueService.hasTransactions("address")).willReturn(true)
-        given(deadQueueService.getTransactions("address")).willReturn(listOf(transaction1, transaction2))
-        given(walletService.score("address")).willReturn(1.0)
+        given(deadQueueService.hasTransactions("[EthereumBlockchain] - [address]")).willReturn(true)
+        given(deadQueueService.getTransactions("[EthereumBlockchain] - [address]")).willReturn(listOf(transaction1, transaction2))
+        given(walletService.score("[EthereumBlockchain] - [address]")).willReturn(1.0)
 
         service.addTransactionsFromDeadQueue(wallet)
 
-        verify(walletService, never()).add("address", transaction1)
-        verify(transactionService, times(1)).addTransaction("address", transaction1)
-        verify(transactionService, times(1)).addTransaction("address", transaction2)
-        verify(deadQueueService, times(1)).remove("address")
+        verify(walletService, never()).add("[EthereumBlockchain] - [address]", transaction1)
+        verify(transactionService, times(1)).add("[EthereumBlockchain] - [address]", transaction1)
+        verify(transactionService, times(1)).add("[EthereumBlockchain] - [address]", transaction2)
+        verify(deadQueueService, times(1)).remove("[EthereumBlockchain] - [address]")
     }
 }
