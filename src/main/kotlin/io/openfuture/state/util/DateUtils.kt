@@ -13,3 +13,8 @@ fun Long.toLocalDateTime(): LocalDateTime {
 fun LocalDateTime.toEpochMilli(): Long {
     return this.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 }
+
+fun Long.toLocalDateTimeInSeconds(): LocalDateTime {
+    return LocalDateTime.ofInstant(Instant.ofEpochSecond(this),
+            TimeZone.getDefault().toZoneId())
+}

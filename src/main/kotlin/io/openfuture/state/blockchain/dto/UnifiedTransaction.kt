@@ -4,7 +4,7 @@ import java.math.BigDecimal
 
 data class UnifiedTransaction(
         val hash: String,
-        val from: String,
-        val to: String,
+        val from: Set<String>,
+        val to: Set<String>,
         val amount: BigDecimal
 )
