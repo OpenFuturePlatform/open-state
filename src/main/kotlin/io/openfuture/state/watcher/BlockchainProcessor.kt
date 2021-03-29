@@ -36,7 +36,7 @@ class BlockchainProcessor(
 
         do {
             val last = processingRepository.getLast(blockchain)
-            val current = processingRepository.getCurrent(blockchain)
+            val current = processingRepository.getCurrentOrElseLast(blockchain)
             log.info("Processing {} at {} from {}", blockchain, current, last)
 
             val block = blockchain.getBlock(current)

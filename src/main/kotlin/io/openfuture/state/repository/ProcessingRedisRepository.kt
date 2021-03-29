@@ -15,8 +15,13 @@ class ProcessingRedisRepository(
     private val setOperations: ReactiveSetOperations<String, Any> = redisTemplate.opsForSet()
     private val valueOperations: ReactiveValueOperations<String, Any> = redisTemplate.opsForValue()
 
-    suspend fun getCurrent(blockchain: Blockchain): Int {
-        return valueOperations.getAndAwait("$blockchain:$CURRENT") as Int? ?: 0
+    suspend fun getCurrentOrElseLast(blockchain: Blockchain): Int {
+        var current = valueOperations.getAndAwait("$blockchain:$CURRENT") as Int?
+        if (null == current) {
+            current = getLast(blockchain)
+            valueOperations.setAndAwait("$blockchain:$CURRENT", current)
+        }
+        return current
     }
 
     suspend fun getLast(blockchain: Blockchain): Int {
