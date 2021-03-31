@@ -6,9 +6,9 @@ import io.openfuture.state.domain.Wallet
 
 interface WalletService {
 
-    suspend fun save(blockchain: Blockchain, address: String, webhook: String): Wallet
+    suspend fun findByAddress(blockchain: String, address: String): Wallet
 
-    suspend fun findByAddress(address: String): Wallet
+    suspend fun save(blockchain: Blockchain, address: String, webhook: String): Wallet
 
     suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock)
 }

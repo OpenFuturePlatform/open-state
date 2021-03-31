@@ -6,7 +6,6 @@ import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.service.WalletService
 import io.openfuture.state.util.createDummyWallet
 import kotlinx.coroutines.runBlocking
-import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -25,13 +24,13 @@ class WalletControllerTest : ControllerTests() {
     @Test
     fun findByAddressShouldReturnWallet() = runBlocking<Unit> {
         val wallet = createDummyWallet(
-                id = ObjectId("5f480720e5cba939f1918911"),
+                id = "5f480720e5cba939f1918911",
                 lastUpdate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
         )
-        given(walletService.findByAddress("this-is-address")).willReturn(wallet)
+        given(walletService.findByAddress("this-is-chain", "this-is-address")).willReturn(wallet)
 
         webClient.get()
-                .uri("/api/wallets/address/this-is-address")
+                .uri("/api/wallets/blockchain/this-is-chain/address/this-is-address")
                 .exchange()
                 .expectStatus().isOk
                 .expectBody()
@@ -48,11 +47,11 @@ class WalletControllerTest : ControllerTests() {
     @Test
     fun saveShouldSaveAndReturnWallet() = runBlocking<Unit> {
         val wallet = createDummyWallet(
-                id = ObjectId("5f480720e5cba939f1918911"),
+                id = "5f480720e5cba939f1918911",
                 lastUpdate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
         )
 
-        given(blockchain.getName()).willReturn("EthereumBlockchain")
+        given(blockchain.getName()).willReturn("Ethereum")
         given(walletService.save(blockchain, "address", "webhook")).willReturn(wallet)
 
         webClient.post()

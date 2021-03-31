@@ -1,6 +1,7 @@
 package io.openfuture.state.repository
 
 import io.openfuture.state.base.MongoRepositoryTests
+import io.openfuture.state.domain.WalletAddress
 import io.openfuture.state.util.createDummyWallet
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -22,22 +23,7 @@ class WalletRepositoryTest : MongoRepositoryTests() {
         var wallet = createDummyWallet()
         wallet = walletRepository.save(wallet).block()!!
 
-        val result = walletRepository.findByAddress("address").block()!!
+        val result = walletRepository.findByAddress(WalletAddress("Ethereum", "address")).block()!!
         assertThat(result).isEqualTo(wallet)
-    }
-
-    @Test
-    fun findByBlockchainAndAddressShouldReturnWallet() {
-        var wallet = createDummyWallet(blockchain = "Ethereum")
-        wallet = walletRepository.save(wallet).block()!!
-
-        val result = walletRepository.findByBlockchainAndAddress("Ethereum", "address").block()!!
-        assertThat(result).isEqualTo(wallet)
-    }
-
-    @Test
-    fun findByBlockchainAndAddressShouldReturnNull() {
-        val result = walletRepository.findByBlockchainAndAddress("Ethereum", "address").block()
-        assertThat(result).isNull()
     }
 }

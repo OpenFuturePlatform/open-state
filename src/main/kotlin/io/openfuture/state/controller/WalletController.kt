@@ -22,9 +22,9 @@ class WalletController(private val walletService: WalletService, private val blo
     }
 
     // TODO: Open Developer should also pass his/her token for the authentication.
-    @GetMapping("/address/{address}")
-    suspend fun findByAddress(@PathVariable address: String): WalletDto {
-        val wallet = walletService.findByAddress(address)
+    @GetMapping("/blockchain/{blockchain}/address/{address}")
+    suspend fun findByAddress(@PathVariable blockchain: String, @PathVariable address: String): WalletDto {
+        val wallet = walletService.findByAddress(blockchain, address)
         return WalletDto(wallet)
     }
 
@@ -45,10 +45,10 @@ class WalletController(private val walletService: WalletService, private val blo
             val lastUpdateDate: LocalDateTime
     ) {
         constructor(wallet: Wallet) : this(
-                wallet.id.toHexString(),
-                wallet.address,
+                wallet.id,
+                wallet.address.address,
                 wallet.webhook,
-                wallet.blockchain,
+                wallet.address.blockchain,
                 wallet.lastUpdate
         )
     }

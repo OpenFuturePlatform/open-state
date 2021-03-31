@@ -5,28 +5,37 @@ import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
+import io.openfuture.state.domain.WalletAddress
 import io.openfuture.state.exception.NotFoundException
+import io.openfuture.state.repository.TransactionRepository
 import io.openfuture.state.repository.WalletRepository
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.stereotype.Service
 
 @Service
-class DefaultWalletService(private val repository: WalletRepository) : WalletService {
+class DefaultWalletService(
+        private val walletRepository: WalletRepository,
+        private val transactionRepository: TransactionRepository
+): WalletService {
 
-    override suspend fun save(blockchain: Blockchain, address: String, webhook: String): Wallet {
-        val wallet = Wallet(blockchain.getName(), address, webhook)
-        return repository.save(wallet).awaitSingle()
+    override suspend fun findByAddress(blockchain: String, address: String): Wallet {
+        val walletAddress = WalletAddress(blockchain, address)
+        return walletRepository.findByAddress(walletAddress).awaitFirstOrNull()
+                ?: throw NotFoundException("Wallet not found: $blockchain - $address")
     }
 
-    override suspend fun findByAddress(address: String): Wallet {
-        return repository.findByAddress(address).awaitFirstOrNull()
-                ?: throw NotFoundException("Wallet not found")
+    override suspend fun save(blockchain: Blockchain, address: String, webhook: String): Wallet {
+        val walletAddress = WalletAddress(blockchain.getName(), address)
+        val wallet = Wallet(walletAddress, webhook)
+
+        return walletRepository.save(wallet).awaitSingle()
     }
 
     override suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock) {
         for (transaction in block.transactions) {
-            val wallet = repository.findByBlockchainAndAddress(blockchain.getName(), transaction.to).awaitFirstOrNull()
+            val address = WalletAddress(blockchain.getName(), transaction.to)
+            val wallet = walletRepository.findByAddress(address).awaitFirstOrNull()
 
             wallet?.let { saveTransaction(it, block, transaction) }
         }
@@ -34,6 +43,7 @@ class DefaultWalletService(private val repository: WalletRepository) : WalletSer
 
     private suspend fun saveTransaction(wallet: Wallet, block: UnifiedBlock, unifiedTransaction: UnifiedTransaction) {
         val transaction = Transaction(
+                wallet.address,
                 unifiedTransaction.hash,
                 unifiedTransaction.from,
                 unifiedTransaction.to,
@@ -42,7 +52,7 @@ class DefaultWalletService(private val repository: WalletRepository) : WalletSer
                 block.number,
                 block.hash
         )
-        wallet.addTransaction(transaction)
-        repository.save(wallet).awaitSingle()
+
+        transactionRepository.save(transaction).awaitSingle()
     }
 }

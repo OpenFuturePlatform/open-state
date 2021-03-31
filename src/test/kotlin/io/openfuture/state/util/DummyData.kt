@@ -2,20 +2,22 @@ package io.openfuture.state.util
 
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
+import io.openfuture.state.domain.WalletAddress
 import org.bson.types.ObjectId
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
 fun createDummyWallet(
-        blockchain: String = "EthereumBlockchain",
+        blockchain: String = "Ethereum",
         address: String = "address",
         webhook: String = "webhook",
-        id: ObjectId = ObjectId(),
-        transactions: List<Transaction> = arrayListOf(createDummyTransaction()),
+        id: String = ObjectId().toHexString(),
         lastUpdate: LocalDateTime = LocalDateTime.of(2020, 10, 10, 10, 10)
-) = Wallet(blockchain, address, webhook, transactions, lastUpdate, id)
+) = Wallet(WalletAddress(blockchain, address), webhook, lastUpdate, id)
 
 fun createDummyTransaction(
+        blockchain: String = "Ethereum",
+        address: String = "address",
         hash: String = "hash",
         from: String = "from",
         to: String = "to",
@@ -23,4 +25,4 @@ fun createDummyTransaction(
         date: LocalDateTime = LocalDateTime.of(2020, 9, 9, 9, 9),
         blockHeight: Long = 1,
         blockHash: String = "block hash"
-) = Transaction(hash, from, to, amount, date, blockHeight, blockHash)
+) = Transaction(WalletAddress(blockchain, address), hash, from, to, amount, date, blockHeight, blockHash)
