@@ -1,5 +1,6 @@
 package io.openfuture.state.repository
 
+import io.openfuture.state.webhook.ScheduledTransaction
 import org.springframework.data.redis.core.*
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
@@ -13,27 +14,27 @@ class TransactionsRedisRepository(
     private val transactions: ReactiveListOperations<String, Any> = redisTemplate.opsForList()
 
 
-    suspend fun add(walletKey: String, transaction: String) {
-        transactions.rightPushAndAwait(walletKey, transaction)
+    suspend fun add(walletId: String, transaction: ScheduledTransaction) {
+        transactions.rightPushAndAwait(walletId, transaction)
     }
 
-    suspend fun setAtPosition(walletKey: String, transaction: String, index: Long) {
-        transactions.setAndAwait(walletKey, index, transaction)
+    suspend fun setAtPosition(walletId: String, transaction: ScheduledTransaction, index: Long) {
+        transactions.setAndAwait(walletId, index, transaction)
     }
 
-    suspend fun first(walletKey: String) : Mono<Any> {
-        return transactions.leftPop(walletKey)
+    suspend fun first(walletId: String) : Mono<Any> {
+        return transactions.leftPop(walletId)
     }
 
-    suspend fun findAll(walletKey: String, start: Long, end: Long): Flux<Any> {
-        return transactions.range(walletKey, start, end)
+    suspend fun findAll(walletId: String, start: Long, end: Long): Flux<Any> {
+        return transactions.range(walletId, start, end)
     }
 
-    suspend fun count(walletKey: String) : Mono<Long> {
-        return transactions.size(walletKey)
+    suspend fun count(walletId: String) : Mono<Long> {
+        return transactions.size(walletId)
     }
 
-    suspend fun remove(walletKey: String) {
-        transactions.deleteAndAwait(walletKey)
+    suspend fun remove(walletId: String) {
+        transactions.deleteAndAwait(walletId)
     }
 }

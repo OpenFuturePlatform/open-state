@@ -45,10 +45,10 @@ class WalletController(private val walletService: WalletService, private val blo
             val lastUpdateDate: LocalDateTime
     ) {
         constructor(wallet: Wallet) : this(
-                wallet.id.toHexString(),
-                wallet.address,
+                wallet.id,
+                wallet.address.address,
                 wallet.webhook,
-                wallet.blockchain,
+                wallet.address.blockchain,
                 wallet.lastUpdate
         )
     }
@@ -62,5 +62,4 @@ class WalletController(private val walletService: WalletService, private val blo
     data class UpdateWalletRequest(
             @field:NotNull @field:NotBlank @field:HttpUrl val webhook: String?
     )
-
 }

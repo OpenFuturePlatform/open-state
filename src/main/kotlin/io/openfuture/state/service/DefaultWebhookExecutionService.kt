@@ -11,9 +11,8 @@ class DefaultWebhookExecutionService(
         private val repository: WebhookExecutionRepository
 ): WebhookExecutionService  {
 
-    override suspend fun findByTransactionHash(hash: String): WebhookExecution? {
-        return repository.findByTransactionHash(hash)
-                .awaitFirstOrNull()
+    override suspend fun findByTransactionId(id: String): WebhookExecution? {
+        return repository.findByTransactionId(id).awaitFirstOrNull()
     }
 
     override suspend fun save(webhookExecution: WebhookExecution): WebhookExecution {

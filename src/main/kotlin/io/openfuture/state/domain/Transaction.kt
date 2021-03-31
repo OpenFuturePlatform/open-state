@@ -9,12 +9,15 @@ import java.time.LocalDateTime
 
 @Document
 data class Transaction(
-        @Indexed val hash: String,
+        @Indexed
+        val walletAddress: WalletAddress,
+        val hash: String,
         val from: String,
         val to: String,
         val amount: BigDecimal,
         val date: LocalDateTime,
         val blockHeight: Long,
         val blockHash: String,
-        @MongoId val id: ObjectId = ObjectId(),
+        @MongoId
+        val id: String = ObjectId().toHexString()
 )

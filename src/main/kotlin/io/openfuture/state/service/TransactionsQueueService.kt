@@ -4,15 +4,15 @@ import io.openfuture.state.webhook.ScheduledTransaction
 
 interface TransactionsQueueService {
 
-    suspend fun add(walletKey: String, transaction: ScheduledTransaction)
+    suspend fun add(walletId: String, transaction: ScheduledTransaction)
 
-    suspend fun remove(walletKey: String)
+    suspend fun remove(walletId: String)
 
-    suspend fun setAt(walletKey: String, transaction: ScheduledTransaction, index: Long)
+    suspend fun setAt(walletId: String, transaction: ScheduledTransaction, index: Long)
 
-    suspend fun hasTransactions(walletKey: String): Boolean
+    suspend fun hasTransactions(walletId: String): Boolean
 
-    suspend fun first(walletKey: String): ScheduledTransaction
+    suspend fun first(walletId: String): ScheduledTransaction
 
-    suspend fun findAll(walletKey: String): List<ScheduledTransaction>
+    suspend fun findAll(walletId: String): List<ScheduledTransaction>
 }

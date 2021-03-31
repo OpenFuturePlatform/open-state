@@ -12,12 +12,12 @@ class DefaultTransactionService(
         private val repository: TransactionRepository
 ): TransactionService {
 
-    override suspend fun findByHash(hash: String): Transaction {
-        return repository.findByHash(hash).awaitFirstOrNull()
-                ?: throw NotFoundException("Transaction not found: $hash")
+    override suspend fun findById(id: String): Transaction {
+        return repository.findById(id).awaitFirstOrNull()
+                ?: throw NotFoundException("Transaction not found: $id")
     }
 
-    override suspend fun save(transaction: Transaction): Transaction {
-        return repository.save(transaction).awaitSingle()
+    override suspend fun save(transaction: Transaction) {
+        repository.save(transaction).awaitSingle()
     }
 }

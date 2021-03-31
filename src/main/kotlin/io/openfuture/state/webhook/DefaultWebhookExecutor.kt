@@ -4,9 +4,10 @@ import io.openfuture.state.config.WebhookConfig
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WebhookExecution
-import io.openfuture.state.exception.NotFoundException
-import io.openfuture.state.service.*
-import io.openfuture.state.webhook.dto.TransactionPayload
+import io.openfuture.state.service.TransactionService
+import io.openfuture.state.service.WalletService
+import io.openfuture.state.service.WebhookExecutionService
+import io.openfuture.state.service.WebhookService
 import io.openfuture.state.webhook.dto.WebhookPayload
 import org.springframework.stereotype.Service
 
@@ -20,18 +21,14 @@ class DefaultWebhookExecutor(
         private val webhookConfig: WebhookConfig
 ): WebhookExecutor {
 
-    override suspend fun execute(walletKey: String) {
-        val wallet = findWallet(walletKey)
+    override suspend fun execute(walletId: String) {
+        val wallet = walletService.findById(walletId)
         val scheduledTransaction = webhookService.firstTransaction(wallet)
-        val transaction = transactionService.findByHash(scheduledTransaction.hash)
+        val transaction = transactionService.findById(scheduledTransaction.id)
 
-        val response = restClient.doPost(
-                wallet.webhook,
-                createWebhookPayload(wallet, transaction)
-        )
+        val response = restClient.doPost(wallet.webhook, WebhookPayload(transaction))
 
-
-        addWebhookInvocation(wallet, response, scheduledTransaction)
+        registerInvocation(response, transaction, scheduledTransaction.attempts)
         if (response.status.is2xxSuccessful) {
             scheduleNextWebhook(wallet)
         }
@@ -53,53 +50,11 @@ class DefaultWebhookExecutor(
         webhookService.scheduleFailedWebhook(wallet, transaction)
     }
 
-    private suspend fun addWebhookInvocation(wallet: Wallet, response: WebhookResponse, transaction: ScheduledTransaction) {
-        val webhookExecution = executionService
-                .findByTransactionHash(transaction.hash) ?:
-                        WebhookExecution(
-                                blockchain = wallet.blockchain,
-                                walletAddress = wallet.address,
-                                transactionHash = transaction.hash
-                        )
+    private suspend fun registerInvocation(response: WebhookResponse, transaction: Transaction, attempt: Int) {
+        val webhookExecution = executionService.findByTransactionId(transaction.id)
+                ?: WebhookExecution(transaction)
 
-        val invocation = WebhookResult(
-                status = response.status,
-                url = response.url,
-                attempt = transaction.attempts,
-                message = response.message
-        )
-
-        webhookExecution.addInvocation(invocation)
+        webhookExecution.addInvocation(WebhookResult(response, attempt))
         executionService.save(webhookExecution)
-    }
-
-    private fun createWebhookPayload(wallet: Wallet, transaction: Transaction): WebhookPayload {
-        val transactionPayload = TransactionPayload(
-                hash = transaction.hash,
-                from = transaction.from,
-                to = transaction.to,
-                amount = transaction.amount,
-                date = transaction.date,
-                blockHeight = transaction.blockHeight,
-                blockHash = transaction.blockHash
-        )
-
-        return  WebhookPayload(
-                blockchain =  wallet.blockchain,
-                walletAddress = wallet.address,
-                transactionPayload
-        )
-    }
-
-    private suspend fun findWallet(walletKey: String): Wallet {
-        val walletIdentity = walletKey.split("-")
-        if (walletIdentity.size < 2) {
-            throw NotFoundException("Wallet not found: $walletKey")
-        }
-
-        val blockchain = walletIdentity[0].trim().trim('[', ']')
-        val address = walletIdentity[1].trim().trim('[', ']')
-
-        return walletService.findByBlockchainAndAddress(blockchain, address)
     }
 }

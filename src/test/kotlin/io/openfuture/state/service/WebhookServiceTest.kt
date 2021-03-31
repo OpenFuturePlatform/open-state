@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 internal class WebhookServiceTest: ServiceTests() {
 
     private lateinit var service: WebhookService
-    private val walletService: WalletWebhookQueueService = spy(mock())
+    private val walletService: WalletQueueService = spy(mock())
     private val transactionService: TransactionsQueueService = spy(mock())
     private val deadQueueService: WebhookDeadQueueService = spy(mock())
     private val webhookConfig: WebhookConfig = WebhookConfig(WebhookProperties(lockTtl = Duration.ofSeconds(3)),)

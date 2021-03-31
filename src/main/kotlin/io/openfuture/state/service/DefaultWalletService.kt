@@ -5,6 +5,7 @@ import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
+import io.openfuture.state.domain.WalletAddress
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.WalletRepository
 import io.openfuture.state.webhook.WebhookStatus
@@ -20,7 +21,7 @@ class DefaultWalletService(
 ) : WalletService {
 
     override suspend fun save(blockchain: Blockchain, address: String, webhook: String): Wallet {
-        val wallet = Wallet(blockchain.getName(), address, webhook)
+        val wallet = Wallet(WalletAddress(blockchain.getName(), address), webhook)
         return repository.save(wallet).awaitSingle()
     }
 
@@ -29,9 +30,14 @@ class DefaultWalletService(
     }
 
     override suspend fun findByBlockchainAndAddress(blockchain: String, address: String): Wallet {
-        return repository.findByBlockchainAndAddress(blockchain, address)
+        return repository.findByAddress(WalletAddress(blockchain, address))
                 .awaitFirstOrNull() ?:
                 throw NotFoundException("Wallet not found: $blockchain - $address")
+    }
+
+    override suspend fun findById(id: String): Wallet {
+        return repository.findById(id).awaitFirstOrNull() ?:
+                throw NotFoundException("Wallet not found, id: $id")
     }
 
     override suspend fun update(walletId: String, webhook: String): Wallet {
@@ -51,14 +57,15 @@ class DefaultWalletService(
 
     override suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock) {
         for (transaction in block.transactions) {
-            val wallet = repository.findByBlockchainAndAddress(blockchain.getName(), transaction.to).awaitFirstOrNull()
+            val wallet = repository.findByAddress(WalletAddress(blockchain.getName(), transaction.to)).awaitFirstOrNull()
 
             wallet?.let { saveTransaction(it, block, transaction) }
         }
     }
 
     private suspend fun saveTransaction(wallet: Wallet, block: UnifiedBlock, unifiedTransaction: UnifiedTransaction) {
-        var transaction = Transaction(
+        val transaction = Transaction(
+                wallet.address,
                 unifiedTransaction.hash,
                 unifiedTransaction.from,
                 unifiedTransaction.to,
@@ -68,10 +75,7 @@ class DefaultWalletService(
                 block.hash
         )
 
-        transaction = transactionService.save(transaction)
-        wallet.addTransaction(transaction)
-        repository.save(wallet).awaitSingle()
-
+        transactionService.save(transaction)
         webhookService.addTransaction(wallet, transaction)
     }
 }

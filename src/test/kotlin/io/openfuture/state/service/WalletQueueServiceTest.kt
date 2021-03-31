@@ -13,16 +13,16 @@ import org.junit.jupiter.api.Test
 import reactor.core.publisher.Flux
 import java.time.LocalDateTime
 
-internal class WalletWebhookQueueServiceTest: ServiceTests() {
+internal class WalletQueueServiceTest: ServiceTests() {
 
-    private lateinit var service: WalletWebhookQueueService
+    private lateinit var service: WalletQueueService
     private val repository: WalletWebhookRedisRepository = mock()
     private var jsonSerializer: JsonSerializer = JsonSerializer()
 
 
     @BeforeEach
     fun setUp() {
-        service = DefaultWalletWebhookQueueService(repository, jsonSerializer)
+        service = DefaultWalletQueueService(repository, jsonSerializer)
     }
 
     @Test

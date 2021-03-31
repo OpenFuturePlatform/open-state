@@ -8,5 +8,5 @@ import reactor.core.publisher.Mono
 @Repository
 interface WebhookExecutionRepository : ReactiveMongoRepository<WebhookExecution, String> {
 
-    fun findByTransactionHash(transactionHash: String): Mono<WebhookExecution>
+    fun findByTransactionId(transactionId: String): Mono<WebhookExecution>
 }

@@ -9,10 +9,12 @@ import java.time.LocalDateTime
 
 @Document
 data class WebhookDeadQueue(
-        @Indexed val walletKey: String,
-        @Indexed private val transactions: List<ScheduledTransaction> = emptyList(),
+        @Indexed
+        val walletAddress: WalletAddress,
+        private val transactions: List<ScheduledTransaction> = emptyList(),
         val timestamp: LocalDateTime = LocalDateTime.now(),
-        @MongoId val id: ObjectId = ObjectId()
+        @MongoId
+        val id: String = ObjectId().toHexString()
 ) {
 
     fun addTransactions(transactions: List<ScheduledTransaction>) {

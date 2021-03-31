@@ -1,8 +1,10 @@
 package io.openfuture.state.repository
 
-import io.openfuture.state.extension.serialize
+import io.openfuture.state.extension.serializeKey
+import io.openfuture.state.extension.serializeValue
 import io.openfuture.state.property.WebhookProperties
 import io.openfuture.state.util.toEpochMilli
+import io.openfuture.state.webhook.ScheduledTransaction
 import kotlinx.coroutines.reactive.awaitLast
 import org.springframework.data.domain.Range
 import org.springframework.data.redis.core.*
@@ -21,17 +23,17 @@ class WalletWebhookRedisRepository(
     private val locks: ReactiveValueOperations<String, Any> = redisTemplate.opsForValue()
 
 
-    suspend fun add(walletKey: String, transaction: String, timestamp: LocalDateTime) {
+    suspend fun add(walletId: String, transaction: ScheduledTransaction, timestamp: LocalDateTime) {
         val result = redisTemplate.execute { connection ->
             val walletAdd = connection.zSetCommands().zAdd(
-                    redisTemplate.serialize(WALLETS_QUEUE),
+                    redisTemplate.serializeKey(WALLETS_QUEUE),
                     timestamp.toEpochMilli().toDouble(),
-                    redisTemplate.serialize(walletKey)
+                    redisTemplate.serializeValue(walletId)
             )
 
             val transactionAdd = connection.listCommands().rPush(
-                    redisTemplate.serialize(walletKey),
-                    listOf(redisTemplate.serialize(transaction))
+                    redisTemplate.serializeKey(walletId),
+                    listOf(redisTemplate.serializeValue(transaction))
             )
 
             Flux1.zip(walletAdd, transactionAdd)
@@ -40,32 +42,32 @@ class WalletWebhookRedisRepository(
         result.awaitLast()
     }
 
-    suspend fun walletScore(walletKey: String): Mono<Double> {
-        return wallets.score(WALLETS_QUEUE, walletKey)
+    suspend fun walletScore(walletId: String): Mono<Double> {
+        return wallets.score(WALLETS_QUEUE, walletId)
     }
 
-    suspend fun incrementScore(walletKey: String, scoreDiff: Double) {
+    suspend fun incrementScore(walletId: String, scoreDiff: Double) {
         wallets.incrementScoreAndAwait(
                 WALLETS_QUEUE,
-                walletKey,
+                walletId,
                 scoreDiff
         )
     }
 
-    suspend fun remove(walletKey: String) {
-       wallets.removeAndAwait(WALLETS_QUEUE, walletKey)
+    suspend fun remove(walletId: String) {
+       wallets.removeAndAwait(WALLETS_QUEUE, walletId)
     }
 
-    suspend fun lock(walletKey: String): Boolean {
+    suspend fun lock(walletId: String): Boolean {
         return locks.setIfAbsentAndAwait(
-                "LOCK:${walletKey}",
-                walletKey,
+                "LOCK:${walletId}",
+                walletId,
                 webhookProperties.lockTtl
         )
     }
 
-    suspend fun unlock(walletKey: String) {
-        locks.deleteAndAwait("LOCK:${walletKey}")
+    suspend fun unlock(walletId: String) {
+        locks.deleteAndAwait("LOCK:${walletId}")
     }
 
     suspend fun walletsScheduledTo(toDate: LocalDateTime): Flux1<String> {

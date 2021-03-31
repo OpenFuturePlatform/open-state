@@ -8,12 +8,20 @@ import org.springframework.data.mongodb.core.mapping.MongoId
 
 @Document
 data class WebhookExecution(
-        @Indexed val blockchain: String,
-        @Indexed val walletAddress: String,
-        val transactionHash: String?,
+        @Indexed
+        val walletAddress: WalletAddress,
+        @Indexed
+        val transactionId: String,
         private val invocations: List<WebhookResult> = emptyList(),
-        @MongoId val id: ObjectId = ObjectId()
+        @MongoId
+        val id: String = ObjectId().toHexString()
 ) {
+
+    constructor(transaction: Transaction): this(
+            transaction.walletAddress,
+            transaction.id
+    )
+
     fun addInvocation(webhookResult: WebhookResult) {
         invocations.plus(webhookResult)
     }

@@ -14,9 +14,9 @@ interface WebhookService {
 
     suspend fun scheduleFailedWebhook(wallet: Wallet, transaction: ScheduledTransaction)
 
-    suspend fun lock(walletKey: String): Boolean
+    suspend fun lock(walletId: String): Boolean
 
-    suspend fun unlock(walletKey: String)
+    suspend fun unlock(walletId: String)
 
     suspend fun scheduledWallets(): List<String>
 

@@ -22,23 +22,23 @@ class WebhookProcessor(
 
     @Scheduled(fixedDelayString = "#{@webhookProcessDelay}", initialDelay = 1000)
     fun process() = GlobalScope.launch {
-        val walletAddresses = webhookService.scheduledWallets()
-        if (walletAddresses.isEmpty()) {
+        val wallets = webhookService.scheduledWallets()
+        if (wallets.isEmpty()) {
             return@launch
         }
 
-        val walletAddress = walletAddresses
+        val walletId = wallets
                 .firstOrNull { webhookService.lock(it) } ?: return@launch
-        log.info("Start processing webhook for wallet $walletAddress")
+        log.info("Start processing webhook for wallet $walletId")
 
         try {
-            webhookExecutor.execute(walletAddress)
+            webhookExecutor.execute(walletId)
         } catch (e: Exception) {
-            log.error("Error processing webhook for wallet {}",walletAddress, e)
+            log.error("Error processing webhook for wallet $walletId", e)
         }
 
-        log.info("Webhook processed for wallet $walletAddress")
-        webhookService.unlock(walletAddress)
+        log.info("Webhook processed for wallet $walletId")
+        webhookService.unlock(walletId)
     }
 
     companion object {

@@ -4,7 +4,7 @@ import io.openfuture.state.domain.Transaction
 
 interface TransactionService {
 
-    suspend fun findByHash(hash: String): Transaction
+    suspend fun findById(id: String): Transaction
 
-    suspend fun save(transaction: Transaction): Transaction
+    suspend fun save(transaction: Transaction)
 }

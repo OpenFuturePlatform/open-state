@@ -9,4 +9,12 @@ data class WebhookResult(
         val attempt: Int,
         val message: String? = null,
         val timestamp: LocalDateTime = LocalDateTime.now()
-)
+) {
+
+    constructor(response: WebhookResponse, attempt: Int): this(
+            response.status,
+            response.url,
+            attempt,
+            response.message
+    )
+}
