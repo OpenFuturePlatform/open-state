@@ -31,32 +31,31 @@ class BitcoinBlockchain(private val bitcoinRpcClient: BitcoinRpcClient) : Blockc
     }
 
     private suspend fun toUnifiedTransactions(btcTransactions: List<BitcoinTransaction>): List<UnifiedTransaction> {
-        val transactions = btcTransactions.toMutableList()
-        //delete coinbase transaction (miner award)
-        transactions.removeAt(0)
-
-        return transactions.flatMap { obtainTransactions(it) }
+        //skip coinbase transaction (miner award)
+        return btcTransactions
+                .drop(1)
+                .flatMap { obtainTransactions(it) }
     }
 
     private suspend fun obtainTransactions(btcTransaction: BitcoinTransaction): List<UnifiedTransaction> {
-        btcTransaction.inputs.toMutableList().removeAt(0)
         val inputAddresses = btcTransaction.inputs
-                .toMutableList()
                 .map { bitcoinRpcClient.getInputAddress(it.txId!!, it.outputNumber!!) }
                 .toSet()
 
-        //remove if its is `change address`
-        btcTransaction.outputs.toMutableList().removeAll { it.addresses.any { address -> inputAddresses.contains(address) } }
         return btcTransaction.outputs
                 .filter { it.addresses.isNotEmpty() }
+                .filter {
+                    //skip `change addresses`
+                    !it.addresses.any { address -> inputAddresses.contains(address) }
+                }
                 .map {
-            UnifiedTransaction(
-                    btcTransaction.hash,
-                    inputAddresses,
-                    it.addresses,
-                    it.value
-            )
-        }
+                    UnifiedTransaction(
+                            btcTransaction.hash,
+                            inputAddresses,
+                            it.addresses,
+                            it.value
+                    )
+                }
     }
 
 }

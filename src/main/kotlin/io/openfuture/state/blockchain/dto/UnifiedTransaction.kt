@@ -7,4 +7,16 @@ data class UnifiedTransaction(
         val from: Set<String>,
         val to: Set<String>,
         val amount: BigDecimal
-)
+) {
+    constructor(
+            hash: String,
+            from: String,
+            to: String,
+            amount: BigDecimal
+    ) : this(
+            hash,
+            setOf(from),
+            setOf(to),
+            amount
+    )
+}
