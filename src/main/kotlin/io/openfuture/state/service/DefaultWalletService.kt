@@ -16,7 +16,8 @@ import org.springframework.stereotype.Service
 @Service
 class DefaultWalletService(
         private val walletRepository: WalletRepository,
-        private val transactionRepository: TransactionRepository
+        private val transactionRepository: TransactionRepository,
+        private val webhookService: WebhookService
 ): WalletService {
 
     override suspend fun findByIdentity(blockchain: String, address: String): Wallet {
@@ -52,5 +53,6 @@ class DefaultWalletService(
         )
 
         transactionRepository.save(transaction).awaitSingle()
+        webhookService.scheduleTransaction(wallet, transaction)
     }
 }
