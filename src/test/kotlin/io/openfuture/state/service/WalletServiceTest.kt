@@ -5,7 +5,7 @@ import com.nhaarman.mockitokotlin2.given
 import com.nhaarman.mockitokotlin2.mock
 import io.openfuture.state.base.ServiceTests
 import io.openfuture.state.blockchain.Blockchain
-import io.openfuture.state.domain.WalletAddress
+import io.openfuture.state.domain.WalletIdentity
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.TransactionRepository
 import io.openfuture.state.repository.WalletRepository
@@ -39,28 +39,28 @@ class WalletServiceTest : ServiceTests() {
 
         given(walletRepository.save(any())).willReturn(Mono.just(wallet))
 
-        val result = walletService.save(blockchain, wallet.address.address, wallet.webhook)
+        val result = walletService.save(blockchain, wallet.identity.address, wallet.webhook)
 
         assertThat(result).isEqualTo(wallet)
     }
 
     @Test
-    fun findByAddressShouldThrowNotFoundException() {
-        given(walletRepository.findByAddress(WalletAddress("Ethereum", "address"))).willReturn(Mono.empty())
+    fun findByIdentityShouldThrowNotFoundException() {
+        given(walletRepository.findByIdentity(WalletIdentity("Ethereum", "address"))).willReturn(Mono.empty())
         Assertions.assertThrows(NotFoundException::class.java) {
             runBlocking {
-                walletService.findByAddress("Ethereum", "address")
+                walletService.findByIdentity("Ethereum", "address")
             }
         }
     }
 
     @Test
-    fun findByAddressShouldReturnWalletDto() = runBlocking<Unit> {
+    fun findByIdentityShouldReturnWalletDto() = runBlocking<Unit> {
         val wallet = createDummyWallet()
 
-        given(walletRepository.findByAddress(WalletAddress("Ethereum", "address"))).willReturn(Mono.just(wallet))
+        given(walletRepository.findByIdentity(WalletIdentity("Ethereum", "address"))).willReturn(Mono.just(wallet))
 
-        val result = walletService.findByAddress("Ethereum", "address")
+        val result = walletService.findByIdentity("Ethereum", "address")
 
         assertThat(result).isEqualTo(wallet)
     }

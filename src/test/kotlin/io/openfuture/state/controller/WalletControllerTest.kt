@@ -27,7 +27,7 @@ class WalletControllerTest : ControllerTests() {
                 id = "5f480720e5cba939f1918911",
                 lastUpdate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
         )
-        given(walletService.findByAddress("this-is-chain", "this-is-address")).willReturn(wallet)
+        given(walletService.findByIdentity("this-is-chain", "this-is-address")).willReturn(wallet)
 
         webClient.get()
                 .uri("/api/wallets/blockchain/this-is-chain/address/this-is-address")

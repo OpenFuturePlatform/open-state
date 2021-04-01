@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 @Document
 data class Transaction(
         @Indexed
-        val address: WalletAddress,
+        val walletIdentity: WalletIdentity,
         val hash: String,
         val from: String,
         val to: String,

@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 @Document
 data class Wallet(
         @Indexed
-        val address: WalletAddress,
+        val identity: WalletIdentity,
         val webhook: String,
         @LastModifiedDate
         var lastUpdate: LocalDateTime = LocalDateTime.now(),
