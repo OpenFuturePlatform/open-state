@@ -9,16 +9,16 @@ import io.openfuture.state.util.toLocalDateTimeInSeconds
 import org.springframework.stereotype.Component
 
 @Component
-class BitcoinBlockchain(private val bitcoinClient: BitcoinClient) : Blockchain() {
+class BitcoinBlockchain(private val client: BitcoinClient) : Blockchain() {
 
     override suspend fun getLastBlockNumber(): Int {
-        val latestBlockHash = bitcoinClient.getLatestBlockHash()
-        return bitcoinClient.getBlockHeight(latestBlockHash)
+        val latestBlockHash = client.getLatestBlockHash()
+        return client.getBlockHeight(latestBlockHash)
     }
 
     override suspend fun getBlock(blockNumber: Int): UnifiedBlock {
-        val blockHash = bitcoinClient.getBlockHash(blockNumber)
-        val block = bitcoinClient.getBlock(blockHash)
+        val blockHash = client.getBlockHash(blockNumber)
+        val block = client.getBlock(blockHash)
 
         return toUnifiedBlock(block)
     }
@@ -59,7 +59,7 @@ class BitcoinBlockchain(private val bitcoinClient: BitcoinClient) : Blockchain()
 
     private suspend fun getInputAddresses(inputs: List<BitcoinTransaction.Input>): Set<String> {
         return inputs
-                .map { bitcoinClient.getInputAddress(it.txId!!, it.outputNumber!!) }
+                .map { client.getInputAddress(it.txId!!, it.outputNumber!!) }
                 .toSet()
     }
 
