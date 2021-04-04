@@ -1,61 +1,66 @@
 package io.openfuture.state.blockchain.bitcoin
 
 import io.openfuture.state.blockchain.Blockchain
+import io.openfuture.state.blockchain.bitcoin.dto.BitcoinBlock
+import io.openfuture.state.blockchain.bitcoin.dto.BitcoinTransaction
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.util.toLocalDateTimeInSeconds
 import org.springframework.stereotype.Component
 
 @Component
-class BitcoinBlockchain(private val bitcoinRpcClient: BitcoinRpcClient) : Blockchain() {
+class BitcoinBlockchain(private val bitcoinClient: BitcoinClient) : Blockchain() {
 
     override suspend fun getLastBlockNumber(): Int {
-        val latestBlockHash = bitcoinRpcClient.getLatestBlockHash()
-        return bitcoinRpcClient.getBlockHeight(latestBlockHash)
+        val latestBlockHash = bitcoinClient.getLatestBlockHash()
+        return bitcoinClient.getBlockHeight(latestBlockHash)
     }
 
     override suspend fun getBlock(blockNumber: Int): UnifiedBlock {
-        val blockHash = bitcoinRpcClient.getBlockHash(blockNumber)
-        val block = bitcoinRpcClient.getBlock(blockHash)
+        val blockHash = bitcoinClient.getBlockHash(blockNumber)
+        val block = bitcoinClient.getBlock(blockHash)
 
         return toUnifiedBlock(block)
     }
 
-    private suspend fun toUnifiedBlock(btcBlock: BitcoinBlock): UnifiedBlock {
-        return UnifiedBlock(
-                toUnifiedTransactions(btcBlock.transactions),
-                btcBlock.time.toLocalDateTimeInSeconds(),
-                btcBlock.height,
-                btcBlock.hash
-        )
-    }
+    private suspend fun toUnifiedBlock(block: BitcoinBlock): UnifiedBlock = UnifiedBlock(
+            toUnifiedTransactions(block.transactions),
+            block.time.toLocalDateTimeInSeconds(),
+            block.height,
+            block.hash
+    )
 
-    private suspend fun toUnifiedTransactions(btcTransactions: List<BitcoinTransaction>): List<UnifiedTransaction> {
-        //skip coinbase transaction (miner award)
-        return btcTransactions
+    private suspend fun toUnifiedTransactions(transactions: List<BitcoinTransaction>): List<UnifiedTransaction> {
+        return transactions
+                //skip coinbase transaction (miner award)
                 .drop(1)
                 .flatMap { obtainTransactions(it) }
     }
 
-    private suspend fun obtainTransactions(btcTransaction: BitcoinTransaction): List<UnifiedTransaction> {
-        val inputAddresses = btcTransaction.inputs
-                .map { bitcoinRpcClient.getInputAddress(it.txId!!, it.outputNumber!!) }
-                .toSet()
+    private suspend fun obtainTransactions(transaction: BitcoinTransaction): List<UnifiedTransaction> {
+        val inputAddresses = getInputAddresses(transaction.inputs)
 
-        return btcTransaction.outputs
+        return transaction.outputs
                 .filter { it.addresses.isNotEmpty() }
-                .filter {
-                    //skip `change addresses`
-                    !it.addresses.any { address -> inputAddresses.contains(address) }
-                }
+                .filter { !containsChangeAddresses(inputAddresses, it.addresses) }
                 .map {
                     UnifiedTransaction(
-                            btcTransaction.hash,
+                            transaction.hash,
                             inputAddresses,
-                            it.addresses,
+                            it.addresses.first(),
                             it.value
                     )
                 }
+    }
+
+    private fun containsChangeAddresses(inputAddresses: Set<String>, outputAddresses: Set<String>): Boolean {
+        return outputAddresses.any { address -> inputAddresses.contains(address) }
+    }
+
+    private suspend fun getInputAddresses(inputs: List<BitcoinTransaction.Input>): Set<String> {
+        return inputs
+                .map { bitcoinClient.getInputAddress(it.txId!!, it.outputNumber!!) }
+                .toSet()
     }
 
 }

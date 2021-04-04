@@ -1,6 +1,10 @@
 package io.openfuture.state.blockchain.bitcoin
 
 import com.nhaarman.mockitokotlin2.mock
+import io.openfuture.state.blockchain.bitcoin.dto.BitcoinResponse
+import io.openfuture.state.blockchain.bitcoin.dto.BlockHeightBitcoinResponse
+import io.openfuture.state.blockchain.bitcoin.dto.InputInfo
+import io.openfuture.state.blockchain.bitcoin.dto.TransactionInputBitcoinResponse
 import io.openfuture.state.util.createDummyBitcoinBlock
 import io.openfuture.state.util.mockPost
 import kotlinx.coroutines.runBlocking
@@ -12,22 +16,22 @@ import org.springframework.web.reactive.function.client.WebClient
 class BitcoinRpcTest {
 
     private val webClient: WebClient = mock()
-    private lateinit var rpcClient: BitcoinRpcClient
+    private lateinit var client: BitcoinClient
 
     @BeforeEach
     fun setUp() {
-        rpcClient = BitcoinRpcClient(webClient)
+        client = BitcoinClient(webClient)
     }
 
     @Test
     fun getLatestBlockHashShouldReturnExpectedValue() = runBlocking<Unit> {
         val hash = "0000000000015afb856ff92b062a4d023d104f7f1850914d9288d1bb889ffec3"
 
-        val response = BitcoinRpcClient.Response(hash)
+        val response = BitcoinResponse(hash)
 
         mockPost(webClient, response)
 
-        val result = rpcClient.getLatestBlockHash()
+        val result = client.getLatestBlockHash()
 
         Assertions.assertThat(result).isEqualTo(hash)
     }
@@ -36,13 +40,11 @@ class BitcoinRpcTest {
     fun getBlockHeightShouldReturnExpectedValue() = runBlocking<Unit> {
         val hash = "0000000000015afb856ff92b062a4d023d104f7f1850914d9288d1bb889ffec3"
 
-        val response = BitcoinRpcClient.Response(
-                BitcoinRpcClient.BlockHeightResponse(5)
-        )
+        val response = BitcoinResponse(BlockHeightBitcoinResponse(5))
 
         mockPost(webClient, response)
 
-        val result = rpcClient.getBlockHeight(hash)
+        val result = client.getBlockHeight(hash)
 
         Assertions.assertThat(result).isEqualTo(5)
     }
@@ -51,11 +53,11 @@ class BitcoinRpcTest {
     fun getBlockHashShouldReturnExpectedValue() = runBlocking<Unit> {
         val hash = "0000000000015afb856ff92b062a4d023d104f7f1850914d9288d1bb889ffec3"
 
-        val response = BitcoinRpcClient.Response(hash)
+        val response = BitcoinResponse(hash)
 
         mockPost(webClient, response)
 
-        val result = rpcClient.getBlockHash(5)
+        val result = client.getBlockHash(5)
 
         Assertions.assertThat(result).isEqualTo(hash)
     }
@@ -66,11 +68,11 @@ class BitcoinRpcTest {
 
         val block = createDummyBitcoinBlock()
 
-        val response = BitcoinRpcClient.Response(block)
+        val response = BitcoinResponse(block)
 
         mockPost(webClient, response)
 
-        val result = rpcClient.getBlock(hash)
+        val result = client.getBlock(hash)
 
         Assertions.assertThat(result).isEqualTo(block)
     }
@@ -79,25 +81,17 @@ class BitcoinRpcTest {
     fun getInputAddressShouldReturnExpectedValue() = runBlocking<Unit> {
         val txId = "0000000000015afb856ff92b062a4d023d104f7f1850914d9288d1bb889ffec3"
 
-        val info1 = BitcoinRpcClient.InputInfo(
-                vout = 0,
-                "address1"
-        )
+        val info1 = InputInfo(0, "address1")
 
-        val info2 = BitcoinRpcClient.InputInfo(
-                vout = 1,
-                "address2"
-        )
+        val info2 = InputInfo(1, "address2")
 
-        val details = BitcoinRpcClient.TransactionInputResponse(
-                details = listOf(info1, info2)
-        )
+        val details = TransactionInputBitcoinResponse(listOf(info1, info2))
 
-        val response = BitcoinRpcClient.Response(details)
+        val response = BitcoinResponse(details)
 
         mockPost(webClient, response)
 
-        val result = rpcClient.getInputAddress(txId, 0)
+        val result = client.getInputAddress(txId, 0)
 
         Assertions.assertThat(result).isEqualTo("address1")
     }

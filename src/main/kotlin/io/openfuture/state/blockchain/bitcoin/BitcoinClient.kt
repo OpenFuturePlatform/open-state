@@ -1,5 +1,6 @@
 package io.openfuture.state.blockchain.bitcoin
 
+import io.openfuture.state.blockchain.bitcoin.dto.*
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.BodyInserters
@@ -7,71 +8,65 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 
 @Component
-class BitcoinRpcClient(private val bitcoinWebClient: WebClient) {
+class BitcoinClient(private val client: WebClient) {
 
     suspend fun getLatestBlockHash(): String {
-        val command = Command("getbestblockhash", emptyList())
-        return bitcoinWebClient
+        val command = BitcoinCommand("getbestblockhash")
+        return client
                 .post()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(command))
                 .retrieve()
-                .awaitBody<Response<String>>()
+                .awaitBody<BitcoinResponse<String>>()
                 .result
     }
 
     suspend fun getBlockHeight(blockHash: String): Int {
-        val command = Command("getblock", listOf(blockHash, 1))
-        return bitcoinWebClient
+        val command = BitcoinCommand("getblock", listOf(blockHash, 1))
+        return client
                 .post()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(command))
                 .retrieve()
-                .awaitBody<Response<BlockHeightResponse>>()
+                .awaitBody<BitcoinResponse<BlockHeightBitcoinResponse>>()
                 .result
                 .height
     }
 
     suspend fun getBlockHash(blockHeight: Int): String {
-        val command = Command("getblockhash", listOf(blockHeight))
-        return bitcoinWebClient
+        val command = BitcoinCommand("getblockhash", listOf(blockHeight))
+        return client
                 .post()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(command))
                 .retrieve()
-                .awaitBody<Response<String>>()
+                .awaitBody<BitcoinResponse<String>>()
                 .result
     }
 
     suspend fun getBlock(blockHash: String): BitcoinBlock {
-        val command = Command("getblock", listOf(blockHash, 2))
-        return bitcoinWebClient
+        val command = BitcoinCommand("getblock", listOf(blockHash, 2))
+        return client
                 .post()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(command))
                 .retrieve()
-                .awaitBody<Response<BitcoinBlock>>()
+                .awaitBody<BitcoinResponse<BitcoinBlock>>()
                 .result
     }
 
     suspend fun getInputAddress(txId: String, outputNumber: Int): String {
-        val command = Command("gettransaction", listOf(txId, true))
-        return bitcoinWebClient
+        val command = BitcoinCommand("gettransaction", listOf(txId, true))
+        return client
                 .post()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(command))
                 .retrieve()
-                .awaitBody<Response<TransactionInputResponse>>()
+                .awaitBody<BitcoinResponse<TransactionInputBitcoinResponse>>()
                 .result
                 .details
                 .first { it.vout == outputNumber }
                 .address
     }
-
-    private data class Command(val method: String, val params: List<Any> = emptyList())
-    data class Response<T>(val result: T)
-    data class BlockHeightResponse(val height: Int)
-    data class TransactionInputResponse(val details: List<InputInfo>)
-    data class InputInfo(val vout: Int, val address: String)
 
 }

@@ -1,7 +1,7 @@
 package io.openfuture.state.util
 
-import io.openfuture.state.blockchain.bitcoin.BitcoinBlock
-import io.openfuture.state.blockchain.bitcoin.BitcoinTransaction
+import io.openfuture.state.blockchain.bitcoin.dto.BitcoinBlock
+import io.openfuture.state.blockchain.bitcoin.dto.BitcoinTransaction
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.domain.Transaction
@@ -22,7 +22,7 @@ fun createDummyWallet(
 fun createDummyTransaction(
         hash: String = "hash",
         from: Set<String> = setOf("from"),
-        to: Set<String> = setOf("to"),
+        to: String = "to",
         amount: BigDecimal = BigDecimal(100),
         date: LocalDateTime = LocalDateTime.of(2020, 9, 9, 9, 9),
         blockHeight: Long = 1,
@@ -39,7 +39,7 @@ fun createDummyUnifiedBlock(
 fun createDummyUnifiedTransaction(
         hash: String = "hash",
         from: Set<String> = setOf("from"),
-        to: Set<String> = setOf("to"),
+        to: String = "to",
         amount: BigDecimal = BigDecimal.ONE
 ) = UnifiedTransaction(hash, from, to, amount)
 

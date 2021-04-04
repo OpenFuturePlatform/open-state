@@ -15,6 +15,8 @@ fun LocalDateTime.toEpochMilli(): Long {
 }
 
 fun Long.toLocalDateTimeInSeconds(): LocalDateTime {
-    return LocalDateTime.ofInstant(Instant.ofEpochSecond(this),
-            TimeZone.getDefault().toZoneId())
+    return LocalDateTime.ofInstant(
+            Instant.ofEpochSecond(this),
+            TimeZone.getDefault().toZoneId()
+    )
 }

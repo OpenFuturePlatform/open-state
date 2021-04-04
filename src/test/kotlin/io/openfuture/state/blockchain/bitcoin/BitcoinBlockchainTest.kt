@@ -11,14 +11,14 @@ import org.junit.jupiter.api.Test
 
 class BitcoinBlockchainTest {
 
-    private val rpcClient: BitcoinRpcClient = mock()
+    private val client: BitcoinClient = mock()
 
     private lateinit var bitcoinBlockchain: BitcoinBlockchain
 
 
     @BeforeEach
     fun setUp() {
-        bitcoinBlockchain = BitcoinBlockchain(rpcClient)
+        bitcoinBlockchain = BitcoinBlockchain(client)
     }
 
 
@@ -26,8 +26,8 @@ class BitcoinBlockchainTest {
     fun getLastBlockNumberShouldReturnExpectedValue() = runBlocking<Unit> {
         val hash = "0000000000015afb856ff92b062a4d023d104f7f1850914d9288d1bb889ffec3"
 
-        given(rpcClient.getLatestBlockHash()).willReturn(hash)
-        given(rpcClient.getBlockHeight(hash)).willReturn(5)
+        given(client.getLatestBlockHash()).willReturn(hash)
+        given(client.getBlockHeight(hash)).willReturn(5)
 
         val result = bitcoinBlockchain.getLastBlockNumber()
 
@@ -41,9 +41,9 @@ class BitcoinBlockchainTest {
         val block = createDummyBitcoinBlock()
         val expected = createDummyUnifiedBlock()
 
-        given(rpcClient.getBlockHash(1)).willReturn(hash)
-        given(rpcClient.getBlock(hash)).willReturn(block)
-        given(rpcClient.getInputAddress("id", 1)).willReturn("from")
+        given(client.getBlockHash(1)).willReturn(hash)
+        given(client.getBlock(hash)).willReturn(block)
+        given(client.getInputAddress("id", 1)).willReturn("from")
 
         val result = bitcoinBlockchain.getBlock(1)
 
