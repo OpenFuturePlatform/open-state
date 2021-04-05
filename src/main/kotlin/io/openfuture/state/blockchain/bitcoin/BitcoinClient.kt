@@ -1,6 +1,7 @@
 package io.openfuture.state.blockchain.bitcoin
 
 import io.openfuture.state.blockchain.bitcoin.dto.*
+import io.openfuture.state.property.BitcoinProperties
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.BodyInserters
@@ -8,7 +9,16 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 
 @Component
-class BitcoinClient(private val client: WebClient) {
+class BitcoinClient(
+        private val properties: BitcoinProperties,
+        webClientBuilder: WebClient.Builder
+) {
+
+    private val client: WebClient = webClientBuilder
+            .codecs { it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024) }
+            .baseUrl(properties.nodeAddress!!)
+            .defaultHeaders { it.setBasicAuth(properties.username!!, properties.password!!) }
+            .build()
 
     suspend fun getLatestBlockHash(): String {
         val command = BitcoinCommand("getbestblockhash")

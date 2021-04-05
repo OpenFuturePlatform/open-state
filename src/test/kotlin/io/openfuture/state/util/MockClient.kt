@@ -20,3 +20,10 @@ fun mockPost(webClient: WebClient, response: Any) {
     given(uri.retrieve()).willReturn(responseSpec)
     given(responseSpec.bodyToMono(any<ParameterizedTypeReference<Any>>())).willReturn(Mono.just(response))
 }
+
+fun mockBuilder(builder: WebClient.Builder, webClient: WebClient) {
+    given(builder.codecs(any())).willReturn(builder)
+    given(builder.baseUrl(any())).willReturn(builder)
+    given(builder.defaultHeaders(any())).willReturn(builder)
+    given(builder.build()).willReturn(webClient)
+}

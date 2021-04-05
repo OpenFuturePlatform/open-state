@@ -5,7 +5,9 @@ import io.openfuture.state.blockchain.bitcoin.dto.BitcoinResponse
 import io.openfuture.state.blockchain.bitcoin.dto.BlockHeightBitcoinResponse
 import io.openfuture.state.blockchain.bitcoin.dto.InputInfo
 import io.openfuture.state.blockchain.bitcoin.dto.TransactionInputBitcoinResponse
+import io.openfuture.state.property.BitcoinProperties
 import io.openfuture.state.util.createDummyBitcoinBlock
+import io.openfuture.state.util.mockBuilder
 import io.openfuture.state.util.mockPost
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
@@ -13,14 +15,17 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.client.WebClient
 
-class BitcoinRpcTest {
+class BitcoinClientTest {
 
+    private val builder: WebClient.Builder = mock()
     private val webClient: WebClient = mock()
+    private val properties: BitcoinProperties = BitcoinProperties("test", "test", "test")
     private lateinit var client: BitcoinClient
 
     @BeforeEach
     fun setUp() {
-        client = BitcoinClient(webClient)
+        mockBuilder(builder, webClient)
+        client = BitcoinClient(properties, builder)
     }
 
     @Test
