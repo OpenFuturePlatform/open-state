@@ -37,7 +37,7 @@ dependencies {
     implementation('org.web3j:core:4.6.3')
     implementation('com.squareup.okhttp3:okhttp:4.8.1')
 
-    //Binance
+    // Binance
     implementation('com.google.protobuf:protobuf-java:3.15.6')
     implementation('com.github.binance-chain:java-sdk:v1.1.0-bscAlpha.0')
 

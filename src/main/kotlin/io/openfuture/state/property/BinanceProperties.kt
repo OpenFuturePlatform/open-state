@@ -9,7 +9,12 @@ import javax.validation.constraints.NotBlank
 @ConfigurationProperties(prefix = "binance")
 @Validated
 data class BinanceProperties(
-        @field:NotBlank val nodeAddress: String = "https://dataseed1.ninicoin.io",
-        @field:NotBlank val hrp: String = "bnb",
-        @field:NotBlank val valHrp: String = "bva",
+        @field:NotBlank
+        val nodeAddress: String = "https://dataseed1.ninicoin.io",
+
+        @field:NotBlank
+        val hrp: String = "bnb",
+
+        @field:NotBlank
+        val valHrp: String = "bva",
 )
