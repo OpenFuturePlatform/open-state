@@ -65,4 +65,25 @@ class WalletServiceTest : ServiceTests() {
 
         assertThat(result).isEqualTo(wallet)
     }
+
+    @Test
+    fun findByIdShouldThrowNotFoundException() {
+        given(walletRepository.findById("walletId")).willReturn(Mono.empty())
+        Assertions.assertThrows(NotFoundException::class.java) {
+            runBlocking {
+                walletService.findById("walletId")
+            }
+        }
+    }
+
+    @Test
+    fun findByIdShouldReturnWallet() = runBlocking<Unit> {
+        val wallet = createDummyWallet()
+
+        given(walletRepository.findById("walletId")).willReturn(Mono.just(wallet))
+
+        val result = walletService.findById("walletId")
+
+        assertThat(result).isEqualTo(wallet)
+    }
 }

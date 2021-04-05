@@ -27,6 +27,10 @@ class DefaultWebhookService(
         return walletQueueService.walletsScheduledTo(LocalDateTime.now())
     }
 
+    override suspend fun firstTransaction(wallet: Wallet): TransactionQueueTask {
+        return transactionsQueueService.first(wallet.id)
+    }
+
     override suspend fun lock(walletId: String): Boolean {
         return walletQueueService.lock(walletId)
     }

@@ -5,4 +5,6 @@ import io.openfuture.state.domain.TransactionQueueTask
 interface TransactionsQueueService {
 
     suspend fun add(walletId: String, transaction: TransactionQueueTask)
+
+    suspend fun first(walletId: String): TransactionQueueTask
 }
