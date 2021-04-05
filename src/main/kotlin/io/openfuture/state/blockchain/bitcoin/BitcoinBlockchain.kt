@@ -32,7 +32,7 @@ class BitcoinBlockchain(private val client: BitcoinClient) : Blockchain() {
 
     private suspend fun toUnifiedTransactions(transactions: List<BitcoinTransaction>): List<UnifiedTransaction> {
         return transactions
-                //skip coinbase transaction (miner award)
+                // skip coinbase transaction (miner award)
                 .drop(1)
                 .flatMap { obtainTransactions(it) }
     }
