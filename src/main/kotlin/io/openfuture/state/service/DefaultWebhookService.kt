@@ -13,7 +13,7 @@ class DefaultWebhookService(
 ): WebhookService {
 
     override suspend fun scheduleTransaction(wallet: Wallet, transaction: Transaction) {
-        val transactionTask = TransactionQueueTask(transaction.id)
+        val transactionTask = TransactionQueueTask(transaction.id, 1, transaction.date)
 
         val score = walletQueueService.score(wallet.id)
         if (score == null) {

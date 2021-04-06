@@ -1,6 +1,5 @@
 package io.openfuture.state.repository
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.openfuture.state.config.RedisConfig
 import io.openfuture.state.domain.TransactionQueueTask
 import io.openfuture.state.util.createDummyTransactionQueueTask
@@ -51,10 +50,7 @@ internal class TransactionQueueRedisRepositoryTest {
         repository.add("walletId", transactionTask1)
         repository.add("walletId", transactionTask2)
 
-        val result = redisTemplate.opsForList().range("walletId", 0, 1)
-                .map { ObjectMapper().convertValue(it, TransactionQueueTask::class.java) }
-                .collectList()
-                .block()
+        val result = redisTemplate.opsForList().range("walletId", 0, 1).collectList().block()
         Assertions.assertThat(result).isEqualTo(listOf(transactionTask1, transactionTask2))
     }
 

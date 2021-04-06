@@ -30,5 +30,7 @@ fun createDummyTransaction(
 ) = Transaction(WalletIdentity(blockchain, address), hash, from, to, amount, date, blockHeight, blockHash, id)
 
 fun createDummyTransactionQueueTask(
-        transactionId: String = "transactionId"
-) = TransactionQueueTask(transactionId)
+        transactionId: String = "transactionId",
+        attempt: Int = 1,
+        timestamp: LocalDateTime = LocalDateTime.of(2020, 9, 9, 9, 9),
+) = TransactionQueueTask(transactionId, attempt, timestamp)

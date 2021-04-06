@@ -1,6 +1,7 @@
 package io.openfuture.state.repository
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.openfuture.state.base.RedisRepositoryTests
 import io.openfuture.state.domain.TransactionQueueTask
 import io.openfuture.state.extensions.toMillisDouble
@@ -21,6 +22,7 @@ internal class WalletQueueRedisRepositoryTest: RedisRepositoryTests() {
 
     private lateinit var repository: WalletQueueRedisRepository
     private val properties: WebhookProperties = WebhookProperties(lockTTL = Duration.ofSeconds(3))
+    private val objectMapper: ObjectMapper = ObjectMapper().registerModule(JavaTimeModule())
 
 
     @BeforeEach
@@ -48,7 +50,7 @@ internal class WalletQueueRedisRepositoryTest: RedisRepositoryTests() {
         repository.add("walletId", transactionTask, 15.0)
         val result = redisTemplate.opsForList()
                 .range("walletId", 0, 1)
-                .map { ObjectMapper().convertValue(it, TransactionQueueTask::class.java) }
+                .map { objectMapper.convertValue(it, TransactionQueueTask::class.java) }
                 .collectList().block()
 
         Assertions.assertThat(result).isEqualTo(listOf(transactionTask))

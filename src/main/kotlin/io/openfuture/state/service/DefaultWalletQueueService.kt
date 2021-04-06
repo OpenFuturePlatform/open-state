@@ -13,7 +13,7 @@ class DefaultWalletQueueService(
 ): WalletQueueService {
 
     override suspend fun add(walletId: String, transaction: TransactionQueueTask) {
-        repository.add(walletId, transaction, LocalDateTime.now().toMillisDouble())
+        repository.add(walletId, transaction, transaction.timestamp.toMillisDouble())
     }
 
     override suspend fun score(walletId: String): Double? {
