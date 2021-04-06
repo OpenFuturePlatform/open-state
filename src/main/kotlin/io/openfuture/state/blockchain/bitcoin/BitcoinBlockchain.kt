@@ -24,33 +24,33 @@ class BitcoinBlockchain(private val client: BitcoinClient) : Blockchain() {
     }
 
     private suspend fun toUnifiedBlock(block: BitcoinBlock): UnifiedBlock = UnifiedBlock(
-            toUnifiedTransactions(block.transactions),
-            block.time.toLocalDateTimeInSeconds(),
-            block.height,
-            block.hash
+        toUnifiedTransactions(block.transactions),
+        block.time.toLocalDateTimeInSeconds(),
+        block.height,
+        block.hash
     )
 
     private suspend fun toUnifiedTransactions(transactions: List<BitcoinTransaction>): List<UnifiedTransaction> {
         return transactions
-                // skip coinbase transaction (miner award)
-                .drop(1)
-                .flatMap { obtainTransactions(it) }
+            // skip coinbase transaction (miner award)
+            .drop(1)
+            .flatMap { obtainTransactions(it) }
     }
 
     private suspend fun obtainTransactions(transaction: BitcoinTransaction): List<UnifiedTransaction> {
         val inputAddresses = getInputAddresses(transaction.inputs)
 
         return transaction.outputs
-                .filter { it.addresses.isNotEmpty() }
-                .filter { !containsChangeAddresses(inputAddresses, it.addresses) }
-                .map {
-                    UnifiedTransaction(
-                            transaction.hash,
-                            inputAddresses,
-                            it.addresses.first(),
-                            it.value
-                    )
-                }
+            .filter { it.addresses.isNotEmpty() }
+            .filter { !containsChangeAddresses(inputAddresses, it.addresses) }
+            .map {
+                UnifiedTransaction(
+                    transaction.hash,
+                    inputAddresses,
+                    it.addresses.first(),
+                    it.value
+                )
+            }
     }
 
     private fun containsChangeAddresses(inputAddresses: Set<String>, outputAddresses: Set<String>): Boolean {
@@ -59,8 +59,8 @@ class BitcoinBlockchain(private val client: BitcoinClient) : Blockchain() {
 
     private suspend fun getInputAddresses(inputs: List<BitcoinTransaction.Input>): Set<String> {
         return inputs
-                .map { client.getInputAddress(it.txId!!, it.outputNumber!!) }
-                .toSet()
+            .map { client.getInputAddress(it.txId!!, it.outputNumber!!) }
+            .toSet()
     }
 
 }

@@ -38,24 +38,24 @@ class WalletController(private val walletService: WalletService, private val blo
     }
 
     data class WalletDto(
-            val id: String,
-            val address: String,
-            val webhook: String,
-            val blockchain: String,
-            val lastUpdateDate: LocalDateTime
+        val id: String,
+        val address: String,
+        val webhook: String,
+        val blockchain: String,
+        val lastUpdateDate: LocalDateTime
     ) {
         constructor(wallet: Wallet) : this(
-                wallet.id.toHexString(),
-                wallet.address,
-                wallet.webhook,
-                wallet.blockchain,
-                wallet.lastUpdate
+            wallet.id.toHexString(),
+            wallet.address,
+            wallet.webhook,
+            wallet.blockchain,
+            wallet.lastUpdate
         )
     }
 
     data class SaveWalletRequest(
-            @field:NotNull @field:NotBlank val address: String?,
-            @field:NotNull @field:NotBlank val webhook: String?,
-            @field:NotNull val blockchain: String?
+        @field:NotNull @field:NotBlank val address: String?,
+        @field:NotNull @field:NotBlank val webhook: String?,
+        @field:NotNull val blockchain: String?
     )
 }

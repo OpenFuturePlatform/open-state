@@ -21,7 +21,7 @@ class DefaultWalletService(private val repository: WalletRepository) : WalletSer
 
     override suspend fun findByAddress(address: String): Wallet {
         return repository.findByAddress(address).awaitFirstOrNull()
-                ?: throw NotFoundException("Wallet not found")
+            ?: throw NotFoundException("Wallet not found")
     }
 
     override suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock) {
@@ -34,13 +34,13 @@ class DefaultWalletService(private val repository: WalletRepository) : WalletSer
 
     private suspend fun saveTransaction(wallet: Wallet, block: UnifiedBlock, unifiedTransaction: UnifiedTransaction) {
         val transaction = Transaction(
-                unifiedTransaction.hash,
-                unifiedTransaction.from,
-                unifiedTransaction.to,
-                unifiedTransaction.amount,
-                block.date,
-                block.number,
-                block.hash
+            unifiedTransaction.hash,
+            unifiedTransaction.from,
+            unifiedTransaction.to,
+            unifiedTransaction.amount,
+            block.date,
+            block.number,
+            block.hash
         )
         wallet.addTransaction(transaction)
         repository.save(wallet).awaitSingle()

@@ -12,7 +12,10 @@ import org.springframework.data.redis.serializer.RedisSerializationContext
 class RedisConfig {
 
     @Bean
-    fun reactiveRedisTemplate(factory: ReactiveRedisConnectionFactory, objectMapper: ObjectMapper): ReactiveRedisTemplate<String, Any> {
+    fun reactiveRedisTemplate(
+        factory: ReactiveRedisConnectionFactory,
+        objectMapper: ObjectMapper
+    ): ReactiveRedisTemplate<String, Any> {
         val serializer = GenericJackson2JsonRedisSerializer(objectMapper)
         val serializationContext = RedisSerializationContext.newSerializationContext<String, Any>(serializer).build()
         return ReactiveRedisTemplate(factory, serializationContext)
