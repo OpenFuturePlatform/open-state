@@ -21,6 +21,7 @@ class ProcessingRedisRepository(
             current = getLast(blockchain)
             valueOperations.setAndAwait("$blockchain:$CURRENT", current)
         }
+
         return current
     }
 
