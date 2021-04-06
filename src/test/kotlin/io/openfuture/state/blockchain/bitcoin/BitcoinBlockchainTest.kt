@@ -5,7 +5,7 @@ import com.nhaarman.mockitokotlin2.mock
 import io.openfuture.state.util.createDummyBitcoinBlock
 import io.openfuture.state.util.createDummyUnifiedBlock
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -31,7 +31,7 @@ class BitcoinBlockchainTest {
 
         val result = bitcoinBlockchain.getLastBlockNumber()
 
-        Assertions.assertThat(result).isEqualTo(5)
+        assertThat(result).isEqualTo(5)
     }
 
     @Test
@@ -47,7 +47,7 @@ class BitcoinBlockchainTest {
 
         val result = bitcoinBlockchain.getBlock(1)
 
-        Assertions.assertThat(result).isEqualTo(expected)
+        assertThat(result).isEqualTo(expected)
     }
 
 }

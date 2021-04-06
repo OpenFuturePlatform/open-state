@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotNull
 
 @RestController
 @RequestMapping("/api/wallets")
@@ -54,8 +53,13 @@ class WalletController(private val walletService: WalletService, private val blo
     }
 
     data class SaveWalletRequest(
-        @field:NotNull @field:NotBlank val address: String?,
-        @field:NotNull @field:NotBlank val webhook: String?,
-        @field:NotNull val blockchain: String?
+        @field:NotBlank
+        val address: String?,
+
+        @field:NotBlank
+        val webhook: String?,
+
+        @field:NotBlank
+        val blockchain: String?
     )
 }

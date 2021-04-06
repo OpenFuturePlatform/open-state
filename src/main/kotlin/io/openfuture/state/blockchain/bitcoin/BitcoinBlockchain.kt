@@ -32,8 +32,7 @@ class BitcoinBlockchain(private val client: BitcoinClient) : Blockchain() {
 
     private suspend fun toUnifiedTransactions(transactions: List<BitcoinTransaction>): List<UnifiedTransaction> {
         return transactions
-            // skip coinbase transaction (miner award)
-            .drop(1)
+            .drop(1) // skip coinbase transaction (miner award)
             .flatMap { obtainTransactions(it) }
     }
 
@@ -43,14 +42,7 @@ class BitcoinBlockchain(private val client: BitcoinClient) : Blockchain() {
         return transaction.outputs
             .filter { it.addresses.isNotEmpty() }
             .filter { !containsChangeAddresses(inputAddresses, it.addresses) }
-            .map {
-                UnifiedTransaction(
-                    transaction.hash,
-                    inputAddresses,
-                    it.addresses.first(),
-                    it.value
-                )
-            }
+            .map { UnifiedTransaction(transaction.hash, inputAddresses, it.addresses.first(), it.value) }
     }
 
     private fun containsChangeAddresses(inputAddresses: Set<String>, outputAddresses: Set<String>): Boolean {

@@ -10,7 +10,7 @@ import io.openfuture.state.util.createDummyBitcoinBlock
 import io.openfuture.state.util.mockBuilder
 import io.openfuture.state.util.mockPost
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.client.WebClient
@@ -38,7 +38,7 @@ class BitcoinClientTest {
 
         val result = client.getLatestBlockHash()
 
-        Assertions.assertThat(result).isEqualTo(hash)
+        assertThat(result).isEqualTo(hash)
     }
 
     @Test
@@ -51,7 +51,7 @@ class BitcoinClientTest {
 
         val result = client.getBlockHeight(hash)
 
-        Assertions.assertThat(result).isEqualTo(5)
+        assertThat(result).isEqualTo(5)
     }
 
     @Test
@@ -64,7 +64,7 @@ class BitcoinClientTest {
 
         val result = client.getBlockHash(5)
 
-        Assertions.assertThat(result).isEqualTo(hash)
+        assertThat(result).isEqualTo(hash)
     }
 
     @Test
@@ -79,7 +79,7 @@ class BitcoinClientTest {
 
         val result = client.getBlock(hash)
 
-        Assertions.assertThat(result).isEqualTo(block)
+        assertThat(result).isEqualTo(block)
     }
 
     @Test
@@ -98,7 +98,7 @@ class BitcoinClientTest {
 
         val result = client.getInputAddress(txId, 0)
 
-        Assertions.assertThat(result).isEqualTo("address1")
+        assertThat(result).isEqualTo("address1")
     }
 
 }
