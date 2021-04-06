@@ -1,10 +1,9 @@
 package io.openfuture.state.util
 
-import io.openfuture.state.domain.Transaction
-import io.openfuture.state.domain.TransactionQueueTask
-import io.openfuture.state.domain.Wallet
-import io.openfuture.state.domain.WalletIdentity
+import io.openfuture.state.domain.*
+import io.openfuture.state.webhhok.WebhookRestClient
 import org.bson.types.ObjectId
+import org.springframework.http.HttpStatus
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -12,9 +11,10 @@ fun createDummyWallet(
         blockchain: String = "Ethereum",
         address: String = "address",
         webhook: String = "webhook",
+        webhookStatus: WebhookStatus = WebhookStatus.NOT_INVOKED,
         id: String = ObjectId().toHexString(),
         lastUpdate: LocalDateTime = LocalDateTime.of(2020, 10, 10, 10, 10)
-) = Wallet(WalletIdentity(blockchain, address), webhook, lastUpdate, id)
+) = Wallet(WalletIdentity(blockchain, address), webhook, webhookStatus, lastUpdate, id)
 
 fun createDummyTransaction(
         blockchain: String = "Ethereum",
@@ -34,3 +34,15 @@ fun createDummyTransactionQueueTask(
         attempt: Int = 1,
         timestamp: LocalDateTime = LocalDateTime.of(2020, 9, 9, 9, 9),
 ) = TransactionQueueTask(transactionId, attempt, timestamp)
+
+fun createDummyPositiveWebhookResponse(
+        status: HttpStatus = HttpStatus.OK,
+        url: String = "url",
+        message: String? = null
+) = WebhookRestClient.WebhookResponse(status, url, message)
+
+fun createDummyNegativeWebhookResponse(
+        status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+        url: String = "url",
+        message: String? = null
+) = WebhookRestClient.WebhookResponse(status, url, message)

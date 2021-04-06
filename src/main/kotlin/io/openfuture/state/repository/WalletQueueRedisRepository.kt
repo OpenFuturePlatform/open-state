@@ -64,6 +64,14 @@ class WalletQueueRedisRepository(
         locks.deleteAndAwait("LOCK:${walletId}")
     }
 
+    suspend fun incrementScore(walletId: String, scoreDiff: Double) {
+        wallets.incrementScoreAndAwait(WALLETS_QUEUE, walletId, scoreDiff)
+    }
+
+    suspend fun remove(walletId: String) {
+        wallets.removeAndAwait(WALLETS_QUEUE, walletId)
+    }
+
     companion object {
         private const val WALLETS_QUEUE = "wallets_queue"
     }

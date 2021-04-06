@@ -1,5 +1,9 @@
 package io.openfuture.state.webhhok
 
+import io.openfuture.state.domain.TransactionQueueTask
+import io.openfuture.state.domain.Wallet
+import io.openfuture.state.domain.WebhookStatus
+import io.openfuture.state.property.WebhookProperties
 import io.openfuture.state.service.TransactionService
 import io.openfuture.state.service.WalletService
 import io.openfuture.state.service.WebhookInvocationService
@@ -12,7 +16,8 @@ class DefaultWebhookExecutor(
         private val webhookService: WebhookService,
         private val transactionService: TransactionService,
         private val restClient: WebhookRestClient,
-        private val webhookInvocationService: WebhookInvocationService
+        private val webhookInvocationService: WebhookInvocationService,
+        private val webhookProperties: WebhookProperties
 ): WebhookExecutor {
 
     override suspend fun execute(walletId: String) {
@@ -22,5 +27,25 @@ class DefaultWebhookExecutor(
 
         val response = restClient.doPost(wallet.webhook, WebhookPayloadDto(transaction))
         webhookInvocationService.registerInvocation(wallet, transactionTask, response)
+
+        if (response.status.is2xxSuccessful) {
+            scheduleNextWebhook(wallet)
+        }
+        else {
+            scheduleFailedWebhook(wallet, transactionTask)
+        }
+    }
+
+    private suspend fun scheduleNextWebhook(wallet: Wallet) {
+        walletService.updateWebhookStatus(wallet, WebhookStatus.OK )
+        webhookService.rescheduleWallet(wallet)
+    }
+
+    private suspend fun scheduleFailedWebhook(wallet: Wallet, transactionTask: TransactionQueueTask) {
+        if (transactionTask.attempt >= webhookProperties.maxRetryAttempts()) {
+            walletService.updateWebhookStatus(wallet, WebhookStatus.FAILED)
+        }
+
+        webhookService.rescheduleTransaction(wallet, transactionTask)
     }
 }

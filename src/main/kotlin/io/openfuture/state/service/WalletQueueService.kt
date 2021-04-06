@@ -14,4 +14,8 @@ interface WalletQueueService {
     suspend fun lock(walletId: String): Boolean
 
     suspend fun unlock(walletId: String)
+
+    suspend fun remove(walletId: String)
+
+    suspend fun incrementScore(walletId: String, diff: Double)
 }

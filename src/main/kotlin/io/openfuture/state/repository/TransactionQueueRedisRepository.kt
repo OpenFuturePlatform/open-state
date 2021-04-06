@@ -1,9 +1,7 @@
 package io.openfuture.state.repository
 
 import io.openfuture.state.domain.TransactionQueueTask
-import org.springframework.data.redis.core.ReactiveListOperations
-import org.springframework.data.redis.core.ReactiveRedisTemplate
-import org.springframework.data.redis.core.rightPushAndAwait
+import org.springframework.data.redis.core.*
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Mono
 
@@ -21,5 +19,17 @@ class TransactionQueueRedisRepository(
 
     suspend fun first(walletId: String): Mono<TransactionQueueTask> {
         return transactions.leftPop(walletId)
+    }
+
+    suspend fun count(walletId: String) : Mono<Long> {
+        return transactions.size(walletId)
+    }
+
+    suspend fun remove(walletId: String) {
+        transactions.deleteAndAwait(walletId)
+    }
+
+    suspend fun setAtPosition(walletId: String, transaction: TransactionQueueTask, index: Long) {
+        transactions.setAndAwait(walletId, index, transaction)
     }
 }

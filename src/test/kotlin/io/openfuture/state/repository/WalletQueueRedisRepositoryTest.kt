@@ -133,6 +133,26 @@ internal class WalletQueueRedisRepositoryTest: RedisRepositoryTests() {
         Assertions.assertThat(existsAfterTtl).isFalse()
     }
 
+    @Test
+    fun incrementScoreShouldChangeScoreValue() = runBlocking<Unit> {
+        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId", 1.0).block()
+
+        repository.incrementScore("walletId", 3.0)
+        val result = redisTemplate.opsForZSet().score(WALLETS_QUEUE, "walletId").block()
+
+        Assertions.assertThat(result).isEqualTo(4.0)
+    }
+
+    @Test
+    fun removeShouldRemoveValueFromSet() = runBlocking<Unit> {
+        redisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId", 1.0).block()
+
+        repository.remove("walletId")
+        val result = redisTemplate.opsForZSet().score(WALLETS_QUEUE, "walletId").block()
+
+        Assertions.assertThat(result).isNull()
+    }
+
     companion object {
         private const val WALLETS_QUEUE = "wallets_queue"
     }

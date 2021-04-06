@@ -43,4 +43,12 @@ class DefaultWalletQueueService(
     override suspend fun unlock(walletId: String) {
         repository.unlock(walletId)
     }
+
+    override suspend fun remove(walletId: String) {
+        repository.remove(walletId)
+    }
+
+    override suspend fun incrementScore(walletId: String, diff: Double) {
+        repository.incrementScore(walletId, diff)
+    }
 }

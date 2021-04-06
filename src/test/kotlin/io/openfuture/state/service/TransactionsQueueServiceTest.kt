@@ -7,10 +7,10 @@ import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.TransactionQueueRedisRepository
 import io.openfuture.state.util.createDummyTransactionQueueTask
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono
 
 internal class TransactionsQueueServiceTest: ServiceTests() {
@@ -42,5 +42,21 @@ internal class TransactionsQueueServiceTest: ServiceTests() {
 
         val result = service.first("walletId")
         Assertions.assertThat(result).isEqualTo(transactionTask)
+    }
+
+    @Test
+    fun hasTransactionsShouldReturnFalse() = runBlocking<Unit> {
+        given(repository.count("walletId")).willReturn(Mono.just(0))
+        val result = service.hasTransactions("walletId")
+
+        Assertions.assertThat(result).isFalse()
+    }
+
+    @Test
+    fun hasTransactionsShouldReturnTrue() = runBlocking<Unit> {
+        given(repository.count("walletId")).willReturn(Mono.just(5))
+        val result = service.hasTransactions("walletId")
+
+        Assertions.assertThat(result).isTrue()
     }
 }

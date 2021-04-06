@@ -23,10 +23,36 @@ data class WebhookProperties(
          * instances can't process locked wallet
          * (default 300 sec)
          */
-        val lockTTL: Duration = Duration.ofSeconds(300)
+        val lockTTL: Duration = Duration.ofSeconds(300),
+
+        /**
+         * Options to configure webhook invocation retry in
+         * case if previous attempts of invocation are failed
+         */
+        val retryOptions: RetryOptions = RetryOptions()
 ) {
         @Bean
         fun webhookInvocationProcessDelay(): Long {
                 return invocationProcessDelay.toMillis()
         }
+
+        fun maxRetryAttempts(): Int = retryOptions.progressiveMaxAttempts + retryOptions.dailyMaxAttempts
+
+
+        data class RetryOptions(
+
+                /**
+                 * Max count of retry attempts for webhook
+                 * invocation that use Fibonachi row to
+                 * calculate delays between attempts (default 10 times)
+                 */
+                val progressiveMaxAttempts: Int = 10,
+
+                /**
+                 * Max count of attempts that invoked once
+                 * per day after fbMaxAttempts are reached
+                 * (default 17 days)
+                 */
+                val dailyMaxAttempts: Int = 17
+        )
 }

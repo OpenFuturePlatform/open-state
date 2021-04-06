@@ -83,4 +83,48 @@ internal class TransactionQueueRedisRepositoryTest {
 
         Assertions.assertThat(result).isEqualTo(transactionTask1)
     }
+
+    @Test
+    fun countShouldReturnZero() = runBlocking<Unit> {
+        val result = repository.count("walletId").block()
+        Assertions.assertThat(result).isEqualTo(0)
+    }
+
+    @Test
+    fun countShouldReturnProperValue() = runBlocking<Unit> {
+        val transactionTask = createDummyTransactionQueueTask()
+
+        redisTemplate.opsForList().rightPush("walletId", transactionTask).block()
+
+        val result = repository.count("walletId").block()
+        Assertions.assertThat(result).isEqualTo(1)
+    }
+
+    @Test
+    fun setAtPositionShouldAddElementInProperIndex() = runBlocking<Unit> {
+        val transactionTask1 = createDummyTransactionQueueTask("transactionId1")
+        val transactionTask2 = createDummyTransactionQueueTask("transactionId2")
+        val transactionTask3 = createDummyTransactionQueueTask("transactionId3")
+
+        redisTemplate.opsForList().rightPush("walletId", transactionTask1).block()
+        redisTemplate.opsForList().rightPush("walletId", transactionTask2).block()
+        redisTemplate.opsForList().rightPush("walletId", transactionTask3).block()
+
+        repository.setAtPosition("walletId", transactionTask2, 1)
+
+        val result = redisTemplate.opsForList().range("walletId", 1, 1).collectList().block()
+        Assertions.assertThat(result).isEqualTo(listOf(transactionTask2))
+    }
+
+    @Test
+    fun removeShouldRemoveListOfElements() = runBlocking<Unit> {
+        val transactionTask = createDummyTransactionQueueTask()
+
+        redisTemplate.opsForList().rightPush("walletId", transactionTask).block()
+
+        repository.remove("walletId")
+
+        val result = redisTemplate.opsForList().size("walletId").block()
+        Assertions.assertThat(result).isEqualTo(0)
+    }
 }
