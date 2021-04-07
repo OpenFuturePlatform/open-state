@@ -24,10 +24,10 @@ class BinanceBlockchain(private val client: BinanceDexApiNodeClient) : Blockchai
         val unifiedTransactions = transactions.mapNotNull { mapByTransactionType(it) }
 
         return UnifiedBlock(
-                unifiedTransactions,
-                blockInfo.header.time.toLocalDateTime(),
-                blockNumber.toLong(),
-                blockInfo.header.dataHash
+            unifiedTransactions,
+            blockInfo.header.time.toLocalDateTime(),
+            blockNumber.toLong(),
+            blockInfo.header.dataHash
         )
     }
 
@@ -40,10 +40,10 @@ class BinanceBlockchain(private val client: BinanceDexApiNodeClient) : Blockchai
         val output = transferInfo.outputs.first()
         val coin = output.coins.firstOrNull { it.denom == "BNB" } ?: return null
         return UnifiedTransaction(
-                tx.hash,
-                transferInfo.inputs.first().address,
-                output.address,
-                coin.amount.toBigDecimal()
+            tx.hash,
+            transferInfo.inputs.first().address,
+            output.address,
+            coin.amount.toBigDecimal()
         )
     }
 

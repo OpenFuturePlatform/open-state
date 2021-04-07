@@ -10,10 +10,6 @@ fun Long.toLocalDateTime(): LocalDateTime {
             TimeZone.getDefault().toZoneId())
 }
 
-fun LocalDateTime.toEpochMilli(): Long {
-    return this.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-}
-
 fun Date.toLocalDateTime(): LocalDateTime {
     return this.toInstant()
             .atZone(ZoneId.systemDefault())

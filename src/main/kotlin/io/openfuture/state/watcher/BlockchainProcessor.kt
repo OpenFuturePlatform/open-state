@@ -21,9 +21,9 @@ import org.springframework.stereotype.Component
  */
 @Component
 class BlockchainProcessor(
-        private val walletService: WalletService,
-        private val blockchains: List<Blockchain>,
-        private val processingRepository: ProcessingRedisRepository
+    private val walletService: WalletService,
+    private val blockchains: List<Blockchain>,
+    private val processingRepository: ProcessingRedisRepository
 ) {
 
     @Scheduled(fixedDelayString = "#{@processDelay}", initialDelay = 1000)

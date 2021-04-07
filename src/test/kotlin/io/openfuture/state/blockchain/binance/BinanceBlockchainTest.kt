@@ -51,7 +51,7 @@ class BinanceBlockchainTest {
         val blockMeta = BlockMeta()
         val header = BlockMeta.Header()
 
-        header.time = Date.from(block.date.atZone(ZoneId.systemDefault()).toInstant());
+        header.time = Date.from(block.date.atZone(ZoneId.systemDefault()).toInstant())
         header.dataHash = block.hash
         blockMeta.header = header
 
