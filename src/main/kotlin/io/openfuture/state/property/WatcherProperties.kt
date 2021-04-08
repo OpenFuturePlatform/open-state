@@ -9,18 +9,18 @@ import java.time.Duration
 @ConfigurationProperties(prefix = "watcher")
 @Validated
 data class WatcherProperties(
-        /**
-         * Delay for checking for new blocks.
-         */
-        val checkDelay: Duration = Duration.ofSeconds(15),
+    /**
+     * Delay for checking for new blocks.
+     */
+    val checkDelay: Duration = Duration.ofSeconds(15),
 
-        /**
-         * Delay for checking blockchains to process.
-         */
-        val processDelay: Duration = Duration.ofSeconds(15),
+    /**
+     * Delay for checking blockchains to process.
+     */
+    val processDelay: Duration = Duration.ofSeconds(15),
 
-        /**
-         * Lock TTL.
-         */
-        val lockTtl: Duration = Duration.ofSeconds(60)
+    /**
+     * Lock TTL.
+     */
+    val lockTtl: Duration = Duration.ofSeconds(60)
 )

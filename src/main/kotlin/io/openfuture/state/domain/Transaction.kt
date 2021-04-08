@@ -12,7 +12,7 @@ data class Transaction(
         @Indexed
         val walletIdentity: WalletIdentity,
         val hash: String,
-        val from: String,
+        val from: Set<String>,
         val to: String,
         val amount: BigDecimal,
         val date: LocalDateTime,
