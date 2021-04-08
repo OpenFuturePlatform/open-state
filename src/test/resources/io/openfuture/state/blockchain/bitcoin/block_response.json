@@ -1,0 +1,47 @@
+{
+  "result": {
+    "height": 1,
+    "time": 1616862860,
+    "hash": "hash",
+    "tx": [
+      {
+        "hash": "hash",
+        "vin": [
+          {
+            "txid": "id",
+            "vout": 1
+          }
+        ],
+        "vout": [
+          {
+            "value": 1,
+            "scriptPubKey": {
+              "addresses": [
+                "to"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "hash": "hash",
+        "vin": [
+          {
+            "txid": "id",
+            "vout": 1
+          }
+        ],
+        "vout": [
+          {
+            "value": 1,
+            "scriptPubKey": {
+              "addresses": [
+                "to"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
