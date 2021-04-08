@@ -1,102 +1,94 @@
 package io.openfuture.state.blockchain.bitcoin
 
-import com.nhaarman.mockitokotlin2.mock
-import io.openfuture.state.blockchain.bitcoin.dto.BitcoinResponse
-import io.openfuture.state.blockchain.bitcoin.dto.BlockHeightBitcoinResponse
-import io.openfuture.state.blockchain.bitcoin.dto.InputInfo
-import io.openfuture.state.blockchain.bitcoin.dto.TransactionInputBitcoinResponse
 import io.openfuture.state.property.BitcoinProperties
 import io.openfuture.state.util.createDummyBitcoinBlock
-import io.openfuture.state.util.mockBuilder
-import io.openfuture.state.util.mockPost
+import io.openfuture.state.util.readResource
 import kotlinx.coroutines.runBlocking
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
 import org.springframework.web.reactive.function.client.WebClient
 
+
+@RestClientTest
+@TestInstance(PER_CLASS)
 class BitcoinClientTest {
 
-    private val builder: WebClient.Builder = mock()
-    private val webClient: WebClient = mock()
-    private val properties: BitcoinProperties = BitcoinProperties("test", "test", "test")
     private lateinit var client: BitcoinClient
+    private lateinit var mockWebServer: MockWebServer
+
+    @BeforeAll
+    fun setUp() {
+        mockWebServer = MockWebServer()
+        mockWebServer.start()
+    }
+
+    @AfterAll
+    fun tearDown() {
+        mockWebServer.shutdown()
+    }
 
     @BeforeEach
-    fun setUp() {
-        mockBuilder(builder, webClient)
-        client = BitcoinClient(properties, builder)
+    fun init() {
+        val properties = BitcoinProperties("http://${mockWebServer.hostName}:${mockWebServer.port}", "test", "test")
+        client = BitcoinClient(properties, WebClient.builder())
     }
 
     @Test
     fun getLatestBlockHashShouldReturnExpectedValue() = runBlocking<Unit> {
-        val hash = "0000000000015afb856ff92b062a4d023d104f7f1850914d9288d1bb889ffec3"
-
-        val response = BitcoinResponse(hash)
-
-        mockPost(webClient, response)
+        val json = readResource<BitcoinClientTest>("latest_block_hash_response.json")
+        val mockResponse = MockResponse().setBody(json).addHeader("Content-Type", "application/json")
+        mockWebServer.enqueue(mockResponse)
 
         val result = client.getLatestBlockHash()
 
-        assertThat(result).isEqualTo(hash)
+        assertThat(result).isEqualTo("0000000000015afb856ff92b062a4d023d104f7f1850914d9288d1bb889ffec3")
     }
 
     @Test
     fun getBlockHeightShouldReturnExpectedValue() = runBlocking<Unit> {
-        val hash = "0000000000015afb856ff92b062a4d023d104f7f1850914d9288d1bb889ffec3"
+        val json = readResource<BitcoinClientTest>("block_height_response.json")
+        val mockResponse = MockResponse().setBody(json).addHeader("Content-Type", "application/json")
+        mockWebServer.enqueue(mockResponse)
 
-        val response = BitcoinResponse(BlockHeightBitcoinResponse(5))
+        val result = client.getBlockHeight("hash")
 
-        mockPost(webClient, response)
-
-        val result = client.getBlockHeight(hash)
-
-        assertThat(result).isEqualTo(5)
+        assertThat(result).isEqualTo(666)
     }
 
     @Test
     fun getBlockHashShouldReturnExpectedValue() = runBlocking<Unit> {
-        val hash = "0000000000015afb856ff92b062a4d023d104f7f1850914d9288d1bb889ffec3"
-
-        val response = BitcoinResponse(hash)
-
-        mockPost(webClient, response)
+        val json = readResource<BitcoinClientTest>("block_hash_response.json")
+        val mockResponse = MockResponse().setBody(json).addHeader("Content-Type", "application/json")
+        mockWebServer.enqueue(mockResponse)
 
         val result = client.getBlockHash(5)
 
-        assertThat(result).isEqualTo(hash)
+        assertThat(result).isEqualTo("0000000000015afb856ff92b062a4d023d104f7f1850914d9288d1bb889ffec3")
     }
 
     @Test
     fun getBlockShouldReturnExpectedValue() = runBlocking<Unit> {
-        val hash = "0000000000015afb856ff92b062a4d023d104f7f1850914d9288d1bb889ffec3"
+        val expected = createDummyBitcoinBlock()
+        val json = readResource<BitcoinClientTest>("block_response.json")
+        val mockResponse = MockResponse().setBody(json).addHeader("Content-Type", "application/json")
+        mockWebServer.enqueue(mockResponse)
 
-        val block = createDummyBitcoinBlock()
+        val result = client.getBlock("hash")
 
-        val response = BitcoinResponse(block)
-
-        mockPost(webClient, response)
-
-        val result = client.getBlock(hash)
-
-        assertThat(result).isEqualTo(block)
+        assertThat(result).isEqualTo(expected)
     }
 
     @Test
     fun getInputAddressShouldReturnExpectedValue() = runBlocking<Unit> {
-        val txId = "0000000000015afb856ff92b062a4d023d104f7f1850914d9288d1bb889ffec3"
+        val json = readResource<BitcoinClientTest>("input_address_response.json")
+        val mockResponse = MockResponse().setBody(json).addHeader("Content-Type", "application/json")
+        mockWebServer.enqueue(mockResponse)
 
-        val info1 = InputInfo(0, "address1")
-
-        val info2 = InputInfo(1, "address2")
-
-        val details = TransactionInputBitcoinResponse(listOf(info1, info2))
-
-        val response = BitcoinResponse(details)
-
-        mockPost(webClient, response)
-
-        val result = client.getInputAddress(txId, 0)
+        val result = client.getInputAddress("hash", 0)
 
         assertThat(result).isEqualTo("address1")
     }

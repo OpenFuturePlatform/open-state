@@ -12,15 +12,12 @@ import org.junit.jupiter.api.Test
 class BitcoinBlockchainTest {
 
     private val client: BitcoinClient = mock()
-
     private lateinit var bitcoinBlockchain: BitcoinBlockchain
-
 
     @BeforeEach
     fun setUp() {
         bitcoinBlockchain = BitcoinBlockchain(client)
     }
-
 
     @Test
     fun getLastBlockNumberShouldReturnExpectedValue() = runBlocking<Unit> {
