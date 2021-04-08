@@ -1,0 +1,14 @@
+{
+  "result": {
+    "details": [
+      {
+        "vout": 0,
+        "address": "address1"
+      },
+      {
+        "vout": 1,
+        "address": "address2"
+      }
+    ]
+  }
+}

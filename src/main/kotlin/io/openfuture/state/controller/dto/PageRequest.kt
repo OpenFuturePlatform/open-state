@@ -8,8 +8,8 @@ import javax.validation.constraints.Max
 import javax.validation.constraints.Min
 
 data class PageRequest(
-        @field:Min(value = 0) private var offset: Long = 0,
-        @field:Min(value = 1) @field:Max(100) private var limit: Int = 100
+    @field:Min(value = 0) private var offset: Long = 0,
+    @field:Min(value = 1) @field:Max(100) private var limit: Int = 100
 ) : AbstractPageRequest(offset.toInt() / limit + 1, limit) {
 
     override fun getSort(): Sort = Sort.by(ASC, "id")
