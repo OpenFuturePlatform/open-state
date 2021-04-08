@@ -43,11 +43,11 @@ class WalletController(private val walletService: WalletService, private val blo
         val lastUpdateDate: LocalDateTime
     ) {
         constructor(wallet: Wallet) : this(
-                wallet.id,
-                wallet.identity.address,
-                wallet.webhook,
-                wallet.identity .blockchain,
-                wallet.lastUpdate
+            wallet.id,
+            wallet.identity.address,
+            wallet.webhook,
+            wallet.identity.blockchain,
+            wallet.lastUpdate
         )
     }
 
