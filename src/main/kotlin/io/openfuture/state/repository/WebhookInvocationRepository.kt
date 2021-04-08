@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 import reactor.core.publisher.Mono
 
 @Repository
-interface WebhookInvocationRepository: ReactiveMongoRepository<WebhookInvocation, String> {
+interface WebhookInvocationRepository : ReactiveMongoRepository<WebhookInvocation, String> {
 
     fun findByTransactionId(transactionId: String): Mono<WebhookInvocation>
 }

@@ -6,5 +6,9 @@ import io.openfuture.state.webhhok.WebhookRestClient
 
 interface WebhookInvocationService {
 
-    suspend fun registerInvocation(wallet: Wallet, transactionTask: TransactionQueueTask, response: WebhookRestClient.WebhookResponse)
+    suspend fun registerInvocation(
+        wallet: Wallet,
+        transactionTask: TransactionQueueTask,
+        response: WebhookRestClient.WebhookResponse
+    )
 }

@@ -11,14 +11,9 @@ class DefaultWebhookExecutor(
     private val walletService: WalletService,
     private val webhookService: WebhookService,
     private val transactionService: TransactionService,
-    private val restClient: WebhookRestClient
+    private val restClient: WebhookRestClient,
+    private val webhookInvocationService: WebhookInvocationService
 ) : WebhookExecutor {
-        private val walletService: WalletService,
-        private val webhookService: WebhookService,
-        private val transactionService: TransactionService,
-        private val restClient: WebhookRestClient,
-        private val webhookInvocationService: WebhookInvocationService
-): WebhookExecutor {
 
     override suspend fun execute(walletId: String) {
         val wallet = walletService.findById(walletId)
@@ -28,4 +23,5 @@ class DefaultWebhookExecutor(
         val response = restClient.doPost(wallet.webhook, WebhookPayloadDto(transaction))
         webhookInvocationService.registerInvocation(wallet, transactionTask, response)
     }
+
 }

@@ -10,13 +10,13 @@ import java.time.LocalDateTime
 
 @Document
 data class WebhookInvocation(
-        @Indexed
-        val walletIdentity: WalletIdentity,
-        @Indexed
-        val transactionId: String,
-        private val invocations: MutableList<WebhookResult> = ArrayList(),
-        @MongoId
-        val id: String = ObjectId().toHexString()
+    @Indexed
+    val walletIdentity: WalletIdentity,
+    @Indexed
+    val transactionId: String,
+    private val invocations: MutableList<WebhookResult> = ArrayList(),
+    @MongoId
+    val id: String = ObjectId().toHexString()
 ) {
 
     fun addInvocation(webhookResult: WebhookResult) {
@@ -24,18 +24,18 @@ data class WebhookInvocation(
     }
 
     data class WebhookResult(
-            val status: HttpStatus,
-            val url: String,
-            val attempt: Int,
-            val message: String? = null,
-            val timestamp: LocalDateTime = LocalDateTime.now()
+        val status: HttpStatus,
+        val url: String,
+        val attempt: Int,
+        val message: String? = null,
+        val timestamp: LocalDateTime = LocalDateTime.now()
     ) {
 
-        constructor(response: WebhookRestClient.WebhookResponse, attempt: Int): this(
-                response.status,
-                response.url,
-                attempt,
-                response.message
+        constructor(response: WebhookRestClient.WebhookResponse, attempt: Int) : this(
+            response.status,
+            response.url,
+            attempt,
+            response.message
         )
     }
 }

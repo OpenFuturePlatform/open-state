@@ -3,6 +3,10 @@ package io.openfuture.state.service
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.TransactionQueueTask
 import io.openfuture.state.domain.Wallet
+import io.openfuture.state.domain.WalletQueueTask
+import io.openfuture.state.exception.NotFoundException
+import io.openfuture.state.repository.WebhookQueueRedisRepository
+import io.openfuture.state.util.toEpochMilli
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -13,6 +17,7 @@ class DefaultWebhookService(
 
     override suspend fun scheduleTransaction(wallet: Wallet, transaction: Transaction) {
         val transactionTask = TransactionQueueTask(transaction.id, transaction.date)
+
         if (isQueued(wallet.id)) {
             repository.addTransaction(wallet.id, transactionTask)
         } else {
