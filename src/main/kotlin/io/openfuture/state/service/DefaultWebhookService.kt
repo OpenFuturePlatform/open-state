@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 @Service
 class DefaultWebhookService(
     private val repository: WebhookQueueRedisRepository
-): WebhookService {
+) : WebhookService {
 
     override suspend fun scheduleTransaction(wallet: Wallet, transaction: Transaction) {
         val transactionTask = TransactionQueueTask(transaction.id, transaction.date)

@@ -15,15 +15,15 @@ import org.springframework.stereotype.Service
 
 @Service
 class DefaultWalletService(
-        private val walletRepository: WalletRepository,
-        private val transactionRepository: TransactionRepository,
-        private val webhookService: WebhookService
-): WalletService {
+    private val walletRepository: WalletRepository,
+    private val transactionRepository: TransactionRepository,
+    private val webhookService: WebhookService
+) : WalletService {
 
     override suspend fun findByIdentity(blockchain: String, address: String): Wallet {
         val identity = WalletIdentity(blockchain, address)
         return walletRepository.findByIdentity(identity).awaitFirstOrNull()
-                ?: throw NotFoundException("Wallet not found: $blockchain - $address")
+            ?: throw NotFoundException("Wallet not found: $blockchain - $address")
     }
 
     override suspend fun save(blockchain: Blockchain, address: String, webhook: String): Wallet {
@@ -42,14 +42,14 @@ class DefaultWalletService(
 
     private suspend fun saveTransaction(wallet: Wallet, block: UnifiedBlock, unifiedTransaction: UnifiedTransaction) {
         val transaction = Transaction(
-                wallet.identity,
-                unifiedTransaction.hash,
-                unifiedTransaction.from,
-                unifiedTransaction.to,
-                unifiedTransaction.amount,
-                block.date,
-                block.number,
-                block.hash
+            wallet.identity,
+            unifiedTransaction.hash,
+            unifiedTransaction.from,
+            unifiedTransaction.to,
+            unifiedTransaction.amount,
+            block.date,
+            block.number,
+            block.hash
         )
 
         transactionRepository.save(transaction).awaitSingle()

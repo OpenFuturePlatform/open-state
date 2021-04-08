@@ -14,7 +14,7 @@ import org.springframework.data.redis.core.setAndAwait
 import java.time.Duration
 import java.time.LocalDateTime
 
-internal class WebhookQueueRedisRepositoryTest: RedisRepositoryTests() {
+internal class WebhookQueueRedisRepositoryTest : RedisRepositoryTests() {
 
     private lateinit var repository: WebhookQueueRedisRepository
     private val properties: WebhookProperties = WebhookProperties(lockTTL = Duration.ofSeconds(3))
@@ -72,8 +72,8 @@ internal class WebhookQueueRedisRepositoryTest: RedisRepositoryTests() {
 
         repository.addWallet("walletId", transactionTask, 15.0)
         val result = transactionTaskRedisTemplate.opsForList()
-                .range("walletId", 0, 1)
-                .collectList().block()
+            .range("walletId", 0, 1)
+            .collectList().block()
 
         assertThat(result).isEqualTo(listOf(transactionTask))
     }
@@ -108,9 +108,11 @@ internal class WebhookQueueRedisRepositoryTest: RedisRepositoryTests() {
     fun firstWalletInScoreRangeShouldReturnProperValuesIfStartOfRangeNotSet() = runBlocking<Unit> {
         val timestamp = LocalDateTime.now()
 
-        commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId1", timestamp.minusDays(1).toEpochMilli().toDouble()).block()
+        commonRedisTemplate.opsForZSet()
+            .add(WALLETS_QUEUE, "walletId1", timestamp.minusDays(1).toEpochMilli().toDouble()).block()
         commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId2", timestamp.toEpochMilli().toDouble()).block()
-        commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId3", timestamp.plusDays(1).toEpochMilli().toDouble()).block()
+        commonRedisTemplate.opsForZSet()
+            .add(WALLETS_QUEUE, "walletId3", timestamp.plusDays(1).toEpochMilli().toDouble()).block()
 
         val result = repository.firstWalletInScoreRange(null, timestamp.toEpochMilli().toDouble())
         assertThat(result).isEqualTo("walletId1")
@@ -120,11 +122,16 @@ internal class WebhookQueueRedisRepositoryTest: RedisRepositoryTests() {
     fun firstWalletInScoreRangeShouldReturnProperValuesIfStartOfRangeIsSet() = runBlocking<Unit> {
         val timestamp = LocalDateTime.now()
 
-        commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId1", timestamp.minusDays(1).toEpochMilli().toDouble()).block()
+        commonRedisTemplate.opsForZSet()
+            .add(WALLETS_QUEUE, "walletId1", timestamp.minusDays(1).toEpochMilli().toDouble()).block()
         commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId2", timestamp.toEpochMilli().toDouble()).block()
-        commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId3", timestamp.plusDays(1).toEpochMilli().toDouble()).block()
+        commonRedisTemplate.opsForZSet()
+            .add(WALLETS_QUEUE, "walletId3", timestamp.plusDays(1).toEpochMilli().toDouble()).block()
 
-        val result = repository.firstWalletInScoreRange(timestamp.toEpochMilli().toDouble(), timestamp.plusDays(3).toEpochMilli().toDouble())
+        val result = repository.firstWalletInScoreRange(
+            timestamp.toEpochMilli().toDouble(),
+            timestamp.plusDays(3).toEpochMilli().toDouble()
+        )
         assertThat(result).isEqualTo("walletId2")
     }
 
@@ -132,11 +139,16 @@ internal class WebhookQueueRedisRepositoryTest: RedisRepositoryTests() {
     fun firstWalletInScoreRangeShouldReturnNull() = runBlocking<Unit> {
         val timestamp = LocalDateTime.now()
 
-        commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId1", timestamp.minusDays(1).toEpochMilli().toDouble()).block()
+        commonRedisTemplate.opsForZSet()
+            .add(WALLETS_QUEUE, "walletId1", timestamp.minusDays(1).toEpochMilli().toDouble()).block()
         commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId2", timestamp.toEpochMilli().toDouble()).block()
-        commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId3", timestamp.plusDays(1).toEpochMilli().toDouble()).block()
+        commonRedisTemplate.opsForZSet()
+            .add(WALLETS_QUEUE, "walletId3", timestamp.plusDays(1).toEpochMilli().toDouble()).block()
 
-        val result = repository.firstWalletInScoreRange(timestamp.plusDays(2).toEpochMilli().toDouble(), timestamp.plusDays(3).toEpochMilli().toDouble())
+        val result = repository.firstWalletInScoreRange(
+            timestamp.plusDays(2).toEpochMilli().toDouble(),
+            timestamp.plusDays(3).toEpochMilli().toDouble()
+        )
         assertThat(result).isNull()
     }
 
@@ -147,7 +159,7 @@ internal class WebhookQueueRedisRepositoryTest: RedisRepositoryTests() {
     }
 
     @Test
-    fun lockShouldReturnNotReceiveLock()= runBlocking<Unit> {
+    fun lockShouldReturnNotReceiveLock() = runBlocking<Unit> {
         commonRedisTemplate.opsForValue().setAndAwait("LOCK:walletId", "walletId", properties.lockTTL)
 
         val result = repository.lock("walletId")

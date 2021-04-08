@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate
 abstract class RedisRepositoryTests {
     @Autowired
     protected lateinit var commonRedisTemplate: ReactiveRedisTemplate<String, Any>
+
     @Autowired
     protected lateinit var transactionTaskRedisTemplate: ReactiveRedisTemplate<String, TransactionQueueTask>
 }

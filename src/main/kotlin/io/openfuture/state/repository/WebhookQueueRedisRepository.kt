@@ -20,7 +20,8 @@ class WebhookQueueRedisRepository(
 ) {
     private val wallets: ReactiveZSetOperations<String, Any> = commonRedisTemplate.opsForZSet()
     private val locks: ReactiveValueOperations<String, Any> = commonRedisTemplate.opsForValue()
-    private val transactions: ReactiveListOperations<String, TransactionQueueTask> = transactionTaskRedisTemplate.opsForList()
+    private val transactions: ReactiveListOperations<String, TransactionQueueTask> =
+        transactionTaskRedisTemplate.opsForList()
 
 
     suspend fun addWallet(walletId: String, transaction: TransactionQueueTask, score: Double) {
@@ -52,9 +53,9 @@ class WebhookQueueRedisRepository(
 
     suspend fun lock(walletId: String): Boolean {
         return locks.setIfAbsentAndAwait(
-                "LOCK:${walletId}",
-                LocalDateTime.now(),
-                webhookProperties.lockTTL
+            "LOCK:${walletId}",
+            LocalDateTime.now(),
+            webhookProperties.lockTTL
         )
     }
 

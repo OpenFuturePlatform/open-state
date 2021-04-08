@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
  * Processor starts to execute webhook for first
  * wallet tat not processed by another process
  * at the same time
-*/
+ */
 
 @Component
 class WebhookProcessor(
@@ -24,7 +24,7 @@ class WebhookProcessor(
     @Scheduled(fixedDelayString = "#{@webhookInvocationProcessDelay}", initialDelay = 1000)
     fun process() = runBlocking {
         var walletTask = webhookService.firstWalletInQueue() ?: return@runBlocking
-        while(!webhookService.lock(walletTask.walletId)) {
+        while (!webhookService.lock(walletTask.walletId)) {
             walletTask = webhookService.firstWalletInQueue(walletTask.score) ?: return@runBlocking
         }
 

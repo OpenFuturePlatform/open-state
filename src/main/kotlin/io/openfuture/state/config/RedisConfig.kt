@@ -31,7 +31,8 @@ class RedisConfig {
         val serializer = Jackson2JsonRedisSerializer(TransactionQueueTask::class.java)
         serializer.setObjectMapper(objectMapper)
 
-        val serializationContext = RedisSerializationContext.newSerializationContext<String, TransactionQueueTask>(serializer).build()
+        val serializationContext =
+            RedisSerializationContext.newSerializationContext<String, TransactionQueueTask>(serializer).build()
         return ReactiveRedisTemplate(factory, serializationContext)
     }
 
