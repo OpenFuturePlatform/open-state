@@ -1,9 +1,6 @@
 package io.openfuture.state.util
 
-import io.openfuture.state.domain.Transaction
-import io.openfuture.state.domain.TransactionQueueTask
-import io.openfuture.state.domain.Wallet
-import io.openfuture.state.domain.WalletIdentity
+import io.openfuture.state.domain.*
 import org.bson.types.ObjectId
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -30,5 +27,11 @@ fun createDummyTransaction(
 ) = Transaction(WalletIdentity(blockchain, address), hash, from, to, amount, date, blockHeight, blockHash, id)
 
 fun createDummyTransactionQueueTask(
-        transactionId: String = "transactionId"
-) = TransactionQueueTask(transactionId)
+        transactionId: String = "transactionId",
+        timestamp: LocalDateTime = LocalDateTime.of(2020, 9, 9, 9, 9)
+) = TransactionQueueTask(transactionId, timestamp)
+
+fun createDummyWalletQueueTask(
+        walletId: String = "walletId",
+        score: Double = 5.0
+) = WalletQueueTask(walletId, score)
