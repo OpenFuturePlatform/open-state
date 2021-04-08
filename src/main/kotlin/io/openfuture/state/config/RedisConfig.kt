@@ -1,7 +1,6 @@
 package io.openfuture.state.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.openfuture.state.domain.TransactionQueueTask
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -15,18 +14,26 @@ import org.springframework.data.redis.serializer.RedisSerializationContext
 class RedisConfig {
 
     @Bean
-    fun reactiveRedisTemplate(factory: ReactiveRedisConnectionFactory, objectMapper: ObjectMapper): ReactiveRedisTemplate<String, Any> {
+    fun commonRedisTemplate(
+        factory: ReactiveRedisConnectionFactory,
+        objectMapper: ObjectMapper
+    ): ReactiveRedisTemplate<String, Any> {
         val serializer = GenericJackson2JsonRedisSerializer(objectMapper)
         val serializationContext = RedisSerializationContext.newSerializationContext<String, Any>(serializer).build()
         return ReactiveRedisTemplate(factory, serializationContext)
     }
 
     @Bean
-    fun transactionsRedisTemplate(factory: ReactiveRedisConnectionFactory): ReactiveRedisTemplate<String, TransactionQueueTask> {
+    fun transactionTaskRedisTemplate(
+        factory: ReactiveRedisConnectionFactory,
+        objectMapper: ObjectMapper
+    ): ReactiveRedisTemplate<String, TransactionQueueTask> {
         val serializer = Jackson2JsonRedisSerializer(TransactionQueueTask::class.java)
-        serializer.setObjectMapper(ObjectMapper().registerModule(JavaTimeModule()))
+        serializer.setObjectMapper(objectMapper)
 
-        val serializationContext = RedisSerializationContext.newSerializationContext<String, TransactionQueueTask>(serializer).build()
+        val serializationContext =
+            RedisSerializationContext.newSerializationContext<String, TransactionQueueTask>(serializer).build()
         return ReactiveRedisTemplate(factory, serializationContext)
     }
+
 }

@@ -8,34 +8,42 @@ import java.time.LocalDateTime
 
 @Service
 class DefaultWebhookService(
-        private val walletQueueService: WalletQueueService,
-        private val transactionsQueueService: TransactionsQueueService
-): WebhookService {
+    private val repository: WebhookQueueRedisRepository
+) : WebhookService {
 
     override suspend fun scheduleTransaction(wallet: Wallet, transaction: Transaction) {
-        val transactionTask = TransactionQueueTask(transaction.id, 1, transaction.date)
-
-        val score = walletQueueService.score(wallet.id)
-        if (score == null) {
-            walletQueueService.add(wallet.id, transactionTask)
+        val transactionTask = TransactionQueueTask(transaction.id, transaction.date)
+        if (isQueued(wallet.id)) {
+            repository.addTransaction(wallet.id, transactionTask)
         } else {
-            transactionsQueueService.add(wallet.id, transactionTask)
+            repository.addWallet(wallet.id, transactionTask, transactionTask.timestamp.toEpochMilli().toDouble())
         }
     }
 
-    override suspend fun walletsScheduledForNow(): List<String> {
-        return walletQueueService.walletsScheduledTo(LocalDateTime.now())
+    override suspend fun firstWalletInQueue(score: Double?): WalletQueueTask? {
+        val walletId = repository.firstWalletInScoreRange(score, LocalDateTime.now().toEpochMilli().toDouble())
+        if (walletId != null) {
+            val walletScore = repository.walletScore(walletId)
+            return WalletQueueTask(walletId, walletScore)
+        }
+
+        return null
     }
 
-    override suspend fun firstTransaction(wallet: Wallet): TransactionQueueTask {
-        return transactionsQueueService.first(wallet.id)
+    override suspend fun firstTransaction(walletId: String): TransactionQueueTask {
+        return repository.firstTransaction(walletId) ?: throw NotFoundException("Transaction not found")
     }
 
     override suspend fun lock(walletId: String): Boolean {
-        return walletQueueService.lock(walletId)
+        return repository.lock(walletId)
     }
 
     override suspend fun unlock(walletId: String) {
-        walletQueueService.unlock(walletId)
+        repository.unlock(walletId)
     }
+
+    private suspend fun isQueued(walletId: String): Boolean {
+        return repository.walletScore(walletId) != null
+    }
+
 }

@@ -1,6 +1,7 @@
 package io.openfuture.state.base
 
 import io.openfuture.state.config.RedisConfig
+import io.openfuture.state.domain.TransactionQueueTask
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
 import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest
@@ -11,5 +12,8 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate
 @Import(RedisConfig::class, JacksonAutoConfiguration::class)
 abstract class RedisRepositoryTests {
     @Autowired
-    protected lateinit var redisTemplate: ReactiveRedisTemplate<String, Any>
+    protected lateinit var commonRedisTemplate: ReactiveRedisTemplate<String, Any>
+
+    @Autowired
+    protected lateinit var transactionTaskRedisTemplate: ReactiveRedisTemplate<String, TransactionQueueTask>
 }

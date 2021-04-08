@@ -12,7 +12,3 @@ fun ReactiveRedisTemplate<String, Any>.keyToByteBuffer(key: String): ByteBuffer 
 fun ReactiveRedisTemplate<String, Any>.valueToByteBuffer(value: Any): ByteBuffer {
     return this.serializationContext.valueSerializationPair.write(value)
 }
-
-fun LocalDateTime.toMillisDouble(): Double {
-    return this.toEpochMilli().toDouble()
-}

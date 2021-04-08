@@ -24,57 +24,63 @@ class WalletControllerTest : ControllerTests() {
     @Test
     fun findByAddressShouldReturnWallet() = runBlocking<Unit> {
         val wallet = createDummyWallet(
-                id = "5f480720e5cba939f1918911",
-                lastUpdate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
+            id = "5f480720e5cba939f1918911",
+            lastUpdate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
         )
         given(walletService.findByIdentity("this-is-chain", "this-is-address")).willReturn(wallet)
 
         webClient.get()
-                .uri("/api/wallets/blockchain/this-is-chain/address/this-is-address")
-                .exchange()
-                .expectStatus().isOk
-                .expectBody()
-                .json("""
+            .uri("/api/wallets/blockchain/this-is-chain/address/this-is-address")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .json(
+                """
                     {
                         "id": "5f480720e5cba939f1918911",
                         "address": "address",
                         "webhook": "webhook",
                         "lastUpdateDate": "2020-08-28T01:18:56.825261"
                     }
-                """.trimIndent())
+                """.trimIndent()
+            )
     }
 
     @Test
     fun saveShouldSaveAndReturnWallet() = runBlocking<Unit> {
         val wallet = createDummyWallet(
-                id = "5f480720e5cba939f1918911",
-                lastUpdate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
+            id = "5f480720e5cba939f1918911",
+            lastUpdate = LocalDateTime.parse("2020-08-28T01:18:56.825261")
         )
 
         given(blockchain.getName()).willReturn("Ethereum")
         given(walletService.save(blockchain, "address", "webhook")).willReturn(wallet)
 
         webClient.post()
-                .uri("/api/wallets")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue("""
+            .uri("/api/wallets")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(
+                """
                     {
                         "address": "address",
                         "webhook": "webhook",
                         "blockchain": "Ethereum"
                     }
-                """.trimIndent())
-                .exchange()
-                .expectStatus().isOk
-                .expectBody()
-                .json("""
+                """.trimIndent()
+            )
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .json(
+                """
                     {
                         "id": "5f480720e5cba939f1918911",
                         "address": "address",
                         "webhook": "webhook",
                         "lastUpdateDate": "2020-08-28T01:18:56.825261"
                     }
-                """.trimIndent())
+                """.trimIndent()
+            )
     }
 
 }
