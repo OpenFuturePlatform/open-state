@@ -40,12 +40,7 @@ class BinanceBlockchain(private val client: BinanceDexApiNodeClient) : Blockchai
         val output = transferInfo.outputs.first()
         val coin = output.coins.firstOrNull { it.denom == "BNB" } ?: return null
         val inputAddresses = transferInfo.inputs.map { it.address }.toSet()
-        return UnifiedTransaction(
-            tx.hash,
-            inputAddresses,
-            output.address,
-            coin.amount.toBigDecimal()
-        )
+        return UnifiedTransaction(tx.hash, inputAddresses, output.address, coin.amount.toBigDecimal())
     }
 
 }
