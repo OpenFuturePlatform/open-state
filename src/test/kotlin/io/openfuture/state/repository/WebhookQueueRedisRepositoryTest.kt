@@ -178,6 +178,36 @@ internal class WebhookQueueRedisRepositoryTest : RedisRepositoryTests() {
         assertThat(existsAfterTtl).isFalse
     }
 
+    @Test
+    fun firstTransactionShouldReturnNull() = runBlocking<Unit> {
+        val result = repository.firstTransaction("walletId")
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun firstTransactionShouldReturnProperValue() = runBlocking<Unit> {
+        val transactionTask = createDummyTransactionQueueTask()
+        transactionTaskRedisTemplate.opsForList().rightPush("walletId", transactionTask).block()
+
+        val result = repository.firstTransaction("walletId")
+        assertThat(result).isEqualTo(transactionTask)
+    }
+
+    @Test
+    fun firstTransactionShouldReturnFirstValueInList() = runBlocking<Unit> {
+        val transactionTask1 = createDummyTransactionQueueTask("transactionId1")
+        val transactionTask2 = createDummyTransactionQueueTask("transactionId2")
+        val transactionTask3 = createDummyTransactionQueueTask("transactionId3")
+
+        transactionTaskRedisTemplate.opsForList().rightPush("walletId", transactionTask1).block()
+        transactionTaskRedisTemplate.opsForList().rightPush("walletId", transactionTask2).block()
+        transactionTaskRedisTemplate.opsForList().rightPush("walletId", transactionTask3).block()
+
+        val result = repository.firstTransaction("walletId")
+
+        assertThat(result).isEqualTo(transactionTask1)
+    }
+
     companion object {
         private const val WALLETS_QUEUE = "wallets_queue"
     }

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono
 
-internal class TransactionServiceTest: ServiceTests() {
+internal class TransactionServiceTest : ServiceTests() {
 
     private lateinit var transactionService: TransactionService
     private val repository: TransactionRepository = mock()
@@ -43,4 +43,5 @@ internal class TransactionServiceTest: ServiceTests() {
 
         org.assertj.core.api.Assertions.assertThat(result).isEqualTo(transaction)
     }
+
 }

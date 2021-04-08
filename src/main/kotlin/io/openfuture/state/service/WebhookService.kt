@@ -11,7 +11,7 @@ interface WebhookService {
 
     suspend fun firstWalletInQueue(score: Double? = null): WalletQueueTask?
 
-    suspend fun firstTransaction(wallet: Wallet): TransactionQueueTask
+    suspend fun firstTransaction(walletId: String): TransactionQueueTask
 
     suspend fun lock(walletId: String): Boolean
 

@@ -28,7 +28,7 @@ class DefaultWalletService(
 
     override suspend fun findById(id: String): Wallet {
         return walletRepository.findById(id).awaitFirstOrNull()
-                ?: throw NotFoundException("Wallet not found: $id")
+            ?: throw NotFoundException("Wallet not found: $id")
     }
 
     override suspend fun save(blockchain: Blockchain, address: String, webhook: String): Wallet {
@@ -60,4 +60,5 @@ class DefaultWalletService(
         transactionRepository.save(transaction).awaitSingle()
         webhookService.scheduleTransaction(wallet, transaction)
     }
+
 }

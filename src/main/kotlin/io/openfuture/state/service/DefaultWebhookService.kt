@@ -4,6 +4,7 @@ import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.TransactionQueueTask
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WalletQueueTask
+import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.WebhookQueueRedisRepository
 import io.openfuture.state.util.toEpochMilli
 import org.springframework.stereotype.Service
@@ -33,8 +34,8 @@ class DefaultWebhookService(
         return null
     }
 
-    override suspend fun firstTransaction(wallet: Wallet): TransactionQueueTask {
-        return transactionsQueueService.first(wallet.id)
+    override suspend fun firstTransaction(walletId: String): TransactionQueueTask {
+        return repository.firstTransaction(walletId) ?: throw NotFoundException("Transaction not found")
     }
 
     override suspend fun lock(walletId: String): Boolean {

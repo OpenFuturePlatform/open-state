@@ -69,6 +69,10 @@ class WebhookQueueRedisRepository(
         locks.deleteAndAwait("LOCK:${walletId}")
     }
 
+    suspend fun firstTransaction(walletId: String): TransactionQueueTask? {
+        return transactions.leftPopAndAwait(walletId)
+    }
+
     companion object {
         private const val WALLETS_QUEUE = "wallets_queue"
     }

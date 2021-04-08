@@ -9,16 +9,19 @@ import org.springframework.web.reactive.function.client.WebClient
 import java.net.UnknownHostException
 
 @Component
-class WebhookRestClient(private val webhookWebClient: WebClient) {
+class WebhookRestClient(builder: WebClient.Builder) {
+
+    private val client: WebClient = builder.build()
+
 
     suspend fun doPost(url: String, body: Any): WebhookResponse {
         return try {
-            val response = webhookWebClient.post()
-                    .uri(url)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(BodyInserters.fromValue(body))
-                    .exchange()
-                    .awaitSingle()
+            val response = client.post()
+                .uri(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(body))
+                .exchange()
+                .awaitSingle()
 
             WebhookResponse(response.statusCode(), url, response.statusCode().reasonPhrase)
         } catch (ex: UnknownHostException) {
@@ -29,8 +32,9 @@ class WebhookRestClient(private val webhookWebClient: WebClient) {
     }
 
     data class WebhookResponse(
-            val status: HttpStatus,
-            val url: String,
-            val message: String?
+        val status: HttpStatus,
+        val url: String,
+        val message: String?
     )
+
 }
