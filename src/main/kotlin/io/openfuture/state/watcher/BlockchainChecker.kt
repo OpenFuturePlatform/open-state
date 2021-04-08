@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component
  */
 @Component
 class BlockchainChecker(
-        private val blockchains: List<Blockchain>,
-        private val processingRepository: ProcessingRedisRepository
+    private val blockchains: List<Blockchain>,
+    private val processingRepository: ProcessingRedisRepository
 ) {
 
     @Scheduled(fixedDelayString = "#{@checkDelay}")
