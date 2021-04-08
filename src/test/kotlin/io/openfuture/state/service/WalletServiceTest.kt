@@ -5,8 +5,9 @@ import com.nhaarman.mockitokotlin2.given
 import com.nhaarman.mockitokotlin2.mock
 import io.openfuture.state.base.ServiceTests
 import io.openfuture.state.blockchain.Blockchain
-import io.openfuture.state.domain.Wallet
+import io.openfuture.state.domain.WalletIdentity
 import io.openfuture.state.exception.NotFoundException
+import io.openfuture.state.repository.TransactionRepository
 import io.openfuture.state.repository.WalletRepository
 import io.openfuture.state.util.createDummyWallet
 import kotlinx.coroutines.runBlocking
@@ -22,12 +23,13 @@ class WalletServiceTest : ServiceTests() {
     private lateinit var walletService: WalletService
 
     private val walletRepository: WalletRepository = mock()
+    private val transactionRepository: TransactionRepository = mock()
     private val blockchain: Blockchain = mock()
 
 
     @BeforeEach
     fun setUp() {
-        walletService = DefaultWalletService(walletRepository)
+        walletService = DefaultWalletService(walletRepository, transactionRepository)
         given(blockchain.getName()).willReturn("MockBlockchain")
     }
 
@@ -35,30 +37,30 @@ class WalletServiceTest : ServiceTests() {
     fun saveShouldReturnWallet() = runBlocking<Unit> {
         val wallet = createDummyWallet()
 
-        given(walletRepository.save(any<Wallet>())).willReturn(Mono.just(wallet))
+        given(walletRepository.save(any())).willReturn(Mono.just(wallet))
 
-        val result = walletService.save(blockchain, wallet.address, wallet.webhook)
+        val result = walletService.save(blockchain, wallet.identity.address, wallet.webhook)
 
         assertThat(result).isEqualTo(wallet)
     }
 
     @Test
-    fun findByAddressShouldThrowNotFoundException() {
-        given(walletRepository.findByAddress("address")).willReturn(Mono.empty())
+    fun findByIdentityShouldThrowNotFoundException() {
+        given(walletRepository.findByIdentity(WalletIdentity("Ethereum", "address"))).willReturn(Mono.empty())
         Assertions.assertThrows(NotFoundException::class.java) {
             runBlocking {
-                walletService.findByAddress("address")
+                walletService.findByIdentity("Ethereum", "address")
             }
         }
     }
 
     @Test
-    fun findByAddressShouldReturnWalletDto() = runBlocking<Unit> {
+    fun findByIdentityShouldReturnWalletDto() = runBlocking<Unit> {
         val wallet = createDummyWallet()
 
-        given(walletRepository.findByAddress("address")).willReturn(Mono.just(wallet))
+        given(walletRepository.findByIdentity(WalletIdentity("Ethereum", "address"))).willReturn(Mono.just(wallet))
 
-        val result = walletService.findByAddress("address")
+        val result = walletService.findByIdentity("Ethereum", "address")
 
         assertThat(result).isEqualTo(wallet)
     }
