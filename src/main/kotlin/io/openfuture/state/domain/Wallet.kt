@@ -12,16 +12,9 @@ data class Wallet(
     @Indexed
     val identity: WalletIdentity,
     val webhook: String,
+    var webhookStatus: WebhookStatus = WebhookStatus.NOT_INVOKED,
     @LastModifiedDate
     var lastUpdate: LocalDateTime = LocalDateTime.now(),
     @MongoId
     val id: String = ObjectId().toHexString()
-        @Indexed
-        val identity: WalletIdentity,
-        val webhook: String,
-        var webhookStatus: WebhookStatus = WebhookStatus.NOT_INVOKED,
-        @LastModifiedDate
-        var lastUpdate: LocalDateTime = LocalDateTime.now(),
-        @MongoId
-        val id: String = ObjectId().toHexString()
 )

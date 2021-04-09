@@ -16,15 +16,9 @@ class DefaultWebhookExecutor(
     private val webhookService: WebhookService,
     private val transactionService: TransactionService,
     private val restClient: WebhookRestClient,
-    private val webhookInvocationService: WebhookInvocationService
+    private val webhookInvocationService: WebhookInvocationService,
+    private val webhookProperties: WebhookProperties
 ) : WebhookExecutor {
-        private val walletService: WalletService,
-        private val webhookService: WebhookService,
-        private val transactionService: TransactionService,
-        private val restClient: WebhookRestClient,
-        private val webhookInvocationService: WebhookInvocationService,
-        private val webhookProperties: WebhookProperties
-): WebhookExecutor {
 
     override suspend fun execute(walletId: String) {
         val wallet = walletService.findById(walletId)
@@ -35,21 +29,21 @@ class DefaultWebhookExecutor(
         webhookInvocationService.registerInvocation(wallet, transactionTask, response)
 
         if (response.status.is2xxSuccessful) {
-            scheduleNextWebhook(wallet)
-        }
-        else {
-            scheduleFailedWebhook(wallet, transactionTask)
+            scheduleNextTransaction(wallet)
+        } else {
+            scheduleFailedTransaction(wallet, transactionTask)
         }
     }
 
-    private suspend fun scheduleNextWebhook(wallet: Wallet) {
-        walletService.updateWebhookStatus(wallet, WebhookStatus.OK )
+    private suspend fun scheduleNextTransaction(wallet: Wallet) {
+        walletService.updateWebhookStatus(wallet, WebhookStatus.OK)
         webhookService.rescheduleWallet(wallet)
     }
 
-    private suspend fun scheduleFailedWebhook(wallet: Wallet, transactionTask: TransactionQueueTask) {
+    private suspend fun scheduleFailedTransaction(wallet: Wallet, transactionTask: TransactionQueueTask) {
         if (transactionTask.attempt >= webhookProperties.maxRetryAttempts()) {
             walletService.updateWebhookStatus(wallet, WebhookStatus.FAILED)
+            return
         }
 
         webhookService.rescheduleTransaction(wallet, transactionTask)

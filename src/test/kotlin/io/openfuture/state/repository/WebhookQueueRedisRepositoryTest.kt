@@ -6,6 +6,7 @@ import io.openfuture.state.util.createDummyTransactionQueueTask
 import io.openfuture.state.util.toEpochMilli
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -206,6 +207,64 @@ internal class WebhookQueueRedisRepositoryTest : RedisRepositoryTests() {
         val result = repository.firstTransaction("walletId")
 
         assertThat(result).isEqualTo(transactionTask1)
+    }
+
+    @Test
+    fun transactionsCountShouldReturnZero() = runBlocking<Unit> {
+        val result = repository.transactionsCount("walletId")
+        assertThat(result).isEqualTo(0)
+    }
+
+    @Test
+    fun transactionsCountShouldReturnProperValue() = runBlocking<Unit> {
+        val transactionTask = createDummyTransactionQueueTask()
+
+        transactionTaskRedisTemplate.opsForList().rightPush("walletId", transactionTask).block()
+
+        val result = repository.transactionsCount("walletId")
+        Assertions.assertThat(result).isEqualTo(1)
+    }
+
+    @Test
+    fun setAtPositionShouldAddElementInProperIndex() = runBlocking<Unit> {
+        val transactionTask1 = createDummyTransactionQueueTask("transactionId1")
+        val transactionTask2 = createDummyTransactionQueueTask("transactionId2")
+        val transactionTask3 = createDummyTransactionQueueTask("transactionId3")
+
+        transactionTaskRedisTemplate.opsForList().rightPush("walletId", transactionTask1).block()
+        transactionTaskRedisTemplate.opsForList().rightPush("walletId", transactionTask2).block()
+        transactionTaskRedisTemplate.opsForList().rightPush("walletId", transactionTask3).block()
+
+        repository.setTransactionAtIndex("walletId", transactionTask2, 1)
+
+        val result = transactionTaskRedisTemplate.opsForList().range("walletId", 1, 1).collectList().block()
+        Assertions.assertThat(result).isEqualTo(listOf(transactionTask2))
+    }
+
+    @Test
+    fun removeWalletFromQueueShouldRemoveListOfElements() = runBlocking<Unit> {
+        val transactionTask = createDummyTransactionQueueTask()
+
+        commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId", 10.0).block()
+        transactionTaskRedisTemplate.opsForList().rightPush("walletId", transactionTask).block()
+
+        repository.removeWalletFromQueue("walletId")
+
+        val resultWallet = commonRedisTemplate.opsForZSet().score(WALLETS_QUEUE, "walletId").block()
+        assertThat(resultWallet).isNull()
+
+        val resultTransaction = transactionTaskRedisTemplate.opsForList().size("walletId").block()
+        assertThat(resultTransaction).isEqualTo(0)
+    }
+
+    @Test
+    fun changeScoreShouldChangeScoreValue() = runBlocking<Unit> {
+        commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId", 1.0).block()
+
+        repository.changeScore("walletId", 3.0)
+
+        val result = commonRedisTemplate.opsForZSet().score(WALLETS_QUEUE, "walletId").block()
+        assertThat(result).isEqualTo(4.0)
     }
 
     companion object {

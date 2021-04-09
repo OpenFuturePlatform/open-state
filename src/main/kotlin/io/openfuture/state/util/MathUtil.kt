@@ -16,4 +16,5 @@ class MathUtil {
             return current
         }
     }
+
 }

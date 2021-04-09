@@ -1,6 +1,6 @@
 package io.openfuture.state.util
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class MathUtilTest {
@@ -8,14 +8,13 @@ internal class MathUtilTest {
     @Test
     fun fbShouldReturnSecondElementOne() {
         val value = MathUtil.fb(2)
-
-        Assertions.assertThat(value).isEqualTo(1)
+        assertThat(value).isEqualTo(1)
     }
 
     @Test
     fun fbShouldReturnFifthElementThree() {
         val value = MathUtil.fb(5)
-
-        Assertions.assertThat(value).isEqualTo(3)
+        assertThat(value).isEqualTo(3)
     }
+
 }

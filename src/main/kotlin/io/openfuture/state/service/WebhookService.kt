@@ -9,11 +9,15 @@ interface WebhookService {
 
     suspend fun scheduleTransaction(wallet: Wallet, transaction: Transaction)
 
-    suspend fun walletsScheduledForNow(): List<String>
+    suspend fun firstWalletInQueue(score: Double? = null): WalletQueueTask?
 
     suspend fun firstTransaction(walletId: String): TransactionQueueTask
 
     suspend fun lock(walletId: String): Boolean
 
     suspend fun unlock(walletId: String)
+
+    suspend fun rescheduleWallet(wallet: Wallet)
+
+    suspend fun rescheduleTransaction(wallet: Wallet, transactionTask: TransactionQueueTask)
 }

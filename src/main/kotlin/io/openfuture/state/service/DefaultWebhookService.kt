@@ -2,7 +2,7 @@ package io.openfuture.state.service
 
 import io.openfuture.state.domain.*
 import io.openfuture.state.exception.NotFoundException
-import io.openfuture.state.extensions.toMillisDouble
+import io.openfuture.state.property.WebhookProperties
 import io.openfuture.state.repository.WebhookQueueRedisRepository
 import io.openfuture.state.util.MathUtil
 import io.openfuture.state.util.toEpochMilli
@@ -12,7 +12,8 @@ import java.time.LocalDateTime
 
 @Service
 class DefaultWebhookService(
-    private val repository: WebhookQueueRedisRepository
+    private val repository: WebhookQueueRedisRepository,
+    private val webhookProperties: WebhookProperties
 ) : WebhookService {
 
     override suspend fun scheduleTransaction(wallet: Wallet, transaction: Transaction) {
@@ -47,44 +48,41 @@ class DefaultWebhookService(
         repository.unlock(walletId)
     }
 
-    private suspend fun isQueued(walletId: String): Boolean {
-        return repository.walletScore(walletId) != null
-    }
-
-
     override suspend fun rescheduleWallet(wallet: Wallet) {
         if (wallet.webhookStatus == WebhookStatus.FAILED) {
             return
         }
 
-        if (!transactionsQueueService.hasTransactions(wallet.id)) {
-            cancelWalletSchedule(wallet.id)
+        if (hasTransactions(wallet.id)) {
+            val score = repository.walletScore(wallet.id) ?: throw NotFoundException("Wallet not found: $wallet.id")
+            val nextTransaction = firstTransaction(wallet.id)
+            val scoreDiff = nextTransaction.timestamp.toEpochMilli() - score
+
+            repository.changeScore(wallet.id, scoreDiff)
+            repository.setTransactionAtIndex(wallet.id, nextTransaction, 0)
+
             return
         }
 
-        val score = walletQueueService.score(wallet.id)
-            ?: throw NotFoundException("Wallet not found: $wallet.id")
-
-        val nextTransaction = firstTransaction(wallet)
-        val scoreDiff = nextTransaction.timestamp.toMillisDouble() - score
-
-        walletQueueService.incrementScore(wallet.id, scoreDiff)
-        transactionsQueueService.setAt(wallet.id, nextTransaction, 0)
+        repository.removeWalletFromQueue(wallet.id)
     }
 
     override suspend fun rescheduleTransaction(wallet: Wallet, transactionTask: TransactionQueueTask) {
         if (transactionTask.attempt >= webhookProperties.maxRetryAttempts()) {
-            cancelWalletSchedule(wallet.id)
-        }
-        else {
-            walletQueueService.incrementScore(wallet.id, nextInvocationDelay(transactionTask.attempt))
-            transactionsQueueService.setAt(wallet.id, transactionTask.apply { attempt++ }, 0)
+            repository.removeWalletFromQueue(wallet.id)
+        } else {
+            repository.changeScore(wallet.id, nextInvocationDelay(transactionTask.attempt))
+            repository.setTransactionAtIndex(wallet.id, transactionTask.apply { attempt++ }, 0)
         }
     }
 
-    private suspend fun cancelWalletSchedule(walletId: String) {
-        walletQueueService.remove(walletId)
-        transactionsQueueService.remove(walletId)
+    private suspend fun isQueued(walletId: String): Boolean {
+        return repository.walletScore(walletId) != null
+    }
+
+    private suspend fun hasTransactions(walletId: String): Boolean {
+        val count = repository.transactionsCount(walletId)
+        return count > 0
     }
 
     private fun nextInvocationDelay(attempt: Int): Double {
@@ -95,4 +93,5 @@ class DefaultWebhookService(
 
         return delay.toMillis().toDouble()
     }
+
 }

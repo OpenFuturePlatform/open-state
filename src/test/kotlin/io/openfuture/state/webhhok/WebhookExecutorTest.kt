@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Duration
 
-internal class WebhookExecutorTest: ServiceTests() {
+internal class WebhookExecutorTest : ServiceTests() {
 
     private lateinit var service: WebhookExecutor
     private val restClient: WebhookRestClient = mock()
@@ -27,12 +27,13 @@ internal class WebhookExecutorTest: ServiceTests() {
 
     @BeforeEach
     fun setUp() {
-        service = DefaultWebhookExecutor(walletService,
-                webhookService,
-                transactionService,
-                restClient,
-                invocationService,
-                webhookProperties
+        service = DefaultWebhookExecutor(
+            walletService,
+            webhookService,
+            transactionService,
+            restClient,
+            invocationService,
+            webhookProperties
         )
     }
 
@@ -45,7 +46,7 @@ internal class WebhookExecutorTest: ServiceTests() {
 
         given(walletService.findById("walletId")).willReturn(wallet)
         given(transactionService.findById("transactionId")).willReturn(transaction)
-        given(webhookService.firstTransaction(wallet)).willReturn(transactionTask)
+        given(webhookService.firstTransaction("walletId")).willReturn(transactionTask)
         given(restClient.doPost(eq("webhook"), any())).willReturn(positiveResponse)
 
         service.execute("walletId")
@@ -64,7 +65,7 @@ internal class WebhookExecutorTest: ServiceTests() {
 
         given(walletService.findById("walletId")).willReturn(wallet)
         given(transactionService.findById("transactionId")).willReturn(transaction)
-        given(webhookService.firstTransaction(wallet)).willReturn(transactionTask)
+        given(webhookService.firstTransaction("walletId")).willReturn(transactionTask)
         given(restClient.doPost(eq("webhook"), any())).willReturn(negativeResponse)
 
         service.execute("walletId")
@@ -77,18 +78,18 @@ internal class WebhookExecutorTest: ServiceTests() {
     fun executeShouldFailCancelWalletSchedule() = runBlocking<Unit> {
         val wallet = createDummyWallet(id = "walletId")
         val transaction = createDummyTransaction(id = "transactionId")
-        val transactionTask = createDummyTransactionQueueTask(attempt = 50)
+        val transactionTask = createDummyTransactionQueueTask(transactionId = "transactionId", attempt = 50)
         val negativeResponse = createDummyNegativeWebhookResponse()
 
         given(walletService.findById("walletId")).willReturn(wallet)
         given(transactionService.findById("transactionId")).willReturn(transaction)
-        given(webhookService.firstTransaction(wallet)).willReturn(transactionTask)
+        given(webhookService.firstTransaction("walletId")).willReturn(transactionTask)
         given(restClient.doPost(eq("webhook"), any())).willReturn(negativeResponse)
 
         service.execute("walletId")
 
         verify(walletService, times(1)).updateWebhookStatus(wallet, WebhookStatus.FAILED)
         verify(invocationService, times(1)).registerInvocation(wallet, transactionTask, negativeResponse)
-        verify(webhookService, times(1)).rescheduleTransaction(wallet, transactionTask)
     }
+
 }

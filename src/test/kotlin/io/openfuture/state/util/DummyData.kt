@@ -19,15 +19,9 @@ fun createDummyWallet(
     blockchain: String = "Ethereum",
     address: String = "address",
     webhook: String = "webhook",
+    webhookStatus: WebhookStatus = WebhookStatus.NOT_INVOKED,
     id: String = ObjectId().toHexString(),
     lastUpdate: LocalDateTime = LocalDateTime.of(2020, 10, 10, 10, 10)
-) = Wallet(WalletIdentity(blockchain, address), webhook, lastUpdate, id)
-        blockchain: String = "Ethereum",
-        address: String = "address",
-        webhook: String = "webhook",
-        webhookStatus: WebhookStatus = WebhookStatus.NOT_INVOKED,
-        id: String = ObjectId().toHexString(),
-        lastUpdate: LocalDateTime = LocalDateTime.of(2020, 10, 10, 10, 10)
 ) = Wallet(WalletIdentity(blockchain, address), webhook, webhookStatus, lastUpdate, id)
 
 fun createDummyTransaction(
@@ -45,8 +39,9 @@ fun createDummyTransaction(
 
 fun createDummyTransactionQueueTask(
     transactionId: String = "transactionId",
-    timestamp: LocalDateTime = LocalDateTime.of(2020, 9, 9, 9, 9)
-) = TransactionQueueTask(transactionId, timestamp)
+    timestamp: LocalDateTime = LocalDateTime.of(2020, 9, 9, 9, 9),
+    attempt: Int = 1
+) = TransactionQueueTask(transactionId, timestamp, attempt)
 
 fun createDummyWalletQueueTask(
     walletId: String = "walletId",
@@ -90,13 +85,13 @@ fun createDummyBitcoinOutput(
 }
 
 fun createDummyPositiveWebhookResponse(
-        status: HttpStatus = HttpStatus.OK,
-        url: String = "url",
-        message: String? = null
+    status: HttpStatus = HttpStatus.OK,
+    url: String = "url",
+    message: String? = null
 ) = WebhookRestClient.WebhookResponse(status, url, message)
 
 fun createDummyNegativeWebhookResponse(
-        status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-        url: String = "url",
-        message: String? = null
+    status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+    url: String = "url",
+    message: String? = null
 ) = WebhookRestClient.WebhookResponse(status, url, message)
