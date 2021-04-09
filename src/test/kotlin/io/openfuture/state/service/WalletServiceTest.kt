@@ -12,6 +12,7 @@ import io.openfuture.state.repository.WalletRepository
 import io.openfuture.state.util.createDummyWallet
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.Assert.assertThrows
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -86,4 +87,32 @@ class WalletServiceTest : ServiceTests() {
 
         assertThat(result).isEqualTo(wallet)
     }
+
+    @Test
+    fun updateShouldReturnWalletDto() = runBlocking<Unit> {
+        val wallet = createDummyWallet()
+        val id = wallet.id
+
+        given(walletRepository.findById(id)).willReturn(Mono.just(wallet))
+        given(walletRepository.save(wallet)).willReturn(Mono.just(wallet))
+
+        val result = walletService.update(id, wallet.webhook)
+
+        assertThat(result).isEqualTo(wallet)
+    }
+
+    @Test
+    fun updateShouldThrowNotFoundException() = runBlocking<Unit> {
+        val wallet = createDummyWallet()
+        val id = wallet.id
+
+        given(walletRepository.findById(id)).willReturn(Mono.empty())
+
+        assertThrows(NotFoundException::class.java) {
+            runBlocking {
+                walletService.update(id, wallet.webhook)
+            }
+        }
+    }
+
 }

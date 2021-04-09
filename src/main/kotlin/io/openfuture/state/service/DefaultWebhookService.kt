@@ -13,16 +13,29 @@ import java.time.LocalDateTime
 @Service
 class DefaultWebhookService(
     private val repository: WebhookQueueRedisRepository,
+    private val deadQueueService: TransactionDeadQueueService,
     private val webhookProperties: WebhookProperties
 ) : WebhookService {
 
     override suspend fun scheduleTransaction(wallet: Wallet, transaction: Transaction) {
         val transactionTask = TransactionQueueTask(transaction.id, transaction.date)
 
+        if (wallet.webhookStatus == WebhookStatus.FAILED) {
+            deadQueueService.addTransactionToDeadQueue(wallet.identity, listOf(transactionTask))
+            return
+        }
+
+        val transactions = retrieveDeadQueueTransactions(wallet.identity)
+        transactions.add(transactionTask)
+
         if (isQueued(wallet.id)) {
-            repository.addTransaction(wallet.id, transactionTask)
+            repository.addTransactions(wallet.id, transactions)
         } else {
-            repository.addWallet(wallet.id, transactionTask, transactionTask.timestamp.toEpochMilli().toDouble())
+            repository.addWallet(wallet.id, transactions, transactions.first().timestamp.toEpochMilli().toDouble())
+        }
+
+        if (deadQueueService.hasTransactions(wallet.identity)) {
+            deadQueueService.removeFromDeadQueue(wallet.identity)
         }
     }
 
@@ -76,6 +89,23 @@ class DefaultWebhookService(
         }
     }
 
+    override suspend fun scheduleTransactionsFromDeadQueue(wallet: Wallet) {
+        val transactions = retrieveDeadQueueTransactions(wallet.identity)
+        if (transactions.isEmpty()) {
+            return
+        }
+
+        if (isQueued(wallet.id)) {
+            repository.addTransactions(wallet.id, transactions)
+        } else {
+            repository.addWallet(wallet.id, transactions, transactions.first().timestamp.toEpochMilli().toDouble())
+        }
+
+        if (deadQueueService.hasTransactions(wallet.identity)) {
+            deadQueueService.removeFromDeadQueue(wallet.identity)
+        }
+    }
+
     private suspend fun isQueued(walletId: String): Boolean {
         return repository.walletScore(walletId) != null
     }
@@ -83,6 +113,11 @@ class DefaultWebhookService(
     private suspend fun hasTransactions(walletId: String): Boolean {
         val count = repository.transactionsCount(walletId)
         return count > 0
+    }
+
+    private suspend fun retrieveDeadQueueTransactions(walletIdentity: WalletIdentity): MutableList<TransactionQueueTask> {
+        val transactions = deadQueueService.getTransactionFromDeadQueue(walletIdentity)
+        return ArrayList(transactions)
     }
 
     private fun nextInvocationDelay(attempt: Int): Double {

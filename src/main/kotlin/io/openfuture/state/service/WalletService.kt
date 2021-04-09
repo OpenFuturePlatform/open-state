@@ -16,4 +16,6 @@ interface WalletService {
     suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock)
 
     suspend fun updateWebhookStatus(wallet: Wallet, status: WebhookStatus)
+
+    suspend fun update(walletId: String, webhook: String): Wallet
 }

@@ -37,6 +37,21 @@ class DefaultWalletService(
         return walletRepository.save(wallet).awaitSingle()
     }
 
+    override suspend fun update(walletId: String, webhook: String): Wallet {
+        val wallet = walletRepository.findById(walletId).awaitFirstOrNull() ?: throw NotFoundException("Wallet not found")
+        if (webhook != wallet.webhook) {
+            wallet.let {
+                it.webhookStatus = WebhookStatus.OK
+                it.webhook = webhook
+            }
+        }
+
+        walletRepository.save(wallet).awaitSingle()
+        webhookService.scheduleTransactionsFromDeadQueue(wallet)
+
+        return wallet
+    }
+
     override suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock) {
         for (transaction in block.transactions) {
             val identity = WalletIdentity(blockchain.getName(), transaction.to)

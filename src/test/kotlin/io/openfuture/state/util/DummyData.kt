@@ -1,19 +1,16 @@
 package io.openfuture.state.util
 
-import io.openfuture.state.domain.*
 import io.openfuture.state.blockchain.bitcoin.dto.BitcoinBlock
 import io.openfuture.state.blockchain.bitcoin.dto.BitcoinTransaction
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
-import io.openfuture.state.domain.Transaction
-import io.openfuture.state.domain.Wallet
-import io.openfuture.state.domain.WalletIdentity
 import io.openfuture.state.domain.*
 import io.openfuture.state.webhhok.WebhookRestClient
 import org.bson.types.ObjectId
 import org.springframework.http.HttpStatus
 import java.math.BigDecimal
 import java.time.LocalDateTime
+import java.util.*
 
 fun createDummyWallet(
     blockchain: String = "Ethereum",
@@ -95,3 +92,10 @@ fun createDummyNegativeWebhookResponse(
     url: String = "url",
     message: String? = null
 ) = WebhookRestClient.WebhookResponse(status, url, message)
+
+fun createDummyTransactionDeadQueue(
+    identity: WalletIdentity = WalletIdentity("Ethereum", "address"),
+    transactions: MutableList<TransactionQueueTask> = LinkedList(),
+    timestamp: LocalDateTime = LocalDateTime.now(),
+    id: String = ObjectId().toHexString()
+) = TransactionDeadQueue(identity, transactions, timestamp, id)

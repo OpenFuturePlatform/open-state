@@ -30,9 +30,9 @@ internal class WebhookQueueRedisRepositoryTest : RedisRepositoryTests() {
     }
 
     @Test
-    fun addTransactionShouldAddElement() = runBlocking<Unit> {
+    fun addTransactionsShouldAddElement() = runBlocking<Unit> {
         val transactionTask = createDummyTransactionQueueTask()
-        repository.addTransaction("walletId", transactionTask)
+        repository.addTransactions("walletId", listOf(transactionTask))
 
         val result = transactionTaskRedisTemplate.opsForList()
             .range("walletId", 0, 1)
@@ -42,12 +42,11 @@ internal class WebhookQueueRedisRepositoryTest : RedisRepositoryTests() {
     }
 
     @Test
-    fun addTransactionShouldAddElementToTheEndOfQueue() = runBlocking<Unit> {
+    fun addTransactionsShouldAddElementToTheEndOfQueue() = runBlocking<Unit> {
         val transactionTask1 = createDummyTransactionQueueTask("1")
         val transactionTask2 = createDummyTransactionQueueTask("2")
 
-        repository.addTransaction("walletId", transactionTask1)
-        repository.addTransaction("walletId", transactionTask2)
+        repository.addTransactions("walletId", listOf(transactionTask1, transactionTask2))
 
         val result = transactionTaskRedisTemplate.opsForList()
             .range("walletId", 0, 1)
@@ -61,7 +60,7 @@ internal class WebhookQueueRedisRepositoryTest : RedisRepositoryTests() {
     fun addWalletShouldAddItemToZSet() = runBlocking<Unit> {
         val transactionTask = createDummyTransactionQueueTask()
 
-        repository.addWallet("walletId", transactionTask, 15.0)
+        repository.addWallet("walletId", listOf(transactionTask), 15.0)
         val result = commonRedisTemplate.opsForZSet().score(WALLETS_QUEUE, "walletId").block()
 
         assertThat(result).isEqualTo(15.0)
@@ -71,7 +70,7 @@ internal class WebhookQueueRedisRepositoryTest : RedisRepositoryTests() {
     fun addWalletShouldAddTransactionToList() = runBlocking<Unit> {
         val transactionTask = createDummyTransactionQueueTask()
 
-        repository.addWallet("walletId", transactionTask, 15.0)
+        repository.addWallet("walletId", listOf(transactionTask), 15.0)
         val result = transactionTaskRedisTemplate.opsForList()
             .range("walletId", 0, 1)
             .collectList().block()
