@@ -12,6 +12,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class DefaultWebhookExecutor(
+    private val walletService: WalletService,
+    private val webhookService: WebhookService,
+    private val transactionService: TransactionService,
+    private val restClient: WebhookRestClient,
+    private val webhookInvocationService: WebhookInvocationService
+) : WebhookExecutor {
         private val walletService: WalletService,
         private val webhookService: WebhookService,
         private val transactionService: TransactionService,
@@ -22,7 +28,7 @@ class DefaultWebhookExecutor(
 
     override suspend fun execute(walletId: String) {
         val wallet = walletService.findById(walletId)
-        val transactionTask = webhookService.firstTransaction(wallet)
+        val transactionTask = webhookService.firstTransaction(walletId)
         val transaction = transactionService.findById(transactionTask.transactionId)
 
         val response = restClient.doPost(wallet.webhook, WebhookPayloadDto(transaction))
@@ -48,4 +54,5 @@ class DefaultWebhookExecutor(
 
         webhookService.rescheduleTransaction(wallet, transactionTask)
     }
+
 }

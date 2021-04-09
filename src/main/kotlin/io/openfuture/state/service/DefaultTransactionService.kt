@@ -8,11 +8,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class DefaultTransactionService(
-        private val repository: TransactionRepository
-): TransactionService {
+    private val repository: TransactionRepository
+) : TransactionService {
 
     override suspend fun findById(id: String): Transaction {
         return repository.findById(id).awaitFirstOrNull()
-                ?: throw NotFoundException("Transaction not found: $id")
+            ?: throw NotFoundException("Transaction not found: $id")
     }
+
 }

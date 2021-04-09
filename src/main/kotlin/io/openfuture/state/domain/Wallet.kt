@@ -9,6 +9,13 @@ import java.time.LocalDateTime
 
 @Document
 data class Wallet(
+    @Indexed
+    val identity: WalletIdentity,
+    val webhook: String,
+    @LastModifiedDate
+    var lastUpdate: LocalDateTime = LocalDateTime.now(),
+    @MongoId
+    val id: String = ObjectId().toHexString()
         @Indexed
         val identity: WalletIdentity,
         val webhook: String,

@@ -1,50 +1,56 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.domain.Transaction
-import io.openfuture.state.domain.TransactionQueueTask
-import io.openfuture.state.domain.Wallet
-import io.openfuture.state.domain.WebhookStatus
+import io.openfuture.state.domain.*
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.extensions.toMillisDouble
-import io.openfuture.state.property.WebhookProperties
+import io.openfuture.state.repository.WebhookQueueRedisRepository
 import io.openfuture.state.util.MathUtil
+import io.openfuture.state.util.toEpochMilli
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
 
 @Service
 class DefaultWebhookService(
-        private val walletQueueService: WalletQueueService,
-        private val transactionsQueueService: TransactionsQueueService,
-        private val webhookProperties: WebhookProperties
-): WebhookService {
+    private val repository: WebhookQueueRedisRepository
+) : WebhookService {
 
     override suspend fun scheduleTransaction(wallet: Wallet, transaction: Transaction) {
-        val transactionTask = TransactionQueueTask(transaction.id, 1, transaction.date)
+        val transactionTask = TransactionQueueTask(transaction.id, transaction.date)
 
-        val score = walletQueueService.score(wallet.id)
-        if (score == null) {
-            walletQueueService.add(wallet.id, transactionTask)
+        if (isQueued(wallet.id)) {
+            repository.addTransaction(wallet.id, transactionTask)
         } else {
-            transactionsQueueService.add(wallet.id, transactionTask)
+            repository.addWallet(wallet.id, transactionTask, transactionTask.timestamp.toEpochMilli().toDouble())
         }
     }
 
-    override suspend fun walletsScheduledForNow(): List<String> {
-        return walletQueueService.walletsScheduledTo(LocalDateTime.now())
+    override suspend fun firstWalletInQueue(score: Double?): WalletQueueTask? {
+        val walletId = repository.firstWalletInScoreRange(score, LocalDateTime.now().toEpochMilli().toDouble())
+        if (walletId != null) {
+            val walletScore = repository.walletScore(walletId)
+            return WalletQueueTask(walletId, walletScore)
+        }
+
+        return null
     }
 
-    override suspend fun firstTransaction(wallet: Wallet): TransactionQueueTask {
-        return transactionsQueueService.first(wallet.id)
+    override suspend fun firstTransaction(walletId: String): TransactionQueueTask {
+        return repository.firstTransaction(walletId) ?: throw NotFoundException("Transaction not found")
     }
 
     override suspend fun lock(walletId: String): Boolean {
-        return walletQueueService.lock(walletId)
+        return repository.lock(walletId)
     }
 
     override suspend fun unlock(walletId: String) {
-        walletQueueService.unlock(walletId)
+        repository.unlock(walletId)
     }
+
+    private suspend fun isQueued(walletId: String): Boolean {
+        return repository.walletScore(walletId) != null
+    }
+
 
     override suspend fun rescheduleWallet(wallet: Wallet) {
         if (wallet.webhookStatus == WebhookStatus.FAILED) {
@@ -57,7 +63,7 @@ class DefaultWebhookService(
         }
 
         val score = walletQueueService.score(wallet.id)
-                ?: throw NotFoundException("Wallet not found: $wallet.id")
+            ?: throw NotFoundException("Wallet not found: $wallet.id")
 
         val nextTransaction = firstTransaction(wallet)
         val scoreDiff = nextTransaction.timestamp.toMillisDouble() - score

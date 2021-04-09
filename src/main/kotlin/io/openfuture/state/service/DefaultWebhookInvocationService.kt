@@ -10,14 +10,19 @@ import org.springframework.stereotype.Service
 
 @Service
 class DefaultWebhookInvocationService(
-        private val repository: WebhookInvocationRepository
-): WebhookInvocationService {
+    private val repository: WebhookInvocationRepository
+) : WebhookInvocationService {
 
-    override suspend fun registerInvocation(wallet: Wallet, transactionTask: TransactionQueueTask, response: WebhookRestClient.WebhookResponse) {
+    override suspend fun registerInvocation(
+        wallet: Wallet,
+        transactionTask: TransactionQueueTask,
+        response: WebhookRestClient.WebhookResponse
+    ) {
         val invocation = repository.findByTransactionId(transactionTask.transactionId).awaitFirstOrNull()
-                ?: WebhookInvocation(wallet.identity, transactionTask.transactionId)
+            ?: WebhookInvocation(wallet.identity, transactionTask.transactionId)
 
         invocation.addInvocation(WebhookInvocation.WebhookResult(response, transactionTask.attempt))
         repository.save(invocation)
     }
+
 }
