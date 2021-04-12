@@ -47,7 +47,9 @@ class DefaultWalletService(
         }
 
         walletRepository.save(wallet).awaitSingle()
-        webhookService.scheduleTransactionsFromDeadQueue(wallet)
+        if (wallet.webhookStatus == WebhookStatus.OK) {
+            webhookService.scheduleTransactionsFromDeadQueue(wallet)
+        }
 
         return wallet
     }
