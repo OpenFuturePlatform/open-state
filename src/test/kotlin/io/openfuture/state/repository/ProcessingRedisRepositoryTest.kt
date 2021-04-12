@@ -26,10 +26,8 @@ class ProcessingRedisRepositoryTest : RedisRepositoryTests() {
 
     @BeforeEach
     fun setUp() {
-        repository = ProcessingRedisRepository(redisTemplate, properties)
-        redisTemplate.execute {
-            it.serverCommands().flushAll()
-        }.blockFirst()
+        repository = ProcessingRedisRepository(commonRedisTemplate, properties)
+        commonRedisTemplate.execute { it.serverCommands().flushAll() }.blockFirst()
         given(blockchain.getName()).willReturn("MockBlockchain")
         given(blockchain.toString()).willReturn("MockBlockchain")
     }
@@ -42,7 +40,7 @@ class ProcessingRedisRepositoryTest : RedisRepositoryTests() {
 
     @Test
     fun getCurrentShouldReturnProperValue() = runBlocking<Unit> {
-        redisTemplate.opsForValue().setAndAwait("$blockchain:current", 11)
+        commonRedisTemplate.opsForValue().setAndAwait("$blockchain:current", 11)
 
         val result = repository.getCurrentOrElseLast(blockchain)
         assertThat(result).isEqualTo(11)
@@ -56,7 +54,7 @@ class ProcessingRedisRepositoryTest : RedisRepositoryTests() {
 
     @Test
     fun getLastShouldReturnProperValue() = runBlocking<Unit> {
-        redisTemplate.opsForValue().setAndAwait("$blockchain:last", 11)
+        commonRedisTemplate.opsForValue().setAndAwait("$blockchain:last", 11)
         val result = repository.getLast(blockchain)
         assertThat(result).isEqualTo(11)
     }
@@ -85,7 +83,7 @@ class ProcessingRedisRepositoryTest : RedisRepositoryTests() {
 
     @Test
     fun lockIfAbsentReturnFalse(): Unit = runBlocking {
-        redisTemplate.opsForValue().setAndAwait("lock:$blockchain", LocalDateTime.now(), properties.lockTtl)
+        commonRedisTemplate.opsForValue().setAndAwait("lock:$blockchain", LocalDateTime.now(), properties.lockTtl)
         val result = repository.lockIfAbsent(blockchain)
         assertThat(result).isFalse()
     }
@@ -93,12 +91,12 @@ class ProcessingRedisRepositoryTest : RedisRepositoryTests() {
     @Test
     fun lockShouldExpire(): Unit = runBlocking {
         repository.lock(blockchain)
-        val exists = redisTemplate.hasKeyAndAwait("lock:$blockchain")
+        val exists = commonRedisTemplate.hasKeyAndAwait("lock:$blockchain")
         assertThat(exists).isTrue
 
         delay(properties.lockTtl.toMillis())
 
-        val existsAfterTtl = redisTemplate.hasKeyAndAwait("lock:$blockchain")
+        val existsAfterTtl = commonRedisTemplate.hasKeyAndAwait("lock:$blockchain")
         assertThat(existsAfterTtl).isFalse()
     }
 
@@ -106,7 +104,7 @@ class ProcessingRedisRepositoryTest : RedisRepositoryTests() {
     fun queueShouldAdd() = runBlocking {
         repository.queue(blockchain)
 
-        val result = redisTemplate.opsForSet().isMemberAndAwait("queue", blockchain.getName())
+        val result = commonRedisTemplate.opsForSet().isMemberAndAwait("queue", blockchain.getName())
 
         assertTrue(result)
     }
