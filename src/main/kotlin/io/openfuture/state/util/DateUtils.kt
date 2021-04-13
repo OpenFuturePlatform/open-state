@@ -24,3 +24,7 @@ fun Long.toLocalDateTimeInSeconds(): LocalDateTime {
         TimeZone.getDefault().toZoneId()
     )
 }
+
+fun LocalDateTime.toEpochMillis(): Long {
+    return this.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+}
