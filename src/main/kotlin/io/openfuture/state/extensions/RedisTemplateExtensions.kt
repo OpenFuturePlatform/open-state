@@ -1,9 +1,7 @@
 package io.openfuture.state.extensions
 
-import io.openfuture.state.util.toEpochMilli
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import java.nio.ByteBuffer
-import java.time.LocalDateTime
 
 fun ReactiveRedisTemplate<String, Any>.keyToByteBuffer(key: String): ByteBuffer {
     return this.serializationContext.keySerializationPair.write(key)

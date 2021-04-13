@@ -34,7 +34,7 @@ class ProcessingRedisRepositoryTest : RedisRepositoryTests() {
 
     @Test
     fun getCurrentShouldReturnZero() = runBlocking<Unit> {
-        val result = repository.getCurrent(blockchain)
+        val result = repository.getCurrentOrElseLast(blockchain)
         assertThat(result).isEqualTo(0)
     }
 
@@ -42,7 +42,7 @@ class ProcessingRedisRepositoryTest : RedisRepositoryTests() {
     fun getCurrentShouldReturnProperValue() = runBlocking<Unit> {
         commonRedisTemplate.opsForValue().setAndAwait("$blockchain:current", 11)
 
-        val result = repository.getCurrent(blockchain)
+        val result = repository.getCurrentOrElseLast(blockchain)
         assertThat(result).isEqualTo(11)
     }
 

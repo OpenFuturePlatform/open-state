@@ -3,7 +3,7 @@ package io.openfuture.state.repository
 import io.openfuture.state.base.RedisRepositoryTests
 import io.openfuture.state.property.WebhookProperties
 import io.openfuture.state.util.createDummyTransactionQueueTask
-import io.openfuture.state.util.toEpochMilli
+import io.openfuture.state.util.toEpochMillis
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
@@ -95,13 +95,13 @@ internal class WebhookQueueRedisRepositoryTest : RedisRepositoryTests() {
 
     @Test
     fun firstWalletInScoreRangeShouldReturnNullIfRangeStartNotSet() = runBlocking {
-        val result = repository.firstWalletInScoreRange(null, LocalDateTime.now().toEpochMilli().toDouble())
+        val result = repository.firstWalletInScoreRange(null, LocalDateTime.now().toEpochMillis().toDouble())
         assertThat(result).isNull()
     }
 
     @Test
     fun firstWalletInScoreRangeShouldReturnNullIfRangeStartIsSet() = runBlocking {
-        val result = repository.firstWalletInScoreRange(1000.0, LocalDateTime.now().toEpochMilli().toDouble())
+        val result = repository.firstWalletInScoreRange(1000.0, LocalDateTime.now().toEpochMillis().toDouble())
         assertThat(result).isNull()
     }
 
@@ -110,12 +110,12 @@ internal class WebhookQueueRedisRepositoryTest : RedisRepositoryTests() {
         val timestamp = LocalDateTime.now()
 
         commonRedisTemplate.opsForZSet()
-            .add(WALLETS_QUEUE, "walletId1", timestamp.minusDays(1).toEpochMilli().toDouble()).block()
-        commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId2", timestamp.toEpochMilli().toDouble()).block()
+            .add(WALLETS_QUEUE, "walletId1", timestamp.minusDays(1).toEpochMillis().toDouble()).block()
+        commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId2", timestamp.toEpochMillis().toDouble()).block()
         commonRedisTemplate.opsForZSet()
-            .add(WALLETS_QUEUE, "walletId3", timestamp.plusDays(1).toEpochMilli().toDouble()).block()
+            .add(WALLETS_QUEUE, "walletId3", timestamp.plusDays(1).toEpochMillis().toDouble()).block()
 
-        val result = repository.firstWalletInScoreRange(null, timestamp.toEpochMilli().toDouble())
+        val result = repository.firstWalletInScoreRange(null, timestamp.toEpochMillis().toDouble())
         assertThat(result).isEqualTo("walletId1")
     }
 
@@ -124,14 +124,14 @@ internal class WebhookQueueRedisRepositoryTest : RedisRepositoryTests() {
         val timestamp = LocalDateTime.now()
 
         commonRedisTemplate.opsForZSet()
-            .add(WALLETS_QUEUE, "walletId1", timestamp.minusDays(1).toEpochMilli().toDouble()).block()
-        commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId2", timestamp.toEpochMilli().toDouble()).block()
+            .add(WALLETS_QUEUE, "walletId1", timestamp.minusDays(1).toEpochMillis().toDouble()).block()
+        commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId2", timestamp.toEpochMillis().toDouble()).block()
         commonRedisTemplate.opsForZSet()
-            .add(WALLETS_QUEUE, "walletId3", timestamp.plusDays(1).toEpochMilli().toDouble()).block()
+            .add(WALLETS_QUEUE, "walletId3", timestamp.plusDays(1).toEpochMillis().toDouble()).block()
 
         val result = repository.firstWalletInScoreRange(
-            timestamp.toEpochMilli().toDouble(),
-            timestamp.plusDays(3).toEpochMilli().toDouble()
+            timestamp.toEpochMillis().toDouble(),
+            timestamp.plusDays(3).toEpochMillis().toDouble()
         )
         assertThat(result).isEqualTo("walletId2")
     }
@@ -141,14 +141,14 @@ internal class WebhookQueueRedisRepositoryTest : RedisRepositoryTests() {
         val timestamp = LocalDateTime.now()
 
         commonRedisTemplate.opsForZSet()
-            .add(WALLETS_QUEUE, "walletId1", timestamp.minusDays(1).toEpochMilli().toDouble()).block()
-        commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId2", timestamp.toEpochMilli().toDouble()).block()
+            .add(WALLETS_QUEUE, "walletId1", timestamp.minusDays(1).toEpochMillis().toDouble()).block()
+        commonRedisTemplate.opsForZSet().add(WALLETS_QUEUE, "walletId2", timestamp.toEpochMillis().toDouble()).block()
         commonRedisTemplate.opsForZSet()
-            .add(WALLETS_QUEUE, "walletId3", timestamp.plusDays(1).toEpochMilli().toDouble()).block()
+            .add(WALLETS_QUEUE, "walletId3", timestamp.plusDays(1).toEpochMillis().toDouble()).block()
 
         val result = repository.firstWalletInScoreRange(
-            timestamp.plusDays(2).toEpochMilli().toDouble(),
-            timestamp.plusDays(3).toEpochMilli().toDouble()
+            timestamp.plusDays(2).toEpochMillis().toDouble(),
+            timestamp.plusDays(3).toEpochMillis().toDouble()
         )
         assertThat(result).isNull()
     }
