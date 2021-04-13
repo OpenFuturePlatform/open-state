@@ -1,15 +1,13 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.domain.Transaction
-import io.openfuture.state.domain.TransactionQueueTask
-import io.openfuture.state.domain.Wallet
-import io.openfuture.state.domain.WalletQueueTask
+import io.openfuture.state.domain.*
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.property.WebhookProperties
 import io.openfuture.state.repository.WebhookQueueRedisRepository
-import io.openfuture.state.util.toEpochMilli
+import io.openfuture.state.util.MathUtil
 import io.openfuture.state.util.toEpochMillis
 import org.springframework.stereotype.Service
+import java.time.Duration
 import java.time.LocalDateTime
 
 @Service
@@ -58,7 +56,7 @@ class DefaultWebhookService(
         if (hasTransactions(wallet.id)) {
             val score = repository.walletScore(wallet.id) ?: throw NotFoundException("Wallet not found: $wallet.id")
             val nextTransaction = firstTransaction(wallet.id)
-            val scoreDiff = nextTransaction.timestamp.toEpochMilli() - score
+            val scoreDiff = nextTransaction.timestamp.toEpochMillis() - score
 
             repository.changeScore(wallet.id, scoreDiff)
             repository.setTransactionAtIndex(wallet.id, nextTransaction, 0)
