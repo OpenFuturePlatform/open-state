@@ -12,8 +12,10 @@ fun Long.toLocalDateTime(): LocalDateTime {
     )
 }
 
-fun LocalDateTime.toEpochMilli(): Long {
-    return this.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+fun Date.toLocalDateTime(): LocalDateTime {
+    return this.toInstant()
+            .atZone(ZoneId.systemDefault())
+            .toLocalDateTime()
 }
 
 fun Long.toLocalDateTimeInSeconds(): LocalDateTime {
@@ -21,4 +23,8 @@ fun Long.toLocalDateTimeInSeconds(): LocalDateTime {
         Instant.ofEpochSecond(this),
         TimeZone.getDefault().toZoneId()
     )
+}
+
+fun LocalDateTime.toEpochMillis(): Long {
+    return this.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 }
