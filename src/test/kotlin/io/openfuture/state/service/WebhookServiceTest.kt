@@ -193,7 +193,7 @@ internal class WebhookServiceTest : ServiceTests() {
 
         verify(repository, times(1)).transactionsCount("walletId")
         verify(repository, times(1)).walletScore("walletId")
-        verify(repository, times(1)).changeScore("walletId", transactionTask.timestamp.toEpochMilli() - 10000.0)
+        verify(repository, times(1)).changeScore("walletId", transactionTask.timestamp.toEpochMillis() - 10000.0)
         verify(repository, times(1)).setTransactionAtIndex("walletId", transactionTask, 0)
     }
 
