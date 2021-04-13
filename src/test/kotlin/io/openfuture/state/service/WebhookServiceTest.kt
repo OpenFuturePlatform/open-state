@@ -79,7 +79,7 @@ internal class WebhookServiceTest : ServiceTests() {
             .addWallet(
                 eq("walletId"),
                 eq(listOf(transactionTask)),
-                eq(transactionTask.timestamp.toEpochMilli().toDouble())
+                eq(transactionTask.timestamp.toEpochMillis().toDouble())
             )
     }
 

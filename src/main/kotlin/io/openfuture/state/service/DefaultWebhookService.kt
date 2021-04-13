@@ -31,7 +31,7 @@ class DefaultWebhookService(
         if (isQueued(wallet.id)) {
             repository.addTransactions(wallet.id, transactions)
         } else {
-            repository.addWallet(wallet.id, transactions, transactions.first().timestamp.toEpochMilli().toDouble())
+            repository.addWallet(wallet.id, transactions, transactions.first().timestamp.toEpochMillis().toDouble())
         }
 
         if (deadQueueService.hasTransactions(wallet.identity)) {
@@ -40,7 +40,7 @@ class DefaultWebhookService(
     }
 
     override suspend fun firstWalletInQueue(score: Double?): WalletQueueTask? {
-        val walletId = repository.firstWalletInScoreRange(score, LocalDateTime.now().toEpochMilli().toDouble())
+        val walletId = repository.firstWalletInScoreRange(score, LocalDateTime.now().toEpochMillis().toDouble())
         if (walletId != null) {
             val walletScore = repository.walletScore(walletId)
             return WalletQueueTask(walletId, walletScore)
@@ -98,7 +98,7 @@ class DefaultWebhookService(
         if (isQueued(wallet.id)) {
             repository.addTransactions(wallet.id, transactions)
         } else {
-            repository.addWallet(wallet.id, transactions, transactions.first().timestamp.toEpochMilli().toDouble())
+            repository.addWallet(wallet.id, transactions, transactions.first().timestamp.toEpochMillis().toDouble())
         }
 
         if (deadQueueService.hasTransactions(wallet.identity)) {
