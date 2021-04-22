@@ -73,6 +73,23 @@ class WebhookQueueRedisRepository(
         return transactions.leftPopAndAwait(walletId)
     }
 
+    suspend fun transactionsCount(walletId: String): Long {
+        return transactions.sizeAndAwait(walletId)
+    }
+
+    suspend fun removeWalletFromQueue(walletId: String) {
+        wallets.removeAndAwait(WALLETS_QUEUE, walletId)
+        transactions.deleteAndAwait(walletId)
+    }
+
+    suspend fun setTransactionAtIndex(walletId: String, transaction: TransactionQueueTask, index: Long) {
+        transactions.setAndAwait(walletId, index, transaction)
+    }
+
+    suspend fun changeScore(walletId: String, scoreDiff: Double) {
+        wallets.incrementScoreAndAwait(WALLETS_QUEUE, walletId, scoreDiff)
+    }
+
     companion object {
         private const val WALLETS_QUEUE = "wallets_queue"
     }

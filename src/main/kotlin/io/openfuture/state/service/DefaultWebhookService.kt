@@ -1,18 +1,19 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.domain.Transaction
-import io.openfuture.state.domain.TransactionQueueTask
-import io.openfuture.state.domain.Wallet
-import io.openfuture.state.domain.WalletQueueTask
+import io.openfuture.state.domain.*
 import io.openfuture.state.exception.NotFoundException
+import io.openfuture.state.property.WebhookProperties
 import io.openfuture.state.repository.WebhookQueueRedisRepository
+import io.openfuture.state.util.MathUtil
 import io.openfuture.state.util.toEpochMillis
 import org.springframework.stereotype.Service
+import java.time.Duration
 import java.time.LocalDateTime
 
 @Service
 class DefaultWebhookService(
-    private val repository: WebhookQueueRedisRepository
+    private val repository: WebhookQueueRedisRepository,
+    private val webhookProperties: WebhookProperties
 ) : WebhookService {
 
     override suspend fun scheduleTransaction(wallet: Wallet, transaction: Transaction) {
@@ -47,8 +48,50 @@ class DefaultWebhookService(
         repository.unlock(walletId)
     }
 
+    override suspend fun rescheduleWallet(wallet: Wallet) {
+        if (wallet.webhookStatus == WebhookStatus.FAILED) {
+            return
+        }
+
+        if (hasTransactions(wallet.id)) {
+            val score = repository.walletScore(wallet.id) ?: throw NotFoundException("Wallet not found: $wallet.id")
+            val nextTransaction = firstTransaction(wallet.id)
+            val scoreDiff = nextTransaction.timestamp.toEpochMillis() - score
+
+            repository.changeScore(wallet.id, scoreDiff)
+            repository.setTransactionAtIndex(wallet.id, nextTransaction, 0)
+
+            return
+        }
+
+        repository.removeWalletFromQueue(wallet.id)
+    }
+
+    override suspend fun rescheduleTransaction(wallet: Wallet, transactionTask: TransactionQueueTask) {
+        if (transactionTask.attempt >= webhookProperties.maxRetryAttempts()) {
+            repository.removeWalletFromQueue(wallet.id)
+        } else {
+            repository.changeScore(wallet.id, nextInvocationDelay(transactionTask.attempt))
+            repository.setTransactionAtIndex(wallet.id, transactionTask.apply { attempt++ }, 0)
+        }
+    }
+
     private suspend fun isQueued(walletId: String): Boolean {
         return repository.walletScore(walletId) != null
+    }
+
+    private suspend fun hasTransactions(walletId: String): Boolean {
+        val count = repository.transactionsCount(walletId)
+        return count > 0
+    }
+
+    private fun nextInvocationDelay(attempt: Int): Double {
+        val delay = if (attempt <= webhookProperties.retryOptions.progressiveMaxAttempts)
+            Duration.ofSeconds(MathUtil.fb(attempt))
+        else
+            Duration.ofDays(1)
+
+        return delay.toMillis().toDouble()
     }
 
 }

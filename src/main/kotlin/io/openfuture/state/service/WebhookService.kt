@@ -16,4 +16,8 @@ interface WebhookService {
     suspend fun lock(walletId: String): Boolean
 
     suspend fun unlock(walletId: String)
+
+    suspend fun rescheduleWallet(wallet: Wallet)
+
+    suspend fun rescheduleTransaction(wallet: Wallet, transactionTask: TransactionQueueTask)
 }

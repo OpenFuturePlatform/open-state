@@ -2,7 +2,9 @@ package io.openfuture.state.service
 
 import com.nhaarman.mockitokotlin2.*
 import io.openfuture.state.base.ServiceTests
+import io.openfuture.state.domain.WebhookStatus
 import io.openfuture.state.exception.NotFoundException
+import io.openfuture.state.property.WebhookProperties
 import io.openfuture.state.repository.WebhookQueueRedisRepository
 import io.openfuture.state.util.*
 import kotlinx.coroutines.runBlocking
@@ -11,16 +13,19 @@ import org.junit.Assert.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import java.time.Duration
+import java.time.LocalDateTime
 
 internal class WebhookServiceTest : ServiceTests() {
 
     private lateinit var service: WebhookService
     private var repository: WebhookQueueRedisRepository = spy(Mockito.mock(WebhookQueueRedisRepository::class.java))
+    private val webhookProperties: WebhookProperties = WebhookProperties()
 
 
     @BeforeEach
     fun setUp() {
-        service = DefaultWebhookService(repository)
+        service = DefaultWebhookService(repository, webhookProperties)
     }
 
     @Test
@@ -114,6 +119,84 @@ internal class WebhookServiceTest : ServiceTests() {
 
         val result = service.firstTransaction("walletId")
         assertThat(result).isEqualTo(transactionTask)
+    }
+
+    @Test
+    fun rescheduleWalletShouldReturnBecauseWalletStatusIsFailed() = runBlocking<Unit> {
+        val wallet = createDummyWallet(id = "walletId", webhookStatus = WebhookStatus.FAILED)
+
+        service.rescheduleWallet(wallet)
+        verify(repository, never(),).transactionsCount("walletId")
+    }
+
+    @Test
+    fun rescheduleWalletShouldCancelWalletSchedule() = runBlocking {
+        val wallet = createDummyWallet(id = "walletId")
+
+        given(repository.transactionsCount("walletId")).willReturn(0)
+        service.rescheduleWallet(wallet)
+
+        verify(repository, times(1)).transactionsCount("walletId")
+        verify(repository, never()).walletScore("walletId")
+        verify(repository, times(1)).removeWalletFromQueue("walletId")
+    }
+
+    @Test
+    fun rescheduleWalletShouldRescheduleWallet() = runBlocking<Unit> {
+        val wallet = createDummyWallet(id = "walletId")
+        val transactionTask = createDummyTransactionQueueTask()
+
+        given(repository.transactionsCount("walletId")).willReturn(10)
+        given(repository.walletScore("walletId")).willReturn(10000.0)
+        given(repository.firstTransaction("walletId")).willReturn(transactionTask)
+
+        service.rescheduleWallet(wallet)
+
+        verify(repository, times(1)).transactionsCount("walletId")
+        verify(repository, times(1)).walletScore("walletId")
+        verify(repository, times(1)).changeScore("walletId", transactionTask.timestamp.toEpochMillis() - 10000.0)
+        verify(repository, times(1)).setTransactionAtIndex("walletId", transactionTask, 0)
+    }
+
+    @Test
+    fun rescheduleWalletShouldThrowNotFoundException() = runBlocking<Unit> {
+        val wallet = createDummyWallet(id = "walletId")
+        val transactionTask = createDummyTransactionQueueTask()
+
+        given(repository.transactionsCount("walletId")).willReturn(10)
+        given(repository.walletScore("walletId")).willReturn(null)
+
+        assertThrows(NotFoundException::class.java) {
+            runBlocking {
+                service.rescheduleWallet(wallet)
+            }
+        }
+    }
+
+    @Test
+    fun rescheduleTransactionShouldReScheduleWalletUsingFibonachiRow() = runBlocking<Unit> {
+        val wallet = createDummyWallet(id = "walletId")
+        val timestamp = LocalDateTime.now()
+        val transaction = createDummyTransactionQueueTask("transactionId", timestamp, 5)
+        val result = createDummyTransactionQueueTask("transactionId", timestamp, 6)
+
+        service.rescheduleTransaction(wallet, transaction)
+
+        verify(repository, times(1)).changeScore("walletId", 3000.0)
+        verify(repository, times(1)).setTransactionAtIndex("walletId", result, 0)
+    }
+
+    @Test
+    fun rescheduleTransactionShouldReScheduleWalletUsingDailyDelay() = runBlocking<Unit> {
+        val wallet = createDummyWallet(id = "walletId")
+        val timestamp = LocalDateTime.now()
+        val transactionTask = createDummyTransactionQueueTask("transactionId", timestamp, 12)
+        val result = createDummyTransactionQueueTask("transactionId", timestamp, 13)
+
+        service.rescheduleTransaction(wallet, transactionTask)
+
+        verify(repository, times(1)).changeScore("walletId", Duration.ofDays(1).toMillis().toDouble())
+        verify(repository, times(1)).setTransactionAtIndex("walletId", result, 0)
     }
 
 }

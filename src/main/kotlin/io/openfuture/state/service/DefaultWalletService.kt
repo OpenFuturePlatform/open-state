@@ -6,6 +6,7 @@ import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WalletIdentity
+import io.openfuture.state.domain.WebhookStatus
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.TransactionRepository
 import io.openfuture.state.repository.WalletRepository
@@ -43,6 +44,10 @@ class DefaultWalletService(
 
             wallet?.let { saveTransaction(it, block, transaction) }
         }
+    }
+
+    override suspend fun updateWebhookStatus(wallet: Wallet, status: WebhookStatus) {
+        walletRepository.save(wallet.apply { webhookStatus = status }).awaitSingle()
     }
 
     private suspend fun saveTransaction(wallet: Wallet, block: UnifiedBlock, unifiedTransaction: UnifiedTransaction) {

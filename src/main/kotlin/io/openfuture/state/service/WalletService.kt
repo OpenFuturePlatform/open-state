@@ -3,6 +3,7 @@ package io.openfuture.state.service
 import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.domain.Wallet
+import io.openfuture.state.domain.WebhookStatus
 
 interface WalletService {
 
@@ -13,4 +14,6 @@ interface WalletService {
     suspend fun save(blockchain: Blockchain, address: String, webhook: String): Wallet
 
     suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock)
+
+    suspend fun updateWebhookStatus(wallet: Wallet, status: WebhookStatus)
 }
