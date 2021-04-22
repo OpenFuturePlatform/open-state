@@ -18,7 +18,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class WebhookProcessor(
-    private val webhookService: WebhookService
+    private val webhookService: WebhookService,
+    private val webhookExecutor: WebhookExecutor
 ) {
 
     @Scheduled(fixedDelayString = "#{@webhookInvocationProcessDelay}", initialDelay = 1000)
@@ -32,7 +33,7 @@ class WebhookProcessor(
         log.info("Start process webhook for wallet $walletTask.walletId")
 
         try {
-            // TODO: Here would be call of executor service
+            webhookExecutor.execute(walletTask.walletId)
         } catch (e: Exception) {
             log.error("Error executing webhook for wallet $walletTask.walletId", e)
         }

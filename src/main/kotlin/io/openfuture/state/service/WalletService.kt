@@ -8,6 +8,8 @@ interface WalletService {
 
     suspend fun findByIdentity(blockchain: String, address: String): Wallet
 
+    suspend fun findById(id: String): Wallet
+
     suspend fun save(blockchain: Blockchain, address: String, webhook: String): Wallet
 
     suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock)

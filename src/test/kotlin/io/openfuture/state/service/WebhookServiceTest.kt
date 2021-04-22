@@ -2,10 +2,12 @@ package io.openfuture.state.service
 
 import com.nhaarman.mockitokotlin2.*
 import io.openfuture.state.base.ServiceTests
+import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.WebhookQueueRedisRepository
 import io.openfuture.state.util.*
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.Assert.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
@@ -36,7 +38,7 @@ internal class WebhookServiceTest : ServiceTests() {
             .addWallet(
                 eq("walletId"),
                 eq(transactionTask),
-                eq(transactionTask.timestamp.toEpochMilli().toDouble())
+                eq(transactionTask.timestamp.toEpochMillis().toDouble())
             )
     }
 
@@ -71,7 +73,7 @@ internal class WebhookServiceTest : ServiceTests() {
 
         val result = service.firstWalletInQueue()
 
-        assertThat(result).isEqualTo(result)
+        assertThat(result).isEqualTo(walletTask)
     }
 
     @Test
@@ -91,7 +93,27 @@ internal class WebhookServiceTest : ServiceTests() {
 
         val result = service.firstWalletInQueue(1000.0)
 
-        assertThat(result).isEqualTo(result)
+        assertThat(result).isEqualTo(walletTask)
+    }
+
+    @Test
+    fun firstTransactionShouldThrowNotFoundException() = runBlocking<Unit> {
+        given(repository.firstTransaction("walletId")).willReturn(null)
+        assertThrows(NotFoundException::class.java) {
+            runBlocking {
+                service.firstTransaction("walletId")
+            }
+        }
+    }
+
+    @Test
+    fun firstTransactionShouldReturnProperValue() = runBlocking<Unit> {
+        val transactionTask = createDummyTransactionQueueTask()
+
+        given(repository.firstTransaction("walletId")).willReturn(transactionTask)
+
+        val result = service.firstTransaction("walletId")
+        assertThat(result).isEqualTo(transactionTask)
     }
 
 }

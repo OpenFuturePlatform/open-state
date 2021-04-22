@@ -4,8 +4,9 @@ import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.TransactionQueueTask
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WalletQueueTask
+import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.WebhookQueueRedisRepository
-import io.openfuture.state.util.toEpochMilli
+import io.openfuture.state.util.toEpochMillis
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -19,18 +20,22 @@ class DefaultWebhookService(
         if (isQueued(wallet.id)) {
             repository.addTransaction(wallet.id, transactionTask)
         } else {
-            repository.addWallet(wallet.id, transactionTask, transactionTask.timestamp.toEpochMilli().toDouble())
+            repository.addWallet(wallet.id, transactionTask, transactionTask.timestamp.toEpochMillis().toDouble())
         }
     }
 
     override suspend fun firstWalletInQueue(score: Double?): WalletQueueTask? {
-        val walletId = repository.firstWalletInScoreRange(score, LocalDateTime.now().toEpochMilli().toDouble())
+        val walletId = repository.firstWalletInScoreRange(score, LocalDateTime.now().toEpochMillis().toDouble())
         if (walletId != null) {
             val walletScore = repository.walletScore(walletId)
             return WalletQueueTask(walletId, walletScore)
         }
 
         return null
+    }
+
+    override suspend fun firstTransaction(walletId: String): TransactionQueueTask {
+        return repository.firstTransaction(walletId) ?: throw NotFoundException("Transaction not found")
     }
 
     override suspend fun lock(walletId: String): Boolean {
