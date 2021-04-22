@@ -24,7 +24,7 @@ class WebhookQueueRedisRepository(
         transactionTaskRedisTemplate.opsForList()
 
 
-    suspend fun addWallet(walletId: String, transaction: TransactionQueueTask, score: Double) {
+    suspend fun addWallet(walletId: String, transactionTasks: Collection<TransactionQueueTask>, score: Double) {
         val result = commonRedisTemplate.execute { connection ->
             val walletAdd = connection.zSetCommands().zAdd(
                 commonRedisTemplate.keyToByteBuffer(WALLETS_QUEUE),
@@ -34,7 +34,9 @@ class WebhookQueueRedisRepository(
 
             val transactionAdd = connection.listCommands().rPush(
                 commonRedisTemplate.keyToByteBuffer(walletId),
-                listOf(commonRedisTemplate.valueToByteBuffer(transaction))
+                transactionTasks.map {
+                    commonRedisTemplate.valueToByteBuffer(it)
+                }
             )
 
             Flux.zip(walletAdd, transactionAdd)
@@ -43,8 +45,8 @@ class WebhookQueueRedisRepository(
         result.awaitLast()
     }
 
-    suspend fun addTransaction(walletId: String, transaction: TransactionQueueTask) {
-        transactions.rightPushAndAwait(walletId, transaction)
+    suspend fun addTransactions(walletId: String, transactionTasks: Collection<TransactionQueueTask>) {
+        transactions.rightPushAllAndAwait(walletId, transactionTasks)
     }
 
     suspend fun walletScore(walletId: String): Double? {

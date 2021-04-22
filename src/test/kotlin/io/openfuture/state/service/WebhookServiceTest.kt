@@ -20,12 +20,46 @@ internal class WebhookServiceTest : ServiceTests() {
 
     private lateinit var service: WebhookService
     private var repository: WebhookQueueRedisRepository = spy(Mockito.mock(WebhookQueueRedisRepository::class.java))
+    private var deadQueueService: TransactionDeadQueueService = spy(mock())
     private val webhookProperties: WebhookProperties = WebhookProperties()
 
 
     @BeforeEach
     fun setUp() {
-        service = DefaultWebhookService(repository, webhookProperties)
+        service = DefaultWebhookService(repository, deadQueueService, webhookProperties)
+    }
+
+    @Test
+    fun scheduleTransactionShouldAddTransactionToDeadQeue() = runBlocking {
+        val wallet = createDummyWallet(blockchain = "Ethereum", address = "address", webhookStatus = WebhookStatus.FAILED)
+        val transaction = createDummyTransaction(id = "transactionId")
+        val transactionTask = createDummyTransactionQueueTask(transactionId = "transactionId")
+
+        service.scheduleTransaction(wallet, transaction)
+
+        verify(deadQueueService, times(1)).addTransactionToDeadQueue(wallet.identity, listOf(transactionTask))
+        verify(repository, never()).addWallet(any(), any(), any())
+        verify(repository, never()).addTransactions(any(), any())
+    }
+
+    @Test
+    fun scheduleTransactionShouldAddTransactionFromDeadQueue() = runBlocking<Unit> {
+        val wallet = createDummyWallet(blockchain = "Ethereum", address = "address", id = "walletId")
+        val transaction = createDummyTransaction(id = "transactionId2")
+        val transactionTask1 = createDummyTransactionQueueTask(transactionId = "transactionId1")
+        val transactionTask2 = createDummyTransactionQueueTask(transactionId = "transactionId2")
+
+        given(deadQueueService.getTransactionFromDeadQueue(wallet.identity)).willReturn(listOf(transactionTask1))
+        given(deadQueueService.hasTransactions(wallet.identity)).willReturn(true)
+        given(repository.walletScore("walletId")).willReturn(null)
+
+        service.scheduleTransaction(wallet, transaction)
+
+        verify(deadQueueService, times(1)).getTransactionFromDeadQueue(eq(wallet.identity))
+        verify(deadQueueService, times(1)).hasTransactions(eq(wallet.identity))
+        verify(deadQueueService, times(1)).removeFromDeadQueue(eq(wallet.identity))
+        verify(repository, times(1)).addWallet(eq("walletId"), eq(listOf(transactionTask1, transactionTask2)), any())
+        verify(repository, times(1)).walletScore(eq("walletId"))
     }
 
     @Test
@@ -34,6 +68,8 @@ internal class WebhookServiceTest : ServiceTests() {
         val transaction = createDummyTransaction(id = "transactionId")
         val transactionTask = createDummyTransactionQueueTask(transactionId = "transactionId")
 
+        given(deadQueueService.getTransactionFromDeadQueue(wallet.identity)).willReturn(emptyList())
+        given(deadQueueService.hasTransactions(wallet.identity)).willReturn(false)
         given(repository.walletScore("walletId")).willReturn(null)
 
         service.scheduleTransaction(wallet, transaction)
@@ -42,7 +78,7 @@ internal class WebhookServiceTest : ServiceTests() {
         verify(repository, times(1))
             .addWallet(
                 eq("walletId"),
-                eq(transactionTask),
+                eq(listOf(transactionTask)),
                 eq(transactionTask.timestamp.toEpochMillis().toDouble())
             )
     }
@@ -54,11 +90,14 @@ internal class WebhookServiceTest : ServiceTests() {
         val transactionTask = createDummyTransactionQueueTask(transactionId = "transactionId", transaction.date)
 
         given(repository.walletScore("walletId")).willReturn(12.0)
+        given(deadQueueService.getTransactionFromDeadQueue(wallet.identity)).willReturn(emptyList())
+        given(deadQueueService.hasTransactions(wallet.identity)).willReturn(false)
+
         service.scheduleTransaction(wallet, transaction)
 
         verify(repository, times(1)).walletScore("walletId")
         verify(repository, never()).addWallet(eq("WalletId"), any(), any())
-        verify(repository, times(1)).addTransaction(eq("walletId"), eq(transactionTask))
+        verify(repository, times(1)).addTransactions(eq("walletId"), eq(listOf(transactionTask)))
     }
 
     @Test
@@ -161,7 +200,6 @@ internal class WebhookServiceTest : ServiceTests() {
     @Test
     fun rescheduleWalletShouldThrowNotFoundException() = runBlocking<Unit> {
         val wallet = createDummyWallet(id = "walletId")
-        val transactionTask = createDummyTransactionQueueTask()
 
         given(repository.transactionsCount("walletId")).willReturn(10)
         given(repository.walletScore("walletId")).willReturn(null)

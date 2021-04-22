@@ -9,6 +9,8 @@ interface WebhookService {
 
     suspend fun scheduleTransaction(wallet: Wallet, transaction: Transaction)
 
+    suspend fun scheduleTransactionsFromDeadQueue(wallet: Wallet)
+
     suspend fun firstWalletInQueue(score: Double? = null): WalletQueueTask?
 
     suspend fun firstTransaction(walletId: String): TransactionQueueTask
