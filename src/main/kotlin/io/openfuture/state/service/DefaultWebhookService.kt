@@ -17,6 +17,7 @@ class DefaultWebhookService(
 
     override suspend fun scheduleTransaction(wallet: Wallet, transaction: Transaction) {
         val transactionTask = TransactionQueueTask(transaction.id, transaction.date)
+
         if (isQueued(wallet.id)) {
             repository.addTransaction(wallet.id, transactionTask)
         } else {
