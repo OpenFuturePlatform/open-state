@@ -60,16 +60,16 @@ class BitcoinClient(
         return response.result
     }
 
-    suspend fun getInputAddress(txId: String, outputNumber: Int): String {
-        val command = BitcoinCommand("gettransaction", listOf(txId, true))
+    suspend fun getInputAddresses(txId: String, outputNumber: Int): Set<String> {
+        val command = BitcoinCommand("getrawtransaction", listOf(txId, true))
         val response = client.post()
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(command))
             .retrieve()
             .awaitBody<BitcoinResponse<TransactionInputBitcoinResponse>>()
-        return response.result.details
-            .first { it.vout == outputNumber }
-            .address
+        return response.result.vout
+            .first { it.n == outputNumber }
+            .addresses
     }
 
 }

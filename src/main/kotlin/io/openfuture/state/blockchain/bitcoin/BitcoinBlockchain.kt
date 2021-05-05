@@ -51,7 +51,7 @@ class BitcoinBlockchain(private val client: BitcoinClient) : Blockchain() {
 
     private suspend fun getInputAddresses(inputs: List<BitcoinTransaction.Input>): Set<String> {
         return inputs
-            .map { client.getInputAddress(it.txId!!, it.outputNumber!!) }
+            .flatMap { client.getInputAddresses(it.txId!!, it.outputNumber!!) }
             .toSet()
     }
 

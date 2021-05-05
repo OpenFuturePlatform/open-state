@@ -29,7 +29,6 @@ class WebhookProcessor(
             walletTask = webhookService.firstWalletInQueue(walletTask.score) ?: return@runBlocking
         }
 
-
         log.info("Start process webhook for wallet $walletTask.walletId")
 
         try {
