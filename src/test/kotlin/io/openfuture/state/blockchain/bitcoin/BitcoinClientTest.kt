@@ -88,9 +88,9 @@ class BitcoinClientTest {
         val mockResponse = MockResponse().setBody(json).addHeader("Content-Type", "application/json")
         mockWebServer.enqueue(mockResponse)
 
-        val result = client.getInputAddress("hash", 0)
+        val result = client.getInputAddresses("hash", 0)
 
-        assertThat(result).isEqualTo("address1")
+        assertThat(result).isEqualTo(setOf("address1"))
     }
 
 }

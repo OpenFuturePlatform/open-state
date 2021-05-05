@@ -1,6 +1,7 @@
 package io.openfuture.state.util
 
 import io.openfuture.state.blockchain.bitcoin.dto.BitcoinBlock
+import io.openfuture.state.blockchain.bitcoin.dto.BitcoinOutput
 import io.openfuture.state.blockchain.bitcoin.dto.BitcoinTransaction
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
@@ -69,14 +70,15 @@ fun createDummyBitcoinBlock(
 fun createDummyBitcoinTransaction(
     hash: String = "hash",
     input: List<BitcoinTransaction.Input> = listOf(BitcoinTransaction.Input("id", 1)),
-    output: List<BitcoinTransaction.Output> = listOf(createDummyBitcoinOutput())
+    output: List<BitcoinOutput> = listOf(createDummyBitcoinOutput())
 ) = BitcoinTransaction(hash, input, output)
 
 fun createDummyBitcoinOutput(
     value: BigDecimal = BigDecimal.ONE,
-    address: String = "to"
-): BitcoinTransaction.Output {
-    val output = BitcoinTransaction.Output(value)
+    address: String = "to",
+    n: Int = 0
+): BitcoinOutput {
+    val output = BitcoinOutput(value, n)
     output.addresses.add(address)
     return output
 }

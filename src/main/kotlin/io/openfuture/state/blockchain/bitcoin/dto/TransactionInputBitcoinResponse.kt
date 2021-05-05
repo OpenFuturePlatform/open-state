@@ -1,3 +1,3 @@
 package io.openfuture.state.blockchain.bitcoin.dto
 
-data class TransactionInputBitcoinResponse(val details: List<InputInfo>)
+data class TransactionInputBitcoinResponse(val vout: List<BitcoinOutput>)

@@ -23,7 +23,7 @@ internal class WebhookQueueRedisRepositoryTest : RedisRepositoryTests() {
 
     @BeforeEach
     fun setUp() {
-        repository = WebhookQueueRedisRepository(commonRedisTemplate, transactionTaskRedisTemplate, properties)
+        repository = WebhookQueueRedisRepository(commonRedisTemplate, properties, transactionTaskRedisTemplate)
 
         commonRedisTemplate.execute { it.serverCommands().flushAll() }.blockFirst()
         transactionTaskRedisTemplate.execute { it.serverCommands().flushAll() }.blockFirst()
@@ -221,7 +221,7 @@ internal class WebhookQueueRedisRepositoryTest : RedisRepositoryTests() {
         transactionTaskRedisTemplate.opsForList().rightPush("walletId", transactionTask).block()
 
         val result = repository.transactionsCount("walletId")
-        Assertions.assertThat(result).isEqualTo(1)
+        assertThat(result).isEqualTo(1)
     }
 
     @Test
@@ -237,7 +237,7 @@ internal class WebhookQueueRedisRepositoryTest : RedisRepositoryTests() {
         repository.setTransactionAtIndex("walletId", transactionTask2, 1)
 
         val result = transactionTaskRedisTemplate.opsForList().range("walletId", 1, 1).collectList().block()
-        Assertions.assertThat(result).isEqualTo(listOf(transactionTask2))
+        assertThat(result).isEqualTo(listOf(transactionTask2))
     }
 
     @Test

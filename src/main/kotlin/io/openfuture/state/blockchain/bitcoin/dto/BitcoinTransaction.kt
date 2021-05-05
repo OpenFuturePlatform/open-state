@@ -10,7 +10,7 @@ data class BitcoinTransaction(
     val inputs: List<Input>,
 
     @field:JsonProperty("vout")
-    val outputs: List<Output>
+    val outputs: List<BitcoinOutput>
 ) {
 
     data class Input(
@@ -20,19 +20,5 @@ data class BitcoinTransaction(
         @field:JsonProperty("vout")
         val outputNumber: Int?
     )
-
-    data class Output(val value: BigDecimal) {
-
-        val addresses: MutableSet<String> = mutableSetOf()
-
-        @Suppress("UNCHECKED_CAST")
-        @JsonProperty("scriptPubKey")
-        private fun unpackNested(scriptPubKey: Map<String, Any>) {
-            val outputAddresses = scriptPubKey["addresses"]
-            outputAddresses?.let {
-                this.addresses.addAll((it as List<String>))
-            }
-        }
-    }
 
 }

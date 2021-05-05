@@ -1,13 +1,23 @@
 {
   "result": {
-    "details": [
+    "vout": [
       {
-        "vout": 0,
-        "address": "address1"
+        "n": 0,
+        "value": 5325.0,
+        "scriptPubKey": {
+          "addresses": [
+            "address1"
+          ]
+        }
       },
       {
-        "vout": 1,
-        "address": "address2"
+        "n": 1,
+        "value": 5325.0,
+        "scriptPubKey": {
+          "addresses": [
+            "address2"
+          ]
+        }
       }
     ]
   }

@@ -15,8 +15,8 @@ import java.time.LocalDateTime
 @Repository
 class WebhookQueueRedisRepository(
     private val commonRedisTemplate: ReactiveRedisTemplate<String, Any>,
-    private val transactionTaskRedisTemplate: ReactiveRedisTemplate<String, TransactionQueueTask>,
-    private val webhookProperties: WebhookProperties
+    private val webhookProperties: WebhookProperties,
+    transactionTaskRedisTemplate: ReactiveRedisTemplate<String, TransactionQueueTask>,
 ) {
     private val wallets: ReactiveZSetOperations<String, Any> = commonRedisTemplate.opsForZSet()
     private val locks: ReactiveValueOperations<String, Any> = commonRedisTemplate.opsForValue()
