@@ -167,7 +167,7 @@ jobs:
           export MONGODB_PASSWORD="${{ secrets.SPRINT_MONGO_PASSWORD }}"
           export DOCKER_IMAGE_TAG="openplatform/open-state:${{ env.IMAGE_TAG }}"
           docker login -u ${{ secrets.DOCKERHUB_USER_NAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
-          docker-compose -f docker-compose-server.yml up -d
+          docker-compose -f docker-compose.yml up -d
           docker image ls --filter reference=openplatform/open-state:${{ env.IMAGE_TAG }} -q | tail -n +4 | xargs --no-run-if-empty docker image rm
 
 
@@ -200,5 +200,5 @@ jobs:
           export MONGODB_PASSWORD="${{ secrets.PROD_MONGO_PASSWORD }}"
           export DOCKER_IMAGE_TAG="openplatform/open-state:${{ env.IMAGE_TAG }}"
           docker login -u ${{ secrets.DOCKERHUB_USER_NAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
-          docker-compose -f docker-compose-server.yml up -d
+          docker-compose -f docker-compose.yml up -d
           docker image ls --filter reference=openplatform/open-state:${{ env.IMAGE_TAG }} -q | tail -n +4 | xargs --no-run-if-empty docker image rm
