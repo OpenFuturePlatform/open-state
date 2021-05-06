@@ -160,6 +160,10 @@ jobs:
           ssh-keyscan ${{ secrets.SPRINT_SERVER }} >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
           export DOCKER_HOST="ssh://gitlab@${{ secrets.SPRINT_SERVER }}"
+          export BITCOIN_NODE="${{ secrets.SPRINT_BITCOIN_NODE }}"
+          export BITCOIN_USERNAME="${{ secrets.SPRINT_BITCOIN_USERNAME }}"
+          export BITCOIN_PASSWORD="${{ secrets.SPRINT_BITCOIN_PASSWORD }}"
+          export ETHEREUM_NODE_ADDRESS="${{ secrets.SPRINT_ETHEREUM_NODE_ADDRESS }}"
           export MONGODB_PASSWORD="${{ secrets.SPRINT_MONGO_PASSWORD }}"
           export DOCKER_IMAGE_TAG="openplatform/open-state:${{ env.IMAGE_TAG }}"
           docker login -u ${{ secrets.DOCKERHUB_USER_NAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -189,6 +193,10 @@ jobs:
           ssh-keyscan ${{ secrets.PROD_SERVER }} >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
           export DOCKER_HOST="ssh://gitlab@${{ secrets.PROD_SERVER }}"
+          export BITCOIN_NODE="${{ secrets.PROD_BITCOIN_NODE }}"
+          export BITCOIN_USERNAME="${{ secrets.PROD_BITCOIN_USERNAME }}"
+          export BITCOIN_PASSWORD="${{ secrets.PROD_BITCOIN_PASSWORD }}"
+          export ETHEREUM_NODE_ADDRESS="${{ secrets.PROD_ETHEREUM_NODE_ADDRESS }}"
           export MONGODB_PASSWORD="${{ secrets.PROD_MONGO_PASSWORD }}"
           export DOCKER_IMAGE_TAG="openplatform/open-state:${{ env.IMAGE_TAG }}"
           docker login -u ${{ secrets.DOCKERHUB_USER_NAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
