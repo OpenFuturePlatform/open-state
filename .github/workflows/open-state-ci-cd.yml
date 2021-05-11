@@ -160,15 +160,25 @@ jobs:
           ssh-keyscan ${{ secrets.SPRINT_SERVER }} >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
           export DOCKER_HOST="ssh://gitlab@${{ secrets.SPRINT_SERVER }}"
-          export BITCOIN_NODE="${{ secrets.SPRINT_BITCOIN_NODE }}"
-          export BITCOIN_USERNAME="${{ secrets.SPRINT_BITCOIN_USERNAME }}"
-          export BITCOIN_PASSWORD="${{ secrets.SPRINT_BITCOIN_PASSWORD }}"
-          export ETHEREUM_NODE_ADDRESS="${{ secrets.SPRINT_ETHEREUM_NODE_ADDRESS }}"
           export MONGODB_PASSWORD="${{ secrets.SPRINT_MONGO_PASSWORD }}"
           export DOCKER_IMAGE_TAG="openplatform/open-state:${{ env.IMAGE_TAG }}"
           docker login -u ${{ secrets.DOCKERHUB_USER_NAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
           docker-compose -f docker-compose.yml up -d
-          docker image ls --filter reference=openplatform/open-state:${{ env.IMAGE_TAG }} -q | tail -n +4 | xargs --no-run-if-empty docker image rm
+          ssh -i /dev/null gitlab@${{ secrets.SPRINT_SERVER }} "
+                                    docker stop open-state && \
+                                    IMG=\$(docker ps -a --filter='name=^/open-state$' --format='{{.Image}}') &&  \
+                                    docker rm -f open-state && \
+                                    docker rmi \$IMG; \
+                                    exit 0
+                                  "
+          docker pull openplatform/open-state:${{ env.IMAGE_TAG }}
+          docker run -d --name 'open-state' --restart=always -p 8080:8080 \
+                    -e "BITCOIN_NODE=${{ secrets.SPRINT_BITCOIN_NODE }}" \
+                    -e "BITCOIN_USERNAME=${{ secrets.SPRINT_BITCOIN_USERNAME }}" \
+                    -e "BITCOIN_PASSWORD=${{ secrets.SPRINT_BITCOIN_PASSWORD }}" \
+                    -e "ETHEREUM_NODE_ADDRESS=${{ secrets.SPRINT_ETHEREUM_NODE_ADDRESS }}" \
+                    -e "MONGODB_PASSWORD=${{ secrets.SPRINT_MONGO_PASSWORD }}" \
+                    openplatform/open-state:${{ env.IMAGE_TAG }}
 
 
   deploy-production:
@@ -193,12 +203,22 @@ jobs:
           ssh-keyscan ${{ secrets.PROD_SERVER }} >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
           export DOCKER_HOST="ssh://gitlab@${{ secrets.PROD_SERVER }}"
-          export BITCOIN_NODE="${{ secrets.PROD_BITCOIN_NODE }}"
-          export BITCOIN_USERNAME="${{ secrets.PROD_BITCOIN_USERNAME }}"
-          export BITCOIN_PASSWORD="${{ secrets.PROD_BITCOIN_PASSWORD }}"
-          export ETHEREUM_NODE_ADDRESS="${{ secrets.PROD_ETHEREUM_NODE_ADDRESS }}"
           export MONGODB_PASSWORD="${{ secrets.PROD_MONGO_PASSWORD }}"
           export DOCKER_IMAGE_TAG="openplatform/open-state:${{ env.IMAGE_TAG }}"
           docker login -u ${{ secrets.DOCKERHUB_USER_NAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
           docker-compose -f docker-compose.yml up -d
-          docker image ls --filter reference=openplatform/open-state:${{ env.IMAGE_TAG }} -q | tail -n +4 | xargs --no-run-if-empty docker image rm
+          ssh -i /dev/null gitlab@${{ secrets.PROD_SERVER }} "
+                                    docker stop open-state && \
+                                    IMG=\$(docker ps -a --filter='name=^/open-state$' --format='{{.Image}}') &&  \
+                                    docker rm -f open-state && \
+                                    docker rmi \$IMG; \
+                                    exit 0
+                                  "
+          docker pull openplatform/open-state:${{ env.IMAGE_TAG }}
+          docker run -d --name 'open-state' --restart=always -p 8080:8080 \
+                    -e "BITCOIN_NODE=${{ secrets.PROD_BITCOIN_NODE }}" \
+                    -e "BITCOIN_USERNAME=${{ secrets.PROD_BITCOIN_USERNAME }}" \
+                    -e "BITCOIN_PASSWORD=${{ secrets.PROD_BITCOIN_PASSWORD }}" \
+                    -e "ETHEREUM_NODE_ADDRESS=${{ secrets.PROD_ETHEREUM_NODE_ADDRESS }}" \
+                    -e "MONGODB_PASSWORD=${{ secrets.PROD_MONGO_PASSWORD }}" \
+                    openplatform/open-state:${{ env.IMAGE_TAG }}
