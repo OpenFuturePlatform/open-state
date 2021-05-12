@@ -2,10 +2,26 @@ version: "2.4"
 services:
   backend:
     image: $DOCKER_IMAGE_TAG
+    restart: always
+    container_name: open-state
+    links:
+      - mongo
+      - redis
     depends_on:
       - mongo
       - redis
+    ports:
+      - 8080:8080
+    environment:
+      BITCOIN_NODE_ADDRESS: $BITCOIN_NODE_ADDRESS
+      BITCOIN_USERNAME: $BITCOIN_USERNAME
+      BITCOIN_PASSWORD: $BITCOIN_PASSWORD
+      ETHEREUM_NODE_ADDRESS: $ETHEREUM_NODE_ADDRESS
+      MONGODB_PASSWORD: $MONGODB_PASSWORD
+      REDIS_HOST: redis
+      MONGODB_HOST: mongo
   mongo:
+    hostname: mongo
     image: mongo:4.4.0
     restart: always
     ports:
@@ -14,6 +30,8 @@ services:
       MONGO_INITDB_ROOT_USERNAME: open_state
       MONGO_INITDB_ROOT_PASSWORD: $MONGODB_PASSWORD
   redis:
+    hostname: redis
     image: redis:6.0.7
+    restart: always
     ports:
       - 6379:6379
