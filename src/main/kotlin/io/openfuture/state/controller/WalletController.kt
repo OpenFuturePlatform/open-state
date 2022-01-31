@@ -2,6 +2,7 @@ package io.openfuture.state.controller
 
 import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.controller.validation.HttpUrl
+import io.openfuture.state.domain.SaveWalletMetaRequest
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.service.WalletService
 import org.springframework.web.bind.annotation.*
@@ -19,6 +20,13 @@ class WalletController(private val walletService: WalletService, private val blo
     suspend fun save(@Valid @RequestBody request: SaveWalletRequest): WalletDto {
         val blockchain = findBlockchain(request.blockchain!!)
         val wallet = walletService.save(blockchain, request.address!!, request.webhook!!)
+        return WalletDto(wallet)
+    }
+
+    @PostMapping("/woocommerce")
+    suspend fun saveMetadata(@Valid @RequestBody request: SaveWalletMetaRequest): WalletDto {
+        val blockchain = findBlockchain(request.blockchain!!)
+        val wallet = walletService.saveMetadata(blockchain, request)
         return WalletDto(wallet)
     }
 

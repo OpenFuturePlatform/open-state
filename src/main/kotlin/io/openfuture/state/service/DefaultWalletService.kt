@@ -3,10 +3,7 @@ package io.openfuture.state.service
 import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
-import io.openfuture.state.domain.Transaction
-import io.openfuture.state.domain.Wallet
-import io.openfuture.state.domain.WalletIdentity
-import io.openfuture.state.domain.WebhookStatus
+import io.openfuture.state.domain.*
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.TransactionRepository
 import io.openfuture.state.repository.WalletRepository
@@ -33,8 +30,12 @@ class DefaultWalletService(
     }
 
     override suspend fun save(blockchain: Blockchain, address: String, webhook: String): Wallet {
-        val wallet = Wallet(WalletIdentity(blockchain.getName(), address), webhook)
+        val wallet = Wallet(WalletIdentity(blockchain.getName(), address), webhook, WebhookStatus.NOT_INVOKED)
         return walletRepository.save(wallet).awaitSingle()
+    }
+
+    override suspend fun saveMetadata(blockchain: Blockchain, request: SaveWalletMetaRequest): Wallet {
+        TODO("Not yet implemented")
     }
 
     override suspend fun update(walletId: String, webhook: String): Wallet {
