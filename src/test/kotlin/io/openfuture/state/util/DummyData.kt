@@ -22,6 +22,15 @@ fun createDummyWallet(
     lastUpdate: LocalDateTime = LocalDateTime.of(2020, 10, 10, 10, 10)
 ) = Wallet(WalletIdentity(blockchain, address), webhook, webhookStatus, lastUpdate, id)
 
+fun createRealCaseWallet(
+    blockchain: String = "EthereumBlockchain",
+    address: String = "0xC2116EA27AB41BaA4f6F8F67cBdCe3d241251a46",
+    webhook: String = "webhook",
+    webhookStatus: WebhookStatus = WebhookStatus.NOT_INVOKED,
+    id: String = ObjectId().toHexString(),
+    lastUpdate: LocalDateTime = LocalDateTime.of(2020, 10, 10, 10, 10)
+) = Wallet(WalletIdentity(blockchain, address), webhook, webhookStatus, lastUpdate, id)
+
 fun createDummyTransaction(
     blockchain: String = "Ethereum",
     address: String = "address",

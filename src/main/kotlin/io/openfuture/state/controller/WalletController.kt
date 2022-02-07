@@ -2,10 +2,10 @@ package io.openfuture.state.controller
 
 import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.controller.validation.HttpUrl
-import io.openfuture.state.domain.SaveWalletMetaRequest
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.service.WalletService
 import org.springframework.web.bind.annotation.*
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
@@ -15,18 +15,10 @@ import javax.validation.constraints.NotNull
 @RequestMapping("/api/wallets")
 class WalletController(private val walletService: WalletService, private val blockchains: List<Blockchain>) {
 
-    // TODO: Needs to be secured and allowed only for Open API calls
     @PostMapping
     suspend fun save(@Valid @RequestBody request: SaveWalletRequest): WalletDto {
         val blockchain = findBlockchain(request.blockchain!!)
-        val wallet = walletService.save(blockchain, request.address!!, request.webhook!!)
-        return WalletDto(wallet)
-    }
-
-    @PostMapping("/woocommerce")
-    suspend fun saveMetadata(@Valid @RequestBody request: SaveWalletMetaRequest): WalletDto {
-        val blockchain = findBlockchain(request.blockchain!!)
-        val wallet = walletService.saveMetadata(blockchain, request)
+        val wallet = walletService.create(blockchain, request)
         return WalletDto(wallet)
     }
 
@@ -69,13 +61,35 @@ class WalletController(private val walletService: WalletService, private val blo
 
     data class SaveWalletRequest(
         @field:NotBlank
-        val address: String?,
+        val address: String,
 
         @field:NotBlank
-        val webhook: String?,
+        val webhook: String,
 
         @field:NotBlank
-        val blockchain: String?
+        val blockchain: String?,
+
+        @field:NotNull
+        var metadata: WalletMetaDataRequest
+    )
+
+    data class WalletMetaDataRequest(
+        @field:NotBlank
+        var orderId: String,
+
+        @field:NotBlank
+        var orderKey: String,
+
+        var amount: BigDecimal,
+
+        @field:NotBlank
+        var productCurrency: String,
+
+        @field:NotBlank
+        var source: String,
+
+        @field:NotBlank
+        val paymentCurrency: String
     )
 
     data class UpdateWalletRequest(

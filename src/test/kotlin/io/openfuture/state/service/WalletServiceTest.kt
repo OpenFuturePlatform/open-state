@@ -1,6 +1,5 @@
 package io.openfuture.state.service
 
-import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.given
 import com.nhaarman.mockitokotlin2.mock
 import io.openfuture.state.base.ServiceTests
@@ -26,24 +25,14 @@ class WalletServiceTest : ServiceTests() {
     private val walletRepository: WalletRepository = mock()
     private val transactionRepository: TransactionRepository = mock()
     private val webhookService: WebhookService = mock()
+    private val webhookInvoker: WebhookInvoker = mock()
     private val blockchain: Blockchain = mock()
 
 
     @BeforeEach
     fun setUp() {
-        walletService = DefaultWalletService(walletRepository, transactionRepository, webhookService)
+        walletService = DefaultWalletService(walletRepository, transactionRepository, webhookService, webhookInvoker)
         given(blockchain.getName()).willReturn("MockBlockchain")
-    }
-
-    @Test
-    fun saveShouldReturnWallet() = runBlocking<Unit> {
-        val wallet = createDummyWallet()
-
-        given(walletRepository.save(any())).willReturn(Mono.just(wallet))
-
-        val result = walletService.save(blockchain, wallet.identity.address, wallet.webhook)
-
-        assertThat(result).isEqualTo(wallet)
     }
 
     @Test

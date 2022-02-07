@@ -22,7 +22,6 @@ class EthereumBlockchain(private val web3j: Web3j) : Blockchain() {
         val block = web3j.ethGetBlockByNumber(parameter, true)
             .sendAsync().await()
             .block
-
         val transactions = obtainTransactions(block)
         val date = block.timestamp.toLong().toLocalDateTime()
         return UnifiedBlock(transactions, date, block.number.toLong(), block.hash)

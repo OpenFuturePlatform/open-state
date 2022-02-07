@@ -22,5 +22,4 @@ abstract class MongoRepositoryTests {
         val indexCreator = MongoIndexCreator(mongoConverter, reactiveMongoTemplate)
         indexCreator.initIndicesAfterStartup()
     }
-
 }

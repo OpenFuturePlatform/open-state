@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
  * at the same time
  */
 
-@Component
+//@Component
 class WebhookProcessor(
     private val webhookService: WebhookService,
     private val webhookExecutor: WebhookExecutor

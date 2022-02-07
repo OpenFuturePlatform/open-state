@@ -11,7 +11,7 @@ services:
       - mongo
       - redis
     ports:
-      - 8080:8080
+      - "8080:8080"
     environment:
       BITCOIN_NODE_ADDRESS: $BITCOIN_NODE_ADDRESS
       BITCOIN_USERNAME: $BITCOIN_USERNAME
@@ -25,7 +25,7 @@ services:
     image: mongo:4.4.0
     restart: always
     ports:
-      - 27017:27017
+      - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: open_state
       MONGO_INITDB_ROOT_PASSWORD: $MONGODB_PASSWORD

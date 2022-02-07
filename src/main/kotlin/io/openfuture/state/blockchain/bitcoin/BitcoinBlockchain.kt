@@ -8,7 +8,7 @@ import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.util.toLocalDateTimeInSeconds
 import org.springframework.stereotype.Component
 
-@Component
+//@Component
 class BitcoinBlockchain(private val client: BitcoinClient) : Blockchain() {
 
     override suspend fun getLastBlockNumber(): Int {

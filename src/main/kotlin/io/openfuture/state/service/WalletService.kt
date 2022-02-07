@@ -2,7 +2,7 @@ package io.openfuture.state.service
 
 import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.blockchain.dto.UnifiedBlock
-import io.openfuture.state.domain.SaveWalletMetaRequest
+import io.openfuture.state.controller.WalletController
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WebhookStatus
 
@@ -12,9 +12,7 @@ interface WalletService {
 
     suspend fun findById(id: String): Wallet
 
-    suspend fun save(blockchain: Blockchain, address: String, webhook: String): Wallet
-
-    suspend fun saveMetadata(blockchain: Blockchain, request: SaveWalletMetaRequest): Wallet
+    suspend fun create(blockchain: Blockchain, request: WalletController.SaveWalletRequest): Wallet
 
     suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock)
 
