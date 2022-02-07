@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.given
 import com.nhaarman.mockitokotlin2.mock
 import io.openfuture.state.base.ServiceTests
 import io.openfuture.state.blockchain.Blockchain
+import io.openfuture.state.client.BinanceHttpClientApi
 import io.openfuture.state.domain.WalletIdentity
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.TransactionRepository
@@ -27,11 +28,12 @@ class WalletServiceTest : ServiceTests() {
     private val webhookService: WebhookService = mock()
     private val webhookInvoker: WebhookInvoker = mock()
     private val blockchain: Blockchain = mock()
+    private val binanceHttpClientApi: BinanceHttpClientApi = mock()
 
 
     @BeforeEach
     fun setUp() {
-        walletService = DefaultWalletService(walletRepository, transactionRepository, webhookService, webhookInvoker)
+        walletService = DefaultWalletService(walletRepository, transactionRepository, webhookService, webhookInvoker, binanceHttpClientApi)
         given(blockchain.getName()).willReturn("MockBlockchain")
     }
 
