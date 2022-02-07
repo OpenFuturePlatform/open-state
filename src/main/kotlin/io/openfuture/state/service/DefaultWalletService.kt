@@ -39,7 +39,7 @@ class DefaultWalletService(
             ?: throw NotFoundException("Wallet not found: $id")
     }
 
-    override suspend fun create(blockchain: Blockchain, request: WalletController.SaveWalletRequest): Wallet {
+    override suspend fun save(blockchain: Blockchain, request: WalletController.SaveWalletRequest): Wallet {
         val price = binanceHttpClientApi.getEthereumRate().price
         val rate = BigDecimal.ONE.divide(price, price.scale(), RoundingMode.HALF_UP)
 

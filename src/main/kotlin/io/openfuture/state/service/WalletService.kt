@@ -12,7 +12,7 @@ interface WalletService {
 
     suspend fun findById(id: String): Wallet
 
-    suspend fun create(blockchain: Blockchain, request: WalletController.SaveWalletRequest): Wallet
+    suspend fun save(blockchain: Blockchain, request: WalletController.SaveWalletRequest): Wallet
 
     suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock)
 

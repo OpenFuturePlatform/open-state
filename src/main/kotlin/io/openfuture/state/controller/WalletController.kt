@@ -18,7 +18,7 @@ class WalletController(private val walletService: WalletService, private val blo
     @PostMapping
     suspend fun save(@Valid @RequestBody request: SaveWalletRequest): WalletDto {
         val blockchain = findBlockchain(request.blockchain!!)
-        val wallet = walletService.create(blockchain, request)
+        val wallet = walletService.save(blockchain, request)
         return WalletDto(wallet)
     }
 
