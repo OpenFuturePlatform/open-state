@@ -3,7 +3,7 @@ package io.openfuture.state.service
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WebhookCallbackResponse
-import io.openfuture.state.webhhok.WebhookRestClient
+import io.openfuture.state.webhook.WebhookRestClient
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

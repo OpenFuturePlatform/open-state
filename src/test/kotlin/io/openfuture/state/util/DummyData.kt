@@ -6,7 +6,7 @@ import io.openfuture.state.blockchain.bitcoin.dto.BitcoinTransaction
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.domain.*
-import io.openfuture.state.webhhok.WebhookRestClient
+import io.openfuture.state.webhook.WebhookRestClient
 import org.bson.types.ObjectId
 import org.springframework.http.HttpStatus
 import java.math.BigDecimal

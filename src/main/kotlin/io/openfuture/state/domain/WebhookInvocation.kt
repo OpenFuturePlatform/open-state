@@ -1,6 +1,6 @@
 package io.openfuture.state.domain
 
-import io.openfuture.state.webhhok.WebhookRestClient
+import io.openfuture.state.webhook.WebhookRestClient
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document

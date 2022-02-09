@@ -1,10 +1,9 @@
-package io.openfuture.state.webhhok
+package io.openfuture.state.webhook
 
 import io.openfuture.state.service.WebhookService
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
 
 /**
  * At every time process try to get wallet scheduled

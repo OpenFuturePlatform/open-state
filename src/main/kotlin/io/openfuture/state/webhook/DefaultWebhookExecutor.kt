@@ -1,5 +1,6 @@
-package io.openfuture.state.webhhok
+package io.openfuture.state.webhook
 
+import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.domain.TransactionQueueTask
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WebhookStatus
@@ -25,7 +26,7 @@ class DefaultWebhookExecutor(
         val transactionTask = webhookService.firstTransaction(walletId)
         val transaction = transactionService.findById(transactionTask.transactionId)
 
-        val response = restClient.doPost(wallet.webhook, WebhookPayloadDto(transaction))
+        val response = if (wallet.source == "woocommerce") restClient.doPostWoocommerce(wallet) else restClient.doPost(wallet.webhook, WebhookPayloadDto(transaction))
         webhookInvocationService.registerInvocation(wallet, transactionTask, response)
 
         if (response.status.is2xxSuccessful) {
@@ -47,6 +48,11 @@ class DefaultWebhookExecutor(
         }
 
         webhookService.rescheduleTransaction(wallet, transactionTask)
+    }
+
+    private suspend fun sendWoocommerceWebhook(wallet: Wallet) {
+        walletService.updateWebhookStatus(wallet, WebhookStatus.OK)
+        webhookService.rescheduleWallet(wallet)
     }
 
 }

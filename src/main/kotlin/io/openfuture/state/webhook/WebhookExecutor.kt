@@ -1,4 +1,4 @@
-package io.openfuture.state.webhhok
+package io.openfuture.state.webhook
 
 interface WebhookExecutor {
 
