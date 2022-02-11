@@ -12,9 +12,11 @@ import io.openfuture.state.service.WebhookService
 import io.openfuture.state.util.*
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.Duration
 
+@Disabled
 internal class WebhookExecutorTest : ServiceTests() {
 
     private lateinit var service: WebhookExecutor
