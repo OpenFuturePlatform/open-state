@@ -1,8 +1,10 @@
 package io.openfuture.state.service
 
+import io.openfuture.state.client.OpenApiClient
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WebhookCallbackResponse
+import io.openfuture.state.property.OpenApiProperties
 import io.openfuture.state.webhook.WebhookRestClient
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
@@ -11,26 +13,45 @@ import java.math.BigDecimal
 
 @Service
 class WebhookInvoker(
-    val webhookRestClient: WebhookRestClient
+    val webhookRestClient: WebhookRestClient,
+    val openApiClient: OpenApiClient
 ) {
 
     suspend fun invoke(wallet: Wallet, transaction: Transaction) = runBlocking {
         log.info("Invoking webhook ${wallet.webhook}")
         val webhookBody = WebhookCallbackResponse(
-            wallet.orderId,transaction.amount,
+            wallet.orderId, transaction.amount,
             wallet.amount,
             wallet.amount - transaction.amount,
-            ((wallet.amount.minus(wallet.totalPaid)).compareTo(BigDecimal.ZERO) > 0).toString(),
+            ((wallet.amount.minus(wallet.totalPaid)) > BigDecimal.ZERO).toString(),
             transaction.to,
             "ETH",
             wallet.rate
         )
+        val requestBody = StateSignRequest(
+            wallet.identity.address,
+            wallet.orderId.toInt(),
+            if (wallet.amount.minus(wallet.totalPaid) > BigDecimal.ZERO) "PROCESSING" else "COMPLETED"
+        )
+        val signature = openApiClient.getSignature(
+            wallet.identity.address,
+            requestBody
+        )
         log.info("Invoking webhook $webhookBody")
+        if (wallet.source == "woocommerce") {
+            signature?.let { webhookRestClient.doPostWoocommerce(requestBody, wallet.webhook, it) } ?: log.warn("Signature was NULL. Skipping webhook invocation...")
+        }
         webhookRestClient.doPost(wallet.webhook, webhookBody)
     }
 
     companion object {
         private val log = LoggerFactory.getLogger(DefaultWalletService::class.java)
     }
+
+    data class StateSignRequest(
+        val address: String,
+        val order_id: Int,
+        val status: String
+    )
 
 }

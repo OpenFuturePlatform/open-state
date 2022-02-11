@@ -1,6 +1,6 @@
 package io.openfuture.state.webhook
 
-import io.openfuture.state.domain.Wallet
+import io.openfuture.state.service.WebhookInvoker
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -33,23 +33,22 @@ class WebhookRestClient(builder: WebClient.Builder) {
         }
     }
 
-    //TODO
-    suspend fun doPostWoocommerce(wallet: Wallet): WebhookResponse {
+    suspend fun doPostWoocommerce(request: WebhookInvoker.StateSignRequest, webhook: String, signature: String): WebhookResponse {
         return try {
             val response = client.post()
-                .uri(wallet.webhook)
-                .header("HTTP_X_OPEN_WEBHOOK_SIGNATURE","50571f2fbab44526a8aa63bb4fcaecf373fadf3a59263648cfc4bc257a2af238")
+                .uri(webhook)
+                .header("HTTP_X_OPEN_WEBHOOK_SIGNATURE", signature)
                 .header("HTTP_X_OPEN_WEBHOOK_TIMESTAMP", TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()).toString())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(wallet.identity))
+                .body(BodyInserters.fromValue(request))
                 .exchange()
                 .awaitSingle()
 
-            WebhookResponse(response.statusCode(), wallet.webhook, response.statusCode().reasonPhrase)
+            WebhookResponse(response.statusCode(), webhook, response.statusCode().reasonPhrase)
         } catch (ex: UnknownHostException) {
-            WebhookResponse(HttpStatus.NOT_FOUND, wallet.webhook, "Host could not be determined")
+            WebhookResponse(HttpStatus.NOT_FOUND, webhook, "Host could not be determined")
         } catch (ex: Exception) {
-            WebhookResponse(HttpStatus.INTERNAL_SERVER_ERROR, wallet.webhook, ex.message)
+            WebhookResponse(HttpStatus.INTERNAL_SERVER_ERROR, webhook, ex.message)
         }
     }
 
