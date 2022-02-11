@@ -23,7 +23,7 @@ class WalletRepositoryTest : MongoRepositoryTests() {
         var wallet = createDummyWallet()
         wallet = walletRepository.save(wallet).block()!!
 
-        val result = walletRepository.findByIdentity(wallet.identity.blockchain, wallet.identity.address).block()!!
+        val result = walletRepository.findByIdentity(WalletIdentity(wallet.identity.blockchain, wallet.identity.address)).block()!!
         assertThat(result).isEqualTo(wallet)
     }
 }

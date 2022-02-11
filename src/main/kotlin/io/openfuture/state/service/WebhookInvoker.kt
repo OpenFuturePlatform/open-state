@@ -28,20 +28,18 @@ class WebhookInvoker(
             "ETH",
             wallet.rate
         )
-        val requestBody = StateSignRequest(
-            wallet.identity.address,
-            wallet.orderId.toInt(),
-            if (wallet.amount.minus(wallet.totalPaid) > BigDecimal.ZERO) "PROCESSING" else "COMPLETED"
-        )
-        val signature = openApiClient.getSignature(
-            wallet.identity.address,
-            requestBody
-        )
         log.info("Invoking webhook $webhookBody")
         if (wallet.source == "woocommerce") {
+            val requestBody = StateSignRequest(
+                wallet.identity.address,
+                wallet.orderId.toInt(),
+                if (wallet.amount.minus(wallet.totalPaid) > BigDecimal.ZERO) "PROCESSING" else "COMPLETED"
+            )
+            val signature = openApiClient.getSignature(wallet.identity.address, requestBody)
             signature?.let { webhookRestClient.doPostWoocommerce(requestBody, wallet.webhook, it) } ?: log.warn("Signature was NULL. Skipping webhook invocation...")
+        } else {
+            webhookRestClient.doPost(wallet.webhook, webhookBody)
         }
-        webhookRestClient.doPost(wallet.webhook, webhookBody)
     }
 
     companion object {
