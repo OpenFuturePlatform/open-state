@@ -2,6 +2,7 @@ package io.openfuture.state.webhook
 
 import com.nhaarman.mockitokotlin2.*
 import io.openfuture.state.base.ServiceTests
+import io.openfuture.state.component.open.DefaultOpenApi
 import io.openfuture.state.domain.WebhookStatus
 import io.openfuture.state.property.WebhookProperties
 import io.openfuture.state.service.TransactionService
@@ -22,6 +23,7 @@ internal class WebhookExecutorTest : ServiceTests() {
     private val webhookService: WebhookService = spy(mock())
     private val transactionService: TransactionService = spy(mock())
     private val invocationService: WebhookInvocationService = spy(mock())
+    private val openApi : DefaultOpenApi = spy(mock())
     private val webhookProperties: WebhookProperties = WebhookProperties(lockTTL = Duration.ofSeconds(3))
 
 
@@ -33,7 +35,8 @@ internal class WebhookExecutorTest : ServiceTests() {
             transactionService,
             restClient,
             invocationService,
-            webhookProperties
+            webhookProperties,
+            openApi
         )
     }
 
