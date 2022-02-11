@@ -1,8 +1,10 @@
 package io.openfuture.state.service
 
+import io.openfuture.state.component.open.DefaultOpenApi
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WebhookCallbackResponse
+import io.openfuture.state.webhook.WebhookPayloadDto
 import io.openfuture.state.webhook.WebhookRestClient
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
@@ -11,7 +13,8 @@ import java.math.BigDecimal
 
 @Service
 class WebhookInvoker(
-    val webhookRestClient: WebhookRestClient
+    val webhookRestClient: WebhookRestClient,
+    private val openApi: DefaultOpenApi
 ) {
 
     suspend fun invoke(wallet: Wallet, transaction: Transaction) = runBlocking {
@@ -26,6 +29,14 @@ class WebhookInvoker(
             wallet.rate
         )
         log.info("Invoking webhook $webhookBody")
+
+        if(wallet.source == "woocommerce"){
+            val woocommerceDto = WebhookPayloadDto.WebhookWoocommerceDto(wallet, "PROCESSING")
+            val signature = openApi.generateSignature(wallet.identity.address, woocommerceDto)
+            log.info("Invoking webhook signature $signature")
+            webhookRestClient.doPostWoocommerce(wallet.webhook, signature, woocommerceDto)
+        }  else  webhookRestClient.doPost(wallet.webhook, WebhookPayloadDto(transaction))
+
         webhookRestClient.doPost(wallet.webhook, webhookBody)
     }
 
