@@ -3,6 +3,7 @@ package io.openfuture.state.controller
 import com.nhaarman.mockitokotlin2.given
 import io.openfuture.state.base.ControllerTests
 import io.openfuture.state.blockchain.Blockchain
+import io.openfuture.state.client.BinanceHttpClientApi
 import io.openfuture.state.service.WalletService
 import io.openfuture.state.util.createDummyWallet
 import kotlinx.coroutines.runBlocking
@@ -22,6 +23,9 @@ class WalletControllerTest : ControllerTests() {
 
     @MockBean
     private lateinit var blockchain: Blockchain
+
+    @MockBean
+    private lateinit var binanceHttpClientApi: BinanceHttpClientApi
 
     @Test
     fun findByAddressShouldReturnWallet() = runBlocking<Unit> {
