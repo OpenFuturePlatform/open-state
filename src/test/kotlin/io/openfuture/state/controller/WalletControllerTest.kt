@@ -70,10 +70,18 @@ class WalletControllerTest : ControllerTests() {
             .bodyValue(
                 """
                     {
-                        "address": "address",
                         "webhook": "webhook",
-                        "blockchain": "Ethereum"
-                    }
+                        "address": "address",
+                        "blockchain": "ethereum",
+                        "metadata": {
+                            "orderId": "OrderId",
+                            "orderKey": "OrderKey",
+                            "amount": 10,
+                            "productCurrency": "USD",
+                            "source": "Woocommerce",
+                            "paymentCurrency": "ETH"
+                        }
+                    }                   
                 """.trimIndent()
             )
             .exchange()
