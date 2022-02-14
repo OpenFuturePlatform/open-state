@@ -137,47 +137,6 @@ jobs:
           tags: openplatform/open-state:${{ env.IMAGE_TAG }}
           file: docker/Dockerfile
 
-
-  deploy-sprint:
-    name: Deploy Sprint
-    runs-on: ubuntu-latest
-    continue-on-error: false
-    needs: [tests, build, package]
-
-    steps:
-
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Deploy server
-        run: |
-          sudo apt install openssh-client
-          sudo curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          eval $(ssh-agent -s)
-          echo "${{ secrets.SPRINT_DEPLOY_SSH_KEY }}" | tr -d '\r' | ssh-add - > /dev/null
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          ssh-keyscan ${{ secrets.SPRINT_SERVER }} >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
-          export DOCKER_HOST="ssh://gitlab@${{ secrets.SPRINT_SERVER }}"
-          export MONGODB_PASSWORD="${{ secrets.SPRINT_MONGO_PASSWORD }}"
-          export BITCOIN_NODE_ADDRESS="${{ secrets.SPRINT_BITCOIN_NODE }}"
-          export BITCOIN_USERNAME="${{ secrets.SPRINT_BITCOIN_USERNAME }}"
-          export BITCOIN_PASSWORD="${{ secrets.SPRINT_BITCOIN_PASSWORD }}"
-          export ETHEREUM_NODE_ADDRESS="${{ secrets.SPRINT_ETHEREUM_NODE_ADDRESS }}"
-          export DOCKER_IMAGE_TAG="openplatform/open-state:${{ env.IMAGE_TAG }}"
-          docker login -u ${{ secrets.DOCKERHUB_USER_NAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
-          docker-compose -f docker-compose.yml up -d
-          ssh -i /dev/null gitlab@${{ secrets.SPRINT_SERVER }} "
-                                    docker stop open-state && \
-                                    IMG=\$(docker ps -a --filter='name=^/open-state$' --format='{{.Image}}') &&  \
-                                    docker rm -f open-state && \
-                                    docker rmi \$IMG; \
-                                    exit 0
-                                  "
-          docker-compose -f docker-compose.yml up -d
-
-
   deploy-production:
     name: Deploy Production
     runs-on: ubuntu-latest
@@ -204,7 +163,9 @@ jobs:
           export BITCOIN_NODE_ADDRESS="${{ secrets.PROD_BITCOIN_NODE }}"
           export BITCOIN_USERNAME="${{ secrets.PROD_BITCOIN_USERNAME }}"
           export BITCOIN_PASSWORD="${{ secrets.PROD_BITCOIN_PASSWORD }}"
+          export OPEN_API_URL="${{ secrets.OPEN_API_URL_PROD }}"
           export ETHEREUM_NODE_ADDRESS="${{ secrets.PROD_ETHEREUM_NODE_ADDRESS }}"
+          export ETHEREUM_ROPSTEN_NODE_ADDRESS="${{ secrets.PROD_ETHEREUM_ROPSTEN_NODE_ADDRESS }}"
           export DOCKER_IMAGE_TAG="openplatform/open-state:${{ env.IMAGE_TAG }}"
           docker login -u ${{ secrets.DOCKERHUB_USER_NAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
           ssh -i /dev/null gitlab@${{ secrets.PROD_SERVER }} "
