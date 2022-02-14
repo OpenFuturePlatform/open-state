@@ -24,8 +24,8 @@ jobs:
         ports:
           - 27017:27017
         env:
-          MONGO_INITDB_ROOT_USERNAME: root
-          MONGO_INITDB_ROOT_PASSWORD: root
+          MONGO_INITDB_ROOT_USERNAME: open_state
+          MONGO_INITDB_ROOT_PASSWORD: open_state˚
           MONGO_INITDB_DATABASE: open_state
 
       redis:
