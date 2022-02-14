@@ -11,15 +11,15 @@ import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.utils.Convert
 
 @Component
-class EthereumBlockchain(private val web3j: Web3j) : Blockchain() {
+class RopstenBlockchain(private val web3jTest: Web3j): Blockchain() {
 
-    override suspend fun getLastBlockNumber(): Int = web3j.ethBlockNumber()
+    override suspend fun getLastBlockNumber(): Int = web3jTest.ethBlockNumber()
         .sendAsync().await()
         .blockNumber.toInt()
 
     override suspend fun getBlock(blockNumber: Int): UnifiedBlock {
         val parameter = DefaultBlockParameterNumber(blockNumber.toLong())
-        val block = web3j.ethGetBlockByNumber(parameter, true)
+        val block = web3jTest.ethGetBlockByNumber(parameter, true)
             .sendAsync().await()
             .block
         val transactions = obtainTransactions(block)
@@ -35,9 +35,8 @@ class EthereumBlockchain(private val web3j: Web3j) : Blockchain() {
             UnifiedTransaction(tx.hash, tx.from, to, amount)
         }
 
-    private suspend fun findContractAddress(transactionHash: String) = web3j.ethGetTransactionReceipt(transactionHash)
+    private suspend fun findContractAddress(transactionHash: String) = web3jTest.ethGetTransactionReceipt(transactionHash)
         .sendAsync().await()
         .transactionReceipt.get()
         .contractAddress
-
 }

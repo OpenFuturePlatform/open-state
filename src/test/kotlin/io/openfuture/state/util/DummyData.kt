@@ -6,7 +6,7 @@ import io.openfuture.state.blockchain.bitcoin.dto.BitcoinTransaction
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.domain.*
-import io.openfuture.state.webhhok.WebhookRestClient
+import io.openfuture.state.webhook.WebhookRestClient
 import org.bson.types.ObjectId
 import org.springframework.http.HttpStatus
 import java.math.BigDecimal
@@ -19,8 +19,16 @@ fun createDummyWallet(
     webhook: String = "webhook",
     webhookStatus: WebhookStatus = WebhookStatus.NOT_INVOKED,
     id: String = ObjectId().toHexString(),
-    lastUpdate: LocalDateTime = LocalDateTime.of(2020, 10, 10, 10, 10)
-) = Wallet(WalletIdentity(blockchain, address), webhook, webhookStatus, lastUpdate, id)
+    lastUpdate: LocalDateTime = LocalDateTime.of(2020, 10, 10, 10, 10),
+    orderId: String = "ds",
+    orderKey: String = "",
+    amount: BigDecimal = BigDecimal.TEN,
+    productCurrency: String = "USD",
+    source: String = "Wocoment",
+    paymentCurrency: String = "ETH",
+    totalPaid: BigDecimal = BigDecimal.ZERO,
+    rate: BigDecimal = BigDecimal.ONE
+) = Wallet(WalletIdentity(blockchain, address), webhook, webhookStatus, lastUpdate, id, orderId, orderKey, amount, productCurrency, source, paymentCurrency, totalPaid, rate)
 
 fun createDummyTransaction(
     blockchain: String = "Ethereum",

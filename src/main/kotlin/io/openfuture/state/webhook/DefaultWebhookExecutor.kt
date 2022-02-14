@@ -1,5 +1,7 @@
-package io.openfuture.state.webhhok
+package io.openfuture.state.webhook
 
+import io.openfuture.state.blockchain.Blockchain
+import io.openfuture.state.component.open.DefaultOpenApi
 import io.openfuture.state.domain.TransactionQueueTask
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WebhookStatus
@@ -17,7 +19,8 @@ class DefaultWebhookExecutor(
     private val transactionService: TransactionService,
     private val restClient: WebhookRestClient,
     private val webhookInvocationService: WebhookInvocationService,
-    private val webhookProperties: WebhookProperties
+    private val webhookProperties: WebhookProperties,
+    private val openApi: DefaultOpenApi
 ) : WebhookExecutor {
 
     override suspend fun execute(walletId: String) {
@@ -25,7 +28,9 @@ class DefaultWebhookExecutor(
         val transactionTask = webhookService.firstTransaction(walletId)
         val transaction = transactionService.findById(transactionTask.transactionId)
 
-        val response = restClient.doPost(wallet.webhook, WebhookPayloadDto(transaction))
+        val woocommerceDto = WebhookPayloadDto.WebhookWoocommerceDto(wallet, "PROCESSING")
+        val signature = openApi.generateSignature(wallet.identity.address, woocommerceDto)
+        val response = if(wallet?.source == "woocommerce")  restClient.doPostWoocommerce(wallet.webhook, signature, woocommerceDto) else restClient.doPost(wallet.webhook, WebhookPayloadDto(transaction))
         webhookInvocationService.registerInvocation(wallet, transactionTask, response)
 
         if (response.status.is2xxSuccessful) {
@@ -33,6 +38,13 @@ class DefaultWebhookExecutor(
         } else {
             scheduleFailedTransaction(wallet, transactionTask)
         }
+    }
+
+    override suspend fun testExecute(walletId: String) {
+        val wallet = walletService.findById(walletId)
+        val woocommerceDto = WebhookPayloadDto.WebhookWoocommerceDto(wallet, "PROCESSING")
+        val signature = openApi.generateSignature(wallet.identity.address, woocommerceDto)
+        restClient.doPostWoocommerce(wallet.webhook, signature, woocommerceDto)
     }
 
     private suspend fun scheduleNextTransaction(wallet: Wallet) {
@@ -47,6 +59,11 @@ class DefaultWebhookExecutor(
         }
 
         webhookService.rescheduleTransaction(wallet, transactionTask)
+    }
+
+    private suspend fun sendWoocommerceWebhook(wallet: Wallet) {
+        walletService.updateWebhookStatus(wallet, WebhookStatus.OK)
+        webhookService.rescheduleWallet(wallet)
     }
 
 }

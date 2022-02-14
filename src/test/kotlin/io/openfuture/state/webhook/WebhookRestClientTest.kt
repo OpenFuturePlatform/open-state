@@ -1,4 +1,4 @@
-package io.openfuture.state.webhhok
+package io.openfuture.state.webhook
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.given

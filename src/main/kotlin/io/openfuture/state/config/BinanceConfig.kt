@@ -11,12 +11,7 @@ class BinanceConfig {
 
     @Bean
     fun binanceClient(properties: BinanceProperties): BinanceDexApiNodeClient {
-        return BinanceDexApiClientFactory.newInstance()
-            .newNodeRpcClient(
-                properties.nodeAddress,
-                properties.hrp,
-                properties.valHrp
-            )
+        return BinanceDexApiClientFactory.newInstance().newNodeRpcClient()
     }
 
 }

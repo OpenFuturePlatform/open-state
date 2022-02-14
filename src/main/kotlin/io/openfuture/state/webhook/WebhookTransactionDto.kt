@@ -1,6 +1,7 @@
-package io.openfuture.state.webhhok
+package io.openfuture.state.webhook
 
 import io.openfuture.state.domain.Transaction
+import io.openfuture.state.domain.Wallet
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -34,6 +35,18 @@ data class WebhookPayloadDto(
             transaction.date,
             transaction.blockHeight,
             transaction.blockHash
+        )
+    }
+
+    data class WebhookWoocommerceDto(
+        val address: String,
+        val order_id: Int,
+        val status: String
+    ) {
+        constructor(wallet: Wallet, status: String) : this(
+            wallet.identity.address,
+            wallet.orderId.toInt(),
+            status
         )
     }
 

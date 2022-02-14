@@ -1,10 +1,10 @@
 package io.openfuture.state.service
 
-import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.given
 import com.nhaarman.mockitokotlin2.mock
 import io.openfuture.state.base.ServiceTests
 import io.openfuture.state.blockchain.Blockchain
+import io.openfuture.state.client.BinanceHttpClientApi
 import io.openfuture.state.domain.WalletIdentity
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.TransactionRepository
@@ -26,24 +26,15 @@ class WalletServiceTest : ServiceTests() {
     private val walletRepository: WalletRepository = mock()
     private val transactionRepository: TransactionRepository = mock()
     private val webhookService: WebhookService = mock()
+    private val webhookInvoker: WebhookInvoker = mock()
     private val blockchain: Blockchain = mock()
+    private val binanceHttpClientApi: BinanceHttpClientApi = mock()
 
 
     @BeforeEach
     fun setUp() {
-        walletService = DefaultWalletService(walletRepository, transactionRepository, webhookService)
+        walletService = DefaultWalletService(walletRepository, transactionRepository, webhookService, webhookInvoker, binanceHttpClientApi)
         given(blockchain.getName()).willReturn("MockBlockchain")
-    }
-
-    @Test
-    fun saveShouldReturnWallet() = runBlocking<Unit> {
-        val wallet = createDummyWallet()
-
-        given(walletRepository.save(any())).willReturn(Mono.just(wallet))
-
-        val result = walletService.save(blockchain, wallet.identity.address, wallet.webhook)
-
-        assertThat(result).isEqualTo(wallet)
     }
 
     @Test

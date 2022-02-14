@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
+import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @WebFluxTest(WalletController::class, ExceptionHandler::class)
@@ -54,7 +55,14 @@ class WalletControllerTest : ControllerTests() {
         )
 
         given(blockchain.getName()).willReturn("Ethereum")
-        given(walletService.save(blockchain, "address", "webhook")).willReturn(wallet)
+        given(
+            walletService.save(
+                blockchain, WalletController.SaveWalletRequest(
+                    "address", "webhook", "ethereum",
+                    WalletController.WalletMetaDataRequest("OrderId", "OrderKey", BigDecimal.TEN, "USD", "Woocommerce", "ETH")
+                )
+            )
+        ).willReturn(wallet)
 
         webClient.post()
             .uri("/api/wallets")
@@ -62,10 +70,18 @@ class WalletControllerTest : ControllerTests() {
             .bodyValue(
                 """
                     {
-                        "address": "address",
                         "webhook": "webhook",
-                        "blockchain": "Ethereum"
-                    }
+                        "address": "address",
+                        "blockchain": "ethereum",
+                        "metadata": {
+                            "orderId": "OrderId",
+                            "orderKey": "OrderKey",
+                            "amount": 10,
+                            "productCurrency": "USD",
+                            "source": "Woocommerce",
+                            "paymentCurrency": "ETH"
+                        }
+                    }                   
                 """.trimIndent()
             )
             .exchange()
@@ -96,22 +112,26 @@ class WalletControllerTest : ControllerTests() {
         webClient.put()
             .uri("/api/wallets/${wallet.id}")
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue("""
+            .bodyValue(
+                """
                     {
                         "webhook": "https://www.openfuture.io/"
                     }
-                """.trimIndent())
+                """.trimIndent()
+            )
             .exchange()
             .expectStatus().isOk
             .expectBody()
-            .json("""
+            .json(
+                """
                     {
                         "id": "5f480720e5cba939f1918911",
                         "address": "address",
                         "webhook": "https://www.openfuture.io/",
                         "lastUpdateDate": "2020-08-28T01:18:56.825261"
                     }
-                """.trimIndent())
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -119,11 +139,13 @@ class WalletControllerTest : ControllerTests() {
         webClient.put()
             .uri("/api/wallets/id")
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue("""
+            .bodyValue(
+                """
                     {
                         "webhook": "not valid url"
                     }
-                """.trimIndent())
+                """.trimIndent()
+            )
             .exchange()
             .expectStatus().isBadRequest
     }
