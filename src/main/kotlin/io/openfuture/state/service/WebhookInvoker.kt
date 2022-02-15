@@ -20,22 +20,25 @@ class WebhookInvoker(
     suspend fun invoke(wallet: Wallet, transaction: Transaction) = runBlocking {
         log.info("Invoking webhook ${wallet.webhook}")
         val webhookBody = WebhookCallbackResponse(
-            wallet.orderId,transaction.amount,
-            wallet.amount,
-            wallet.amount - transaction.amount,
-            ((wallet.amount.minus(wallet.totalPaid)).compareTo(BigDecimal.ZERO) > 0).toString(),
+            wallet.orderId, transaction.amount,
+            wallet.amount,//0,0006
+            wallet.amount - transaction.amount, //0,0006 - 0.001 = -0.0003219200
+            ((wallet.amount.minus(wallet.totalPaid)).compareTo(BigDecimal.ZERO) > 0).toString(), //0.0006 - 0.001 > -0.0003219200
             transaction.to,
             "ETH",
             wallet.rate
         )
         log.info("Invoking webhook $webhookBody")
 
-        if(wallet.source == "woocommerce"){
-            val woocommerceDto = WebhookPayloadDto.WebhookWoocommerceDto(wallet, "PROCESSING")
+        if (wallet.source == "woocommerce") {
+            val woocommerceDto = WebhookPayloadDto.WebhookWoocommerceDto(
+                wallet,
+                if (wallet.amount.minus(wallet.totalPaid) > BigDecimal.ZERO) "PROCESSING" else "COMPLETED"
+            )
             val signature = openApi.generateSignature(wallet.identity.address, woocommerceDto)
             log.info("Invoking webhook signature $signature")
             webhookRestClient.doPostWoocommerce(wallet.webhook, signature, woocommerceDto)
-        }  else  webhookRestClient.doPost(wallet.webhook, WebhookPayloadDto(transaction))
+        } else webhookRestClient.doPost(wallet.webhook, WebhookPayloadDto(transaction))
 
         webhookRestClient.doPost(wallet.webhook, webhookBody)
     }
