@@ -34,6 +34,16 @@ class DefaultWalletService(
             ?: throw NotFoundException("Wallet not found: $blockchain - $address")
     }
 
+    override suspend fun findByIdentityAddress(address: String): Wallet {
+        return walletRepository.findFirstByIdentityAddress(address).awaitFirstOrNull()
+            ?: throw NotFoundException("Wallet not found: $address")
+    }
+
+    override suspend fun findByOrderKey(orderKey: String): Wallet {
+        return walletRepository.findFirstByOrderKey(orderKey).awaitFirstOrNull()
+            ?: throw NotFoundException("Wallet not found: $orderKey")
+    }
+
     override suspend fun findById(id: String): Wallet {
         return walletRepository.findById(id).awaitFirstOrNull()
             ?: throw NotFoundException("Wallet not found: $id")

@@ -19,7 +19,8 @@ class DefaultTransactionService(
     }
 
     override suspend fun findByAddress(address: String): List<Transaction> {
-        return repository.findAllByWalletIdentityAddress(address).collectList().awaitFirstOrNull()?: throw NotFoundException("Transaction not found : $address")
+        return repository.findAllByWalletIdentityAddress(address).collectList().awaitFirstOrNull()
+            ?: throw NotFoundException("Transaction not found : $address")
     }
 
 }
