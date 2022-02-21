@@ -10,6 +10,10 @@ interface WalletService {
 
     suspend fun findByIdentity(blockchain: String, address: String): Wallet
 
+    suspend fun findByIdentityAddress(address: String): Wallet
+
+    suspend fun findByOrderKey(orderKey: String): Wallet
+
     suspend fun findById(id: String): Wallet
 
     suspend fun save(blockchain: Blockchain, request: WalletController.SaveWalletRequest): Wallet
