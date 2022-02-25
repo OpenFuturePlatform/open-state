@@ -7,6 +7,7 @@ import io.openfuture.state.service.WalletService
 import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
 import java.time.LocalDateTime
+import java.util.*
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
@@ -69,27 +70,26 @@ class WalletController(private val walletService: WalletService, private val blo
         @field:NotBlank
         val blockchain: String?,
 
-        @field:NotNull
-        var metadata: WalletMetaDataRequest
+        var metadata: WalletMetaDataRequest = WalletMetaDataRequest()
     )
 
     data class WalletMetaDataRequest(
         @field:NotBlank
-        var orderId: String,
+        var orderId: String = UUID.randomUUID().toString(),
 
         @field:NotBlank
-        var orderKey: String,
+        var orderKey: String = UUID.randomUUID().toString(),
 
-        var amount: BigDecimal,
-
-        @field:NotBlank
-        var productCurrency: String,
+        var amount: BigDecimal = BigDecimal.ZERO,
 
         @field:NotBlank
-        var source: String,
+        var productCurrency: String = UUID.randomUUID().toString(),
 
         @field:NotBlank
-        val paymentCurrency: String
+        var source: String = UUID.randomUUID().toString(),
+
+        @field:NotBlank
+        val paymentCurrency: String = UUID.randomUUID().toString()
     )
 
     data class UpdateWalletRequest(
