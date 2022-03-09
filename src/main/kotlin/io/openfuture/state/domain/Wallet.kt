@@ -13,18 +13,20 @@ import javax.validation.constraints.NotBlank
 data class Wallet(
     @Indexed
     val identity: WalletIdentity,
-    var webhook: String,
-    var webhookStatus: WebhookStatus = WebhookStatus.NOT_INVOKED,
+//    var webhook: String,
+//    var webhookStatus: WebhookStatus = WebhookStatus.NOT_INVOKED,
     @LastModifiedDate
     var lastUpdate: LocalDateTime = LocalDateTime.now(),
     @MongoId
     val id: String = ObjectId().toHexString(),
-    var orderId: String,
-    var orderKey: String,
-    var amount: BigDecimal,
-    var productCurrency: String,
-    var source: String,
-    val paymentCurrency: String,
-    var totalPaid: BigDecimal = BigDecimal.ZERO,
-    var rate: BigDecimal
+    val rate: BigDecimal,
+    val order: Order
+//    var orderId: String,
+//    var orderKey: String,
+//    var amount: BigDecimal,
+//    var productCurrency: String,
+//    var source: String,
+//    val paymentCurrency: String,
+//    var totalPaid: BigDecimal = BigDecimal.ZERO,
+//    var rate: BigDecimal
 )

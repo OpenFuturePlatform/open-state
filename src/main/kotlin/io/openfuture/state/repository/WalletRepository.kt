@@ -14,7 +14,7 @@ interface WalletRepository : ReactiveMongoRepository<Wallet, String> {
 
     fun findFirstByIdentityAddress(address: String): Mono<Wallet>
 
-    fun findFirstByOrderKey(orderKey: String): Mono<Wallet>
+    fun findFirstByOrder_orderKey(orderKey: String): Mono<Wallet>
 
     @Query("{ 'identity' : { 'blockchain' : ?0, 'address' : ?1}}")
     fun findByIdentity(blockchain: String, address: String): Mono<Wallet>

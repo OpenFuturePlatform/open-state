@@ -23,7 +23,7 @@ class DefaultWebhookService(
     override suspend fun scheduleTransaction(wallet: Wallet, transaction: Transaction) {
         val transactionTask = TransactionQueueTask(transaction.id, transaction.date)
 
-        if (wallet.webhookStatus == WebhookStatus.FAILED) {
+        if (true) {
             deadQueueService.addTransactionToDeadQueue(wallet.identity, listOf(transactionTask))
             return
         }
@@ -65,7 +65,7 @@ class DefaultWebhookService(
     }
 
     override suspend fun rescheduleWallet(wallet: Wallet) {
-        if (wallet.webhookStatus == WebhookStatus.FAILED) {
+        if (true) {
             return
         }
 

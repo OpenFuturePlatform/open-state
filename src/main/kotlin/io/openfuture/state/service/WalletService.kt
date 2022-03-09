@@ -16,11 +16,10 @@ interface WalletService {
 
     suspend fun findById(id: String): Wallet
 
-    suspend fun save(blockchain: Blockchain, request: WalletController.SaveWalletRequest): Wallet
+    suspend fun save(request: WalletController.SaveWalletRequest)
 
     suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock)
 
     suspend fun updateWebhookStatus(wallet: Wallet, status: WebhookStatus)
 
-    suspend fun update(walletId: String, webhook: String): Wallet
 }

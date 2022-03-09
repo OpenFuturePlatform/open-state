@@ -5,11 +5,9 @@ import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.client.BinanceHttpClientApi
 import io.openfuture.state.controller.WalletController
-import io.openfuture.state.domain.Transaction
-import io.openfuture.state.domain.Wallet
-import io.openfuture.state.domain.WalletIdentity
-import io.openfuture.state.domain.WebhookStatus
+import io.openfuture.state.domain.*
 import io.openfuture.state.exception.NotFoundException
+import io.openfuture.state.repository.OrderRepository
 import io.openfuture.state.repository.TransactionRepository
 import io.openfuture.state.repository.WalletRepository
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -25,7 +23,9 @@ class DefaultWalletService(
     private val transactionRepository: TransactionRepository,
     private val webhookService: WebhookService,
     private val webhookInvoker: WebhookInvoker,
-    private val binanceHttpClientApi: BinanceHttpClientApi
+    private val binanceHttpClientApi: BinanceHttpClientApi,
+    private val blockchains: List<Blockchain>,
+    private val orderRepository: OrderRepository
 ) : WalletService {
 
     override suspend fun findByIdentity(blockchain: String, address: String): Wallet {
@@ -40,7 +40,7 @@ class DefaultWalletService(
     }
 
     override suspend fun findByOrderKey(orderKey: String): Wallet {
-        return walletRepository.findFirstByOrderKey(orderKey).awaitFirstOrNull()
+        return walletRepository.findFirstByOrder_orderKey(orderKey).awaitFirstOrNull()
             ?: throw NotFoundException("Wallet not found: $orderKey")
     }
 
@@ -49,38 +49,27 @@ class DefaultWalletService(
             ?: throw NotFoundException("Wallet not found: $id")
     }
 
-    override suspend fun save(blockchain: Blockchain, request: WalletController.SaveWalletRequest): Wallet {
-        val price = binanceHttpClientApi.getEthereumRate().price
-        val rate = BigDecimal.ONE.divide(price, price.scale(), RoundingMode.HALF_UP)
-
-        val wallet = Wallet(
-            WalletIdentity(blockchain.getName(), request.address), request.webhook,
-            orderId = request.metadata.orderId,
-            amount = request.metadata.amount.multiply(rate),
-            orderKey = request.metadata.orderKey,
-            productCurrency = request.metadata.productCurrency,
-            source = request.metadata.source,
-            paymentCurrency = request.metadata.paymentCurrency,
-            rate = rate
+    override suspend fun save(request: WalletController.SaveWalletRequest) {
+        val order = Order(
+            request.metadata.orderId,
+            request.metadata.orderKey,
+            request.metadata.amount,
+            request.metadata.productCurrency,
+            request.metadata.source,
+            request.webhook
         )
-        return walletRepository.save(wallet).awaitSingle()
-    }
-
-    override suspend fun update(walletId: String, webhook: String): Wallet {
-        val wallet = walletRepository.findById(walletId).awaitFirstOrNull() ?: throw NotFoundException("Wallet not found")
-        if (webhook != wallet.webhook) {
-            wallet.let {
-                it.webhookStatus = WebhookStatus.OK
-                it.webhook = webhook
-            }
+        orderRepository.save(order).awaitSingle()
+        val savedWallets = mutableListOf<Wallet>()
+        request.blockchainData.forEach {
+            val blockchain: Blockchain = findBlockchain(it.blockchain)
+            val walletIdentity = WalletIdentity(blockchain.getName(), it.address)
+            val price = binanceHttpClientApi.getExchangeRate(blockchain).price
+            val rate = BigDecimal.ONE.divide(price, price.scale(), RoundingMode.HALF_UP)
+            val wallet = Wallet(walletIdentity, rate = rate, order = order)
+            savedWallets.add(walletRepository.save(wallet).awaitSingle())
         }
 
-        walletRepository.save(wallet).awaitSingle()
-        if (wallet.webhookStatus == WebhookStatus.OK) {
-            webhookService.scheduleTransactionsFromDeadQueue(wallet)
-        }
-
-        return wallet
+        //return created wallets and orders
     }
 
     override suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock) {
@@ -93,7 +82,7 @@ class DefaultWalletService(
     }
 
     override suspend fun updateWebhookStatus(wallet: Wallet, status: WebhookStatus) {
-        walletRepository.save(wallet.apply { webhookStatus = status }).awaitSingle()
+        //do nothing
     }
 
     private suspend fun saveTransaction(wallet: Wallet, block: UnifiedBlock, unifiedTransaction: UnifiedTransaction) {
@@ -107,12 +96,21 @@ class DefaultWalletService(
             block.number,
             block.hash
         )
-
+        val order = orderRepository.findAllByOrderId(wallet.order.orderId).awaitSingle()
         transactionRepository.save(transaction).awaitSingle()
         log.info("Saved transaction ${transaction.id}")
-        wallet.totalPaid = wallet.totalPaid.add(transaction.amount)
+//        wallet.totalPaid = wallet.totalPaid.add(transaction.amount)
         val updatedWallet = walletRepository.save(wallet).awaitSingle()
-        webhookInvoker.invoke(updatedWallet, transaction)
+        webhookInvoker.invoke(updatedWallet, transaction, order)
+    }
+
+    private fun findBlockchain(name: String): Blockchain {
+        val nameInLowerCase = name.toLowerCase()
+        for (blockchain in blockchains) {
+            if (blockchain.getName().toLowerCase().startsWith(nameInLowerCase)) return blockchain
+        }
+
+        throw IllegalArgumentException("Can not find blockchain")
     }
 
     companion object {
