@@ -66,9 +66,6 @@ class WalletController(private val walletService: WalletService) {
 
         @field:NotBlank
         var source: String = UUID.randomUUID().toString(),
-
-        @field:NotBlank
-        val paymentCurrency: String = UUID.randomUUID().toString()
     )
 
 }
