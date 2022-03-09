@@ -11,7 +11,7 @@ import io.openfuture.state.util.toLocalDateTime
 import org.springframework.stereotype.Component
 
 
-//@Component
+@Component
 class BinanceBlockchain(private val client: BinanceDexApiNodeClient) : Blockchain() {
 
     override suspend fun getLastBlockNumber(): Int {

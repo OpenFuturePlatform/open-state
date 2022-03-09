@@ -60,7 +60,7 @@ class DefaultWalletService(
         )
         orderRepository.save(order).awaitSingle()
         val savedWallets = mutableListOf<Wallet>()
-        request.blockchainData.forEach {
+        request.blockchains.forEach {
             val blockchain: Blockchain = findBlockchain(it.blockchain)
             val walletIdentity = WalletIdentity(blockchain.getName(), it.address)
             val price = binanceHttpClientApi.getExchangeRate(blockchain).price

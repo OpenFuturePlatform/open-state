@@ -10,7 +10,7 @@ import org.web3j.protocol.core.DefaultBlockParameterNumber
 import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.utils.Convert
 
-//@Component
+@Component
 class EthereumBlockchain(private val web3j: Web3j) : Blockchain() {
 
     override suspend fun getLastBlockNumber(): Int = web3j.ethBlockNumber()

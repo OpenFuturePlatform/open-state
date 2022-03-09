@@ -43,7 +43,7 @@ class WalletController(private val walletService: WalletService) {
     data class SaveWalletRequest(
         @field:NotBlank
         val webhook: String,
-        val blockchainData: ArrayList<BlockChainDataRequest>,
+        val blockchains: ArrayList<BlockChainDataRequest>,
         var metadata: WalletMetaDataRequest = WalletMetaDataRequest()
     )
 
