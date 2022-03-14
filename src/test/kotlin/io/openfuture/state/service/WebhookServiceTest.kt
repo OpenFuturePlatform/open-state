@@ -31,7 +31,7 @@ internal class WebhookServiceTest : ServiceTests() {
 
     @Test
     fun scheduleTransactionShouldAddTransactionToDeadQeue() = runBlocking {
-        val wallet = createDummyWallet(blockchain = "Ethereum", address = "address", webhookStatus = WebhookStatus.FAILED)
+        val wallet = createDummyWallet(blockchain = "Ethereum", address = "address", id = "walletId")
         val transaction = createDummyTransaction(id = "transactionId")
         val transactionTask = createDummyTransactionQueueTask(transactionId = "transactionId")
 
@@ -162,7 +162,7 @@ internal class WebhookServiceTest : ServiceTests() {
 
     @Test
     fun rescheduleWalletShouldReturnBecauseWalletStatusIsFailed() = runBlocking<Unit> {
-        val wallet = createDummyWallet(id = "walletId", webhookStatus = WebhookStatus.FAILED)
+        val wallet = createDummyWallet(id = "walletId")
 
         service.rescheduleWallet(wallet)
         verify(repository, never(),).transactionsCount("walletId")

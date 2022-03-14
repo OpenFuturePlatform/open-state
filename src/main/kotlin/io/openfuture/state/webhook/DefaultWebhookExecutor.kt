@@ -30,7 +30,7 @@ class DefaultWebhookExecutor(
 
         val woocommerceDto = WebhookPayloadDto.WebhookWoocommerceDto(wallet, "PROCESSING")
         val signature = openApi.generateSignature(wallet.identity.address, woocommerceDto)
-        val response = if(wallet?.order.source == "woocommerce")  restClient.doPostWoocommerce(wallet.order.webhook, signature, woocommerceDto) else restClient.doPost(wallet.order
+        val response = if(wallet.order.source == "woocommerce")  restClient.doPostWoocommerce(wallet.order.webhook, signature, woocommerceDto) else restClient.doPost(wallet.order
         .webhook,
             WebhookPayloadDto(transaction))
         webhookInvocationService.registerInvocation(wallet, transactionTask, response)

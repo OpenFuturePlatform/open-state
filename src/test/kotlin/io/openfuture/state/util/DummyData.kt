@@ -16,8 +16,13 @@ import java.util.*
 fun createDummyWallet(
     blockchain: String = "Ethereum",
     address: String = "address",
-    rate: BigDecimal = BigDecimal.ONE
-) = Wallet(WalletIdentity(blockchain, address), rate = rate,)
+    rate: BigDecimal = BigDecimal.ONE,
+    id: String,
+) = Wallet(WalletIdentity(blockchain, address), rate = rate, order = createDummyOrder(), id = id)
+
+fun createDummyOrder(): Order {
+    return Order("111", "222", BigDecimal.valueOf(1000), "USD", "woocommerce", "localhost")
+}
 
 fun createDummyTransaction(
     blockchain: String = "Ethereum",

@@ -20,7 +20,7 @@ class WalletRepositoryTest : MongoRepositoryTests() {
 
     @Test
     fun findByIdentityShouldReturnWallet() {
-        var wallet = createDummyWallet()
+        var wallet = createDummyWallet(blockchain = "Ethereum", address = "address", id = "walletId")
         wallet = walletRepository.save(wallet).block()!!
 
         val result = walletRepository.findByIdentity(WalletIdentity(wallet.identity.blockchain, wallet.identity.address)).block()!!
