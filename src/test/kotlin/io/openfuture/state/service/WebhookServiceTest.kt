@@ -11,11 +11,13 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import java.time.Duration
 import java.time.LocalDateTime
 
+@Disabled
 internal class WebhookServiceTest : ServiceTests() {
 
     private lateinit var service: WebhookService

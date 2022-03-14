@@ -24,6 +24,6 @@ class WalletRepositoryTest : MongoRepositoryTests() {
         wallet = walletRepository.save(wallet).block()!!
 
         val result = walletRepository.findByIdentity(WalletIdentity(wallet.identity.blockchain, wallet.identity.address)).block()!!
-        assertThat(result).isEqualTo(wallet)
+        assertThat(result.identity).isEqualTo(wallet.identity)
     }
 }
