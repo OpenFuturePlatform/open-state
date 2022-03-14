@@ -11,7 +11,6 @@ import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
-import java.math.RoundingMode
 
 @Service
 class WebhookInvoker(
@@ -23,20 +22,19 @@ class WebhookInvoker(
         log.info("Invoking webhook ${order.webhook}")
         val webhookBody = WebhookCallbackResponse(
             order.orderId,
-            transaction.amount,
-            order.amount,//0,0006
-            order.amount - transaction.amount, //0,0006 - 0.001 = -0.0003219200
-            "BigDecimal.ZERO", //0.0006 - 0.001 > -0.0003219200
+            transaction.amount,//in crypto
+            order.amount,//USD
+            order.amount - order.paid, //0,0006 - 0.001 = -0.0003219200
+            (order.paid >= order.amount).toString(), //0.0006 - 0.001 > -0.0003219200
             transaction.to,
-            wallet.identity.blockchain,
-            BigDecimal.ONE.divide(wallet.rate, wallet.rate.scale(), RoundingMode.HALF_UP)
+            wallet.identity.blockchain
         )
         log.info("Invoking webhook $webhookBody")
 
         if (order.source == "woocommerce") {
             val woocommerceDto = WebhookPayloadDto.WebhookWoocommerceDto(
                 wallet,
-                if (order.amount.minus(order.amount - transaction.amount) > BigDecimal.ZERO) "PROCESSING" else "COMPLETED"
+                if ((order.paid < order.amount)) "PROCESSING" else "COMPLETED"
             )
             val signature = openApi.generateSignature(wallet.identity.address, woocommerceDto)
             log.info("Invoking webhook signature $signature")

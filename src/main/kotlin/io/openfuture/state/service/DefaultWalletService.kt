@@ -10,12 +10,12 @@ import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.OrderRepository
 import io.openfuture.state.repository.TransactionRepository
 import io.openfuture.state.repository.WalletRepository
+import io.openfuture.state.service.dto.PlaceOrderResponse
+import io.openfuture.state.service.dto.WalletCreateResponse
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
-import java.math.RoundingMode
 
 @Service
 class DefaultWalletService(
@@ -53,7 +53,7 @@ class DefaultWalletService(
             ?: throw NotFoundException("Wallet not found: $id")
     }
 
-    override suspend fun save(request: WalletController.SaveWalletRequest) {
+    override suspend fun save(request: WalletController.SaveWalletRequest): PlaceOrderResponse {
         val order = Order(
             request.metadata.orderId,
             request.metadata.orderKey,
@@ -67,13 +67,12 @@ class DefaultWalletService(
         request.blockchains.forEach {
             val blockchain: Blockchain = blockchainLookupService.findBlockchain(it.blockchain)
             val walletIdentity = WalletIdentity(blockchain.getName(), it.address)
-            val rate = binanceHttpClientApi.getExchangeRate(blockchain).price
-//            val rate = BigDecimal.ONE.divide(price, price.scale(), RoundingMode.HALF_UP)
+            val rate = binanceHttpClientApi.getExchangeRate(blockchain).price.stripTrailingZeros()
             val wallet = Wallet(walletIdentity, rate = rate, order = order)
             savedWallets.add(walletRepository.save(wallet).awaitSingle())
         }
-
-        //return created wallets and orders
+        val wallets = savedWallets.map { WalletCreateResponse(it.identity.blockchain, it.identity.address, it.rate) }
+        return PlaceOrderResponse(request.webhook, request.metadata.orderId, request.metadata.orderKey, request.metadata.amount, wallets)
     }
 
     override suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock) {
@@ -103,8 +102,12 @@ class DefaultWalletService(
         transactionRepository.save(transaction).awaitSingle()
         log.info("Saved transaction ${transaction.id}")
         val orderId = wallet.order.orderId
-        val order = orderRepository.findAllByOrderId(orderId).awaitSingle()
-        webhookInvoker.invoke(wallet, transaction, order)
+        val order = orderRepository.findByOrderId(orderId).awaitSingle()
+
+        val lastPaidUsd = wallet.rate.multiply(unifiedTransaction.amount)
+        order.paid = order.paid.add(lastPaidUsd)
+        val updatedOrder = orderRepository.save(order).awaitSingle()
+        webhookInvoker.invoke(wallet, transaction, updatedOrder)
     }
 
     companion object {

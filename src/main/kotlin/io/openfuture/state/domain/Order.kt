@@ -1,8 +1,8 @@
 package io.openfuture.state.domain
 
 import org.bson.types.ObjectId
-import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.MongoId
 import java.math.BigDecimal
@@ -15,7 +15,9 @@ data class Order(
     @LastModifiedDate
     var lastUpdate: LocalDateTime = LocalDateTime.now(),
     var placedAt: LocalDateTime = LocalDateTime.now(),
+    @Indexed
     val orderId: String,
+    @Indexed
     val orderKey: String,
     val amount: BigDecimal,//in USD
     val productCurrency: String,//USD

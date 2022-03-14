@@ -5,6 +5,7 @@ import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.controller.WalletController
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WebhookStatus
+import io.openfuture.state.service.dto.PlaceOrderResponse
 
 interface WalletService {
 
@@ -18,7 +19,7 @@ interface WalletService {
 
     suspend fun findById(id: String): Wallet
 
-    suspend fun save(request: WalletController.SaveWalletRequest)
+    suspend fun save(request: WalletController.SaveWalletRequest): PlaceOrderResponse
 
     suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock)
 

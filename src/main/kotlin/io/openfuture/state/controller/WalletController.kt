@@ -2,6 +2,7 @@ package io.openfuture.state.controller
 
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.service.WalletService
+import io.openfuture.state.service.dto.PlaceOrderResponse
 import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -14,8 +15,8 @@ import javax.validation.constraints.NotBlank
 class WalletController(private val walletService: WalletService) {
 
     @PostMapping
-    suspend fun save(@Valid @RequestBody request: SaveWalletRequest) {
-        walletService.save(request)
+    suspend fun save(@Valid @RequestBody request: SaveWalletRequest): PlaceOrderResponse {
+        return walletService.save(request)
     }
 
     @GetMapping("/blockchain/{blockchain}/address/{address}")

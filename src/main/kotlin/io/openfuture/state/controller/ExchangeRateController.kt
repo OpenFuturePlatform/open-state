@@ -20,7 +20,7 @@ class ExchangeRateController(
         for (blockchain in blockchains) {
             if (blockchain.getName().toLowerCase().startsWith("EthereumBlockchain")) {
                 val price = binanceHttpClientApi.getExchangeRate(blockchain).price
-                return BigDecimal.ONE.divide(price, price.scale(), RoundingMode.HALF_UP)
+                return BigDecimal.ONE.divide(price, price.scale(), RoundingMode.HALF_UP).stripTrailingZeros()
             }
         }
         return BigDecimal.ONE
