@@ -19,8 +19,10 @@ class BinanceHttpClientApi(builder: WebClient.Builder) {
                 getRateFromApi("https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT")
             "BitcoinBlockchain" ->
                 getRateFromApi("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT")
+            "BinanceBlockchain" ->
+                getRateFromApi("https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT")
             else -> {
-                ExchangeRate("UNKNOWS", BigDecimal.ONE)
+                ExchangeRate("UNKNOWN", BigDecimal.ONE)
             }
         }
     }

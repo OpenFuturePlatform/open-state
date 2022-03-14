@@ -5,6 +5,7 @@ import io.openfuture.state.domain.WalletIdentity
 import org.springframework.data.mongodb.repository.Query
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import org.springframework.stereotype.Repository
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Repository
@@ -13,6 +14,8 @@ interface WalletRepository : ReactiveMongoRepository<Wallet, String> {
     fun findByIdentity(identity: WalletIdentity): Mono<Wallet>
 
     fun findFirstByIdentityAddress(address: String): Mono<Wallet>
+
+    fun findAllByOrder_OrderKey(orderKey: String): Flux<Wallet>
 
     fun findFirstByOrder_orderKey(orderKey: String): Mono<Wallet>
 

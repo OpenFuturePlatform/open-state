@@ -14,6 +14,8 @@ interface WalletService {
 
     suspend fun findByOrderKey(orderKey: String): Wallet
 
+    suspend fun findAllByOrderKey(orderKey: String): List<Wallet>
+
     suspend fun findById(id: String): Wallet
 
     suspend fun save(request: WalletController.SaveWalletRequest)

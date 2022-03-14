@@ -5,10 +5,13 @@ import io.openfuture.state.blockchain.bitcoin.dto.BitcoinBlock
 import io.openfuture.state.blockchain.bitcoin.dto.BitcoinTransaction
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
+import io.openfuture.state.domain.CurrencyCode
 import io.openfuture.state.util.toLocalDateTimeInSeconds
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
+@ConditionalOnProperty(value = ["production.mode.enabled"], havingValue = "true")
 class BitcoinBlockchain(private val client: BitcoinClient) : Blockchain() {
 
     override suspend fun getLastBlockNumber(): Int {
@@ -21,6 +24,10 @@ class BitcoinBlockchain(private val client: BitcoinClient) : Blockchain() {
         val block = client.getBlock(blockHash)
 
         return toUnifiedBlock(block)
+    }
+
+    override suspend fun getCurrencyCode(): CurrencyCode {
+        return CurrencyCode.BITCOIN
     }
 
     private suspend fun toUnifiedBlock(block: BitcoinBlock): UnifiedBlock = UnifiedBlock(

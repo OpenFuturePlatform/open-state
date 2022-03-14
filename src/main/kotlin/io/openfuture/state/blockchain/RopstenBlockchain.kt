@@ -2,6 +2,7 @@ package io.openfuture.state.blockchain
 
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
+import io.openfuture.state.domain.CurrencyCode
 import io.openfuture.state.util.toLocalDateTime
 import kotlinx.coroutines.future.await
 import org.springframework.stereotype.Component
@@ -25,6 +26,10 @@ class RopstenBlockchain(private val web3jTest: Web3j): Blockchain() {
         val transactions = obtainTransactions(block)
         val date = block.timestamp.toLong().toLocalDateTime()
         return UnifiedBlock(transactions, date, block.number.toLong(), block.hash)
+    }
+
+    override suspend fun getCurrencyCode(): CurrencyCode {
+        return CurrencyCode.ETHEREUM
     }
 
     private suspend fun obtainTransactions(ethBlock: EthBlock.Block): List<UnifiedTransaction> = ethBlock.transactions

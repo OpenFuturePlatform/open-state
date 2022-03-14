@@ -17,4 +17,6 @@ data class BinanceProperties(
 
         @field:NotBlank
         val valHrp: String = "bva",
+
+        val testRpcEndpoints: List<String> = emptyList()
 )

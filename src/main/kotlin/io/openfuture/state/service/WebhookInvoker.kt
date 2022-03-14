@@ -11,6 +11,7 @@ import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Service
 class WebhookInvoker(
@@ -21,13 +22,14 @@ class WebhookInvoker(
     suspend fun invoke(wallet: Wallet, transaction: Transaction, order: Order) = runBlocking {
         log.info("Invoking webhook ${order.webhook}")
         val webhookBody = WebhookCallbackResponse(
-            order.orderId, transaction.amount,
+            order.orderId,
+            transaction.amount,
             order.amount,//0,0006
             order.amount - transaction.amount, //0,0006 - 0.001 = -0.0003219200
             "BigDecimal.ZERO", //0.0006 - 0.001 > -0.0003219200
             transaction.to,
-            "ETH",
-            wallet.rate
+            wallet.identity.blockchain,
+            BigDecimal.ONE.divide(wallet.rate, wallet.rate.scale(), RoundingMode.HALF_UP)
         )
         log.info("Invoking webhook $webhookBody")
 

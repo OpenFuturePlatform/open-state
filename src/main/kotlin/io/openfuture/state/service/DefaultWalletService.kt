@@ -24,8 +24,8 @@ class DefaultWalletService(
     private val webhookService: WebhookService,
     private val webhookInvoker: WebhookInvoker,
     private val binanceHttpClientApi: BinanceHttpClientApi,
-    private val blockchains: List<Blockchain>,
-    private val orderRepository: OrderRepository
+    private val orderRepository: OrderRepository,
+    private val blockchainLookupService: BlockchainLookupService
 ) : WalletService {
 
     override suspend fun findByIdentity(blockchain: String, address: String): Wallet {
@@ -42,6 +42,10 @@ class DefaultWalletService(
     override suspend fun findByOrderKey(orderKey: String): Wallet {
         return walletRepository.findFirstByOrder_orderKey(orderKey).awaitFirstOrNull()
             ?: throw NotFoundException("Wallet not found: $orderKey")
+    }
+
+    override suspend fun findAllByOrderKey(orderKey: String): List<Wallet> {
+        return walletRepository.findAllByOrder_OrderKey(orderKey).collectList().awaitSingle()
     }
 
     override suspend fun findById(id: String): Wallet {
@@ -61,10 +65,10 @@ class DefaultWalletService(
         orderRepository.save(order).awaitSingle()
         val savedWallets = mutableListOf<Wallet>()
         request.blockchains.forEach {
-            val blockchain: Blockchain = findBlockchain(it.blockchain)
+            val blockchain: Blockchain = blockchainLookupService.findBlockchain(it.blockchain)
             val walletIdentity = WalletIdentity(blockchain.getName(), it.address)
-            val price = binanceHttpClientApi.getExchangeRate(blockchain).price
-            val rate = BigDecimal.ONE.divide(price, price.scale(), RoundingMode.HALF_UP)
+            val rate = binanceHttpClientApi.getExchangeRate(blockchain).price
+//            val rate = BigDecimal.ONE.divide(price, price.scale(), RoundingMode.HALF_UP)
             val wallet = Wallet(walletIdentity, rate = rate, order = order)
             savedWallets.add(walletRepository.save(wallet).awaitSingle())
         }
@@ -96,21 +100,11 @@ class DefaultWalletService(
             block.number,
             block.hash
         )
-        val order = orderRepository.findAllByOrderId(wallet.order.orderId).awaitSingle()
         transactionRepository.save(transaction).awaitSingle()
         log.info("Saved transaction ${transaction.id}")
-//        wallet.totalPaid = wallet.totalPaid.add(transaction.amount)
-        val updatedWallet = walletRepository.save(wallet).awaitSingle()
-        webhookInvoker.invoke(updatedWallet, transaction, order)
-    }
-
-    private fun findBlockchain(name: String): Blockchain {
-        val nameInLowerCase = name.toLowerCase()
-        for (blockchain in blockchains) {
-            if (blockchain.getName().toLowerCase().startsWith(nameInLowerCase)) return blockchain
-        }
-
-        throw IllegalArgumentException("Can not find blockchain")
+        val orderId = wallet.order.orderId
+        val order = orderRepository.findAllByOrderId(orderId).awaitSingle()
+        webhookInvoker.invoke(wallet, transaction, order)
     }
 
     companion object {

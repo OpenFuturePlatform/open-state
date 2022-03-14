@@ -7,6 +7,7 @@ import com.binance.dex.api.client.domain.broadcast.TxType
 import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
+import io.openfuture.state.domain.CurrencyCode
 import io.openfuture.state.util.toLocalDateTime
 import org.springframework.stereotype.Component
 
@@ -29,6 +30,10 @@ class BinanceBlockchain(private val client: BinanceDexApiNodeClient) : Blockchai
             blockNumber.toLong(),
             blockInfo.header.dataHash
         )
+    }
+
+    override suspend fun getCurrencyCode(): CurrencyCode {
+        return CurrencyCode.BINANCE
     }
 
     private fun mapByTransactionType(tx: Transaction): UnifiedTransaction? {

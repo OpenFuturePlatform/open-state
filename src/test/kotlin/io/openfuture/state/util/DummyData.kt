@@ -16,19 +16,8 @@ import java.util.*
 fun createDummyWallet(
     blockchain: String = "Ethereum",
     address: String = "address",
-    webhook: String = "webhook",
-    webhookStatus: WebhookStatus = WebhookStatus.NOT_INVOKED,
-    id: String = ObjectId().toHexString(),
-    lastUpdate: LocalDateTime = LocalDateTime.of(2020, 10, 10, 10, 10),
-    orderId: String = "ds",
-    orderKey: String = "",
-    amount: BigDecimal = BigDecimal.TEN,
-    productCurrency: String = "USD",
-    source: String = "Wocoment",
-    paymentCurrency: String = "ETH",
-    totalPaid: BigDecimal = BigDecimal.ZERO,
     rate: BigDecimal = BigDecimal.ONE
-) = Wallet(WalletIdentity(blockchain, address), webhook, webhookStatus, lastUpdate, id, orderId, orderKey, amount, productCurrency, source, paymentCurrency, totalPaid, rate)
+) = Wallet(WalletIdentity(blockchain, address), rate = rate,)
 
 fun createDummyTransaction(
     blockchain: String = "Ethereum",

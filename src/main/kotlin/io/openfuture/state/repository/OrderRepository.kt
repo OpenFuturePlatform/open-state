@@ -9,5 +9,6 @@ import reactor.core.publisher.Flux
 
 @Repository
 interface OrderRepository : ReactiveMongoRepository<Order, String>{
-    suspend fun findAllByOrderId(id: String): Flux<Order>
+    suspend fun findByOrderKey(orderId: String): Flux<Order>
+    suspend fun findAllByOrderId(orderId: String): Flux<Order>
 }
