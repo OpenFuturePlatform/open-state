@@ -27,7 +27,7 @@ class OrderController(
     }
 
     private suspend fun convertToOrderStateResponse(order: Order, wallets: List<Wallet>): OrderStateResponse {
-        val orderDate = order.placedAt
+        val orderDate = order.placedAt.plusHours(7)
         val amount = order.amount
         val paid = order.paid
         val walletsResponse: List<WalletResponse> = wallets.map { convertToWalletResponse(it) }
