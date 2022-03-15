@@ -11,6 +11,8 @@ interface WalletService {
 
     suspend fun findByIdentity(blockchain: String, address: String): Wallet
 
+    suspend fun deleteByIdentity(blockchain: String, address: String)
+
     suspend fun findByIdentityAddress(address: String): Wallet
 
     suspend fun findByOrderKey(orderKey: String): Wallet

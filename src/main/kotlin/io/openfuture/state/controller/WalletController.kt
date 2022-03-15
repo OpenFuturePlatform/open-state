@@ -25,6 +25,12 @@ class WalletController(private val walletService: WalletService) {
         return WalletDto(wallet)
     }
 
+    @DeleteMapping("/blockchain/{blockchain}/address/{address}")
+    suspend fun deleteStateBynAddress(@PathVariable blockchain: String, @PathVariable address: String): Boolean {
+        walletService.deleteByIdentity(blockchain, address)
+        return true
+    }
+
     data class WalletDto(
         val id: String,
         val address: String,

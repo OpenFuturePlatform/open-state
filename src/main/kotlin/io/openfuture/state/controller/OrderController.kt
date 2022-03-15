@@ -5,6 +5,7 @@ import io.openfuture.state.domain.Wallet
 import io.openfuture.state.repository.OrderRepository
 import io.openfuture.state.service.TransactionService
 import io.openfuture.state.service.WalletService
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -20,10 +21,13 @@ class OrderController(
 ) {
 
     @GetMapping("/{orderKey}")
-    suspend fun getOrderState(@PathVariable orderKey: String): OrderStateResponse {
-        val order = orderRepository.findByOrderKey(orderKey).awaitSingle()
+    suspend fun getOrderState(@PathVariable orderKey: String): OrderStateResponse? {
         val wallets = walletService.findAllByOrderKey(orderKey)
-        return convertToOrderStateResponse(order, wallets)
+        orderRepository.findByOrderKey(orderKey).awaitFirstOrNull()?.let {
+            return convertToOrderStateResponse(it, wallets)
+        }
+        return null
+
     }
 
     private suspend fun convertToOrderStateResponse(order: Order, wallets: List<Wallet>): OrderStateResponse {

@@ -34,6 +34,11 @@ class DefaultWalletService(
             ?: throw NotFoundException("Wallet not found: $blockchain - $address")
     }
 
+    override suspend fun deleteByIdentity(blockchain: String, address: String) {
+        val identity = WalletIdentity(blockchain, address)
+        walletRepository.deleteByIdentity(identity)
+    }
+
     override suspend fun findByIdentityAddress(address: String): Wallet {
         return walletRepository.findFirstByIdentityAddress(address).awaitFirstOrNull()
             ?: throw NotFoundException("Wallet not found: $address")
@@ -78,7 +83,7 @@ class DefaultWalletService(
     override suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock) {
         for (transaction in block.transactions) {
             val identity = WalletIdentity(blockchain.getName(), transaction.to)
-            val wallet = walletRepository.findByIdentity(identity.blockchain, identity.address).awaitFirstOrNull()
+            val wallet = walletRepository.findFirstByIdentity(identity).awaitFirstOrNull()//walletRepository.findByIdentity(identity.blockchain, identity.address).awaitFirstOrNull()
 
             wallet?.let { saveTransaction(it, block, transaction) }
         }

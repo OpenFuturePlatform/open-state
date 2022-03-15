@@ -22,4 +22,8 @@ interface WalletRepository : ReactiveMongoRepository<Wallet, String> {
     @Query("{ 'identity' : { 'blockchain' : ?0, 'address' : ?1}}")
     fun findByIdentity(blockchain: String, address: String): Mono<Wallet>
 
+    fun findFirstByIdentity(identity: WalletIdentity): Mono<Wallet>
+
+    fun deleteByIdentity(identity: WalletIdentity)
+
 }
