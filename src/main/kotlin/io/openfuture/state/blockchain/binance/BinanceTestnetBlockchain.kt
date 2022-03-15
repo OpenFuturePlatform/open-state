@@ -7,25 +7,22 @@ import io.openfuture.state.domain.CurrencyCode
 import io.openfuture.state.util.toLocalDateTime
 import kotlinx.coroutines.future.await
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterNumber
 import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.utils.Convert
 
-
 @Component
-@ConditionalOnProperty(value = ["production.mode.enabled"], havingValue = "true")
-class BinanceBlockchain(@Qualifier("web3jBinance") private val web3jBinance: Web3j) : Blockchain() {
+class BinanceTestnetBlockchain(@Qualifier("web3jBinanceTestnet") private val web3jBinanceTestnet: Web3j): Blockchain() {
 
-    override suspend fun getLastBlockNumber(): Int = web3jBinance.ethBlockNumber()
+    override suspend fun getLastBlockNumber(): Int = web3jBinanceTestnet.ethBlockNumber()
         .sendAsync().await()
         .blockNumber.toInt()
 
     override suspend fun getBlock(blockNumber: Int): UnifiedBlock {
         val parameter = DefaultBlockParameterNumber(blockNumber.toLong())
-        val block = web3jBinance.ethGetBlockByNumber(parameter, true)
+        val block = web3jBinanceTestnet.ethGetBlockByNumber(parameter, true)
             .sendAsync().await()
             .block
         val transactions = obtainTransactions(block)
@@ -45,9 +42,8 @@ class BinanceBlockchain(@Qualifier("web3jBinance") private val web3jBinance: Web
             UnifiedTransaction(tx.hash, tx.from, to, amount)
         }
 
-    private suspend fun findContractAddress(transactionHash: String) = web3jBinance.ethGetTransactionReceipt(transactionHash)
+    private suspend fun findContractAddress(transactionHash: String) = web3jBinanceTestnet.ethGetTransactionReceipt(transactionHash)
         .sendAsync().await()
         .transactionReceipt.get()
         .contractAddress
-
 }
