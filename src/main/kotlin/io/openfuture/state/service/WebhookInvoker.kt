@@ -1,6 +1,7 @@
 package io.openfuture.state.service
 
 import io.openfuture.state.component.open.DefaultOpenApi
+import io.openfuture.state.domain.Order
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WebhookCallbackResponse
@@ -17,30 +18,30 @@ class WebhookInvoker(
     private val openApi: DefaultOpenApi
 ) {
 
-    suspend fun invoke(wallet: Wallet, transaction: Transaction) = runBlocking {
-        log.info("Invoking webhook ${wallet.webhook}")
+    suspend fun invoke(wallet: Wallet, transaction: Transaction, order: Order) = runBlocking {
+        log.info("Invoking webhook ${order.webhook}")
         val webhookBody = WebhookCallbackResponse(
-            wallet.orderId, transaction.amount,
-            wallet.amount,//0,0006
-            wallet.amount - transaction.amount, //0,0006 - 0.001 = -0.0003219200
-            ((wallet.amount.minus(wallet.totalPaid)).compareTo(BigDecimal.ZERO) > 0).toString(), //0.0006 - 0.001 > -0.0003219200
+            order.orderId,
+            transaction.amount,//in crypto
+            order.amount,//USD
+            order.amount - order.paid, //0,0006 - 0.001 = -0.0003219200
+            (order.paid >= order.amount).toString(), //0.0006 - 0.001 > -0.0003219200
             transaction.to,
-            "ETH",
-            wallet.rate
+            wallet.identity.blockchain
         )
         log.info("Invoking webhook $webhookBody")
 
-        if (wallet.source == "woocommerce") {
+        if (order.source == "woocommerce") {
             val woocommerceDto = WebhookPayloadDto.WebhookWoocommerceDto(
                 wallet,
-                if (wallet.amount.minus(wallet.totalPaid) > BigDecimal.ZERO) "PROCESSING" else "COMPLETED"
+                if ((order.paid < order.amount)) "PROCESSING" else "COMPLETED"
             )
             val signature = openApi.generateSignature(wallet.identity.address, woocommerceDto)
             log.info("Invoking webhook signature $signature")
-            webhookRestClient.doPostWoocommerce(wallet.webhook, signature, woocommerceDto)
-        } else webhookRestClient.doPost(wallet.webhook, WebhookPayloadDto(transaction))
+            webhookRestClient.doPostWoocommerce(order.webhook, signature, woocommerceDto)
+        } else webhookRestClient.doPost(order.webhook, WebhookPayloadDto(transaction))
 
-        webhookRestClient.doPost(wallet.webhook, webhookBody)
+        webhookRestClient.doPost(order.webhook, webhookBody)
     }
 
     companion object {

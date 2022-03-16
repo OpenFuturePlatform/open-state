@@ -1,46 +1,53 @@
 package io.openfuture.state.blockchain.binance
 
-import com.binance.dex.api.client.BinanceDexApiNodeClient
-import com.binance.dex.api.client.domain.TransferInfo
-import com.binance.dex.api.client.domain.broadcast.Transaction
-import com.binance.dex.api.client.domain.broadcast.TxType
 import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
+import io.openfuture.state.domain.CurrencyCode
 import io.openfuture.state.util.toLocalDateTime
+import kotlinx.coroutines.future.await
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
+import org.web3j.protocol.Web3j
+import org.web3j.protocol.core.DefaultBlockParameterNumber
+import org.web3j.protocol.core.methods.response.EthBlock
+import org.web3j.utils.Convert
 
 
-//@Component
-class BinanceBlockchain(private val client: BinanceDexApiNodeClient) : Blockchain() {
+@Component
+@ConditionalOnProperty(value = ["production.mode.enabled"], havingValue = "true")
+class BinanceBlockchain(@Qualifier("web3jBinance") private val web3jBinance: Web3j) : Blockchain() {
 
-    override suspend fun getLastBlockNumber(): Int {
-        return client.nodeInfo.syncInfo.latestBlockHeight.toInt()
-    }
+    override suspend fun getLastBlockNumber(): Int = web3jBinance.ethBlockNumber()
+        .sendAsync().await()
+        .blockNumber.toInt()
 
     override suspend fun getBlock(blockNumber: Int): UnifiedBlock {
-        val blockInfo = client.getBlockMetaByHeight(blockNumber.toLong())
-        val transactions = client.getBlockTransactions(blockNumber.toLong())
-        val unifiedTransactions = transactions.mapNotNull { mapByTransactionType(it) }
-
-        return UnifiedBlock(
-            unifiedTransactions,
-            blockInfo.header.time.toLocalDateTime(),
-            blockNumber.toLong(),
-            blockInfo.header.dataHash
-        )
+        val parameter = DefaultBlockParameterNumber(blockNumber.toLong())
+        val block = web3jBinance.ethGetBlockByNumber(parameter, true)
+            .sendAsync().await()
+            .block
+        val transactions = obtainTransactions(block)
+        val date = block.timestamp.toLong().toLocalDateTime()
+        return UnifiedBlock(transactions, date, block.number.toLong(), block.hash)
     }
 
-    private fun mapByTransactionType(tx: Transaction): UnifiedTransaction? {
-        return if (tx.txType == TxType.TRANSFER) mapFromTransferInfo(tx) else null
+    override suspend fun getCurrencyCode(): CurrencyCode {
+        return CurrencyCode.BINANCE
     }
 
-    private fun mapFromTransferInfo(tx: Transaction): UnifiedTransaction? {
-        val transferInfo = tx.realTx as TransferInfo
-        val output = transferInfo.outputs.first()
-        val coin = output.coins.firstOrNull { it.denom == "BNB" } ?: return null
-        val inputAddresses = transferInfo.inputs.map { it.address }.toSet()
-        return UnifiedTransaction(tx.hash, inputAddresses, output.address, coin.amount.toBigDecimal())
-    }
+    private suspend fun obtainTransactions(ethBlock: EthBlock.Block): List<UnifiedTransaction> = ethBlock.transactions
+        .map { it.get() as EthBlock.TransactionObject }
+        .map { tx ->
+            val to = tx.to ?: findContractAddress(tx.hash)
+            val amount = Convert.fromWei(tx.value.toBigDecimal(), Convert.Unit.ETHER)
+            UnifiedTransaction(tx.hash, tx.from, to, amount)
+        }
+
+    private suspend fun findContractAddress(transactionHash: String) = web3jBinance.ethGetTransactionReceipt(transactionHash)
+        .sendAsync().await()
+        .transactionReceipt.get()
+        .contractAddress
 
 }

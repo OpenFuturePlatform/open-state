@@ -45,7 +45,7 @@ data class WebhookPayloadDto(
     ) {
         constructor(wallet: Wallet, status: String) : this(
             wallet.identity.address,
-            wallet.orderId.toInt(),
+            wallet.order.orderId.toInt(),
             status
         )
     }

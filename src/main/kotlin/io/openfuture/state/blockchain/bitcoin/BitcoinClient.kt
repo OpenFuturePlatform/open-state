@@ -8,7 +8,7 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 
-//@Component
+@Component
 class BitcoinClient(
     private val properties: BitcoinProperties,
     webClientBuilder: WebClient.Builder

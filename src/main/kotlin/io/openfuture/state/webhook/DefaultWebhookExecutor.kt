@@ -30,7 +30,9 @@ class DefaultWebhookExecutor(
 
         val woocommerceDto = WebhookPayloadDto.WebhookWoocommerceDto(wallet, "PROCESSING")
         val signature = openApi.generateSignature(wallet.identity.address, woocommerceDto)
-        val response = if(wallet?.source == "woocommerce")  restClient.doPostWoocommerce(wallet.webhook, signature, woocommerceDto) else restClient.doPost(wallet.webhook, WebhookPayloadDto(transaction))
+        val response = if(wallet.order.source == "woocommerce")  restClient.doPostWoocommerce(wallet.order.webhook, signature, woocommerceDto) else restClient.doPost(wallet.order
+        .webhook,
+            WebhookPayloadDto(transaction))
         webhookInvocationService.registerInvocation(wallet, transactionTask, response)
 
         if (response.status.is2xxSuccessful) {
@@ -44,7 +46,7 @@ class DefaultWebhookExecutor(
         val wallet = walletService.findById(walletId)
         val woocommerceDto = WebhookPayloadDto.WebhookWoocommerceDto(wallet, "PROCESSING")
         val signature = openApi.generateSignature(wallet.identity.address, woocommerceDto)
-        restClient.doPostWoocommerce(wallet.webhook, signature, woocommerceDto)
+        restClient.doPostWoocommerce(wallet.order.webhook, signature, woocommerceDto)
     }
 
     private suspend fun scheduleNextTransaction(wallet: Wallet) {

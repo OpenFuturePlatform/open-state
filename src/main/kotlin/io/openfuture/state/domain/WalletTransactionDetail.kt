@@ -8,12 +8,9 @@ data class WalletTransactionDetail(
     var totalPaid: BigDecimal = BigDecimal.ZERO,
     var rate: BigDecimal,
     val transactions: List<Transaction>
-) {
+)
+{
     constructor(wallet: Wallet, transactions: List<Transaction>) : this(
-        wallet.orderKey,
-        wallet.amount,
-        wallet.totalPaid,
-        wallet.rate,
-        transactions
+        wallet.order.orderKey, wallet.order.amount, wallet.order.paid, wallet.rate, transactions
     )
 }

@@ -9,6 +9,5 @@ data class WebhookCallbackResponse(
     val remaining: BigDecimal,
     val status: String,
     val address: String,
-    val currency: String,
-    val rate: BigDecimal
+    val currency: String
 )
