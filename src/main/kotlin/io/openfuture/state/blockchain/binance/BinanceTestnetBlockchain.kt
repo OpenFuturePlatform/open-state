@@ -4,17 +4,26 @@ import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.domain.CurrencyCode
+import io.openfuture.state.property.SmartContractAddresses
 import io.openfuture.state.util.toLocalDateTime
 import kotlinx.coroutines.future.await
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
+import org.web3j.abi.FunctionReturnDecoder
+import org.web3j.abi.TypeReference
+import org.web3j.abi.Utils
+import org.web3j.abi.datatypes.Address
+import org.web3j.abi.datatypes.generated.Uint256
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterNumber
 import org.web3j.protocol.core.methods.response.EthBlock
-import org.web3j.utils.Convert
+import java.math.BigDecimal
 
 @Component
-class BinanceTestnetBlockchain(@Qualifier("web3jBinanceTestnet") private val web3jBinanceTestnet: Web3j): Blockchain() {
+class BinanceTestnetBlockchain(
+    @Qualifier("web3jBinanceTestnet") private val web3jBinanceTestnet: Web3j,
+    private val smartContractAddresses: SmartContractAddresses
+): Blockchain() {
 
     override suspend fun getLastBlockNumber(): Int = web3jBinanceTestnet.ethBlockNumber()
         .sendAsync().await()
@@ -34,16 +43,51 @@ class BinanceTestnetBlockchain(@Qualifier("web3jBinanceTestnet") private val web
         return CurrencyCode.BINANCE
     }
 
-    private suspend fun obtainTransactions(ethBlock: EthBlock.Block): List<UnifiedTransaction> = ethBlock.transactions
-        .map { it.get() as EthBlock.TransactionObject }
-        .map { tx ->
-            val to = tx.to ?: findContractAddress(tx.hash)
-            val amount = Convert.fromWei(tx.value.toBigDecimal(), Convert.Unit.ETHER)
-            UnifiedTransaction(tx.hash, tx.from, to, amount)
-        }
+    private suspend fun obtainTransactions(ethBlock: EthBlock.Block): List<UnifiedTransaction> {
+        val transactions = ethBlock
+            .transactions
+            ?.map { it.get() as EthBlock.TransactionObject }
+            ?.filter { it.to != null } // drop smart contract creation transactions
+            ?: throw IllegalStateException()
 
-    private suspend fun findContractAddress(transactionHash: String) = web3jBinanceTestnet.ethGetTransactionReceipt(transactionHash)
-        .sendAsync().await()
-        .transactionReceipt.get()
-        .contractAddress
+        val tokenTransfers = transactions
+            .filter { isBep20Transfer(it) }
+            .filter { smartContractAddresses.addresses.contains(it.to) }
+            .map { mapBep20Transaction(it) }
+
+        val nativeTransfers = transactions
+            .filter { isNativeTransfer(it) }
+            .map { UnifiedTransaction(it.hash, setOf(it.from), it.to, it.value as BigDecimal) }
+
+        listOf(tokenTransfers, nativeTransfers)
+        return tokenTransfers + nativeTransfers
+    }
+
+    private fun isNativeTransfer(tx: EthBlock.TransactionObject): Boolean = tx.input == "0x"
+
+    private fun isBep20Transfer(tx: EthBlock.TransactionObject): Boolean = tx.input.startsWith(TRANSFER_METHOD_SIGNATURE)
+            && tx.input.length >= TRANSFER_INPUT_LENGTH
+
+    private fun mapBep20Transaction(tx: EthBlock.TransactionObject): UnifiedTransaction {
+        val result = FunctionReturnDecoder.decode(tx.input.drop(TRANSFER_METHOD_SIGNATURE.length), DECODE_TYPES)
+        return UnifiedTransaction(
+            tx.hash,
+            setOf(result[0].value as String),
+            tx.to,
+            result[1].value as BigDecimal
+        )
+    }
+
+    companion object {
+        private val DECODE_TYPES = Utils.convert(
+            listOf(
+                object : TypeReference<Address>(true) {},
+                object : TypeReference<Uint256>() {}
+            )
+        )
+
+        private const val TRANSFER_METHOD_SIGNATURE = "0xa9059cbb"
+        private const val TRANSFER_INPUT_LENGTH = 138
+    }
+
 }
