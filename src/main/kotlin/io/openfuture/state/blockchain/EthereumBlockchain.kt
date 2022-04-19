@@ -13,7 +13,7 @@ import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.utils.Convert
 
 @Component
-//@ConditionalOnProperty(value = ["production.mode.enabled"], havingValue = "true")
+@ConditionalOnProperty(value = ["production.mode.enabled"], havingValue = "true")
 class EthereumBlockchain(private val web3j: Web3j) : Blockchain() {
 
     override suspend fun getLastBlockNumber(): Int = web3j.ethBlockNumber()

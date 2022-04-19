@@ -57,7 +57,7 @@ class BinanceTestnetBlockchain(
 
         val nativeTransfers = transactions
             .filter { isNativeTransfer(it) }
-            .map { UnifiedTransaction(it.hash, setOf(it.from), it.to, it.value as BigDecimal) }
+            .map { UnifiedTransaction(it.hash, setOf(it.from), it.to, BigDecimal(it.value)) }
 
         listOf(tokenTransfers, nativeTransfers)
         return tokenTransfers + nativeTransfers
