@@ -10,7 +10,6 @@ import io.openfuture.state.webhook.WebhookRestClient
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
 
 @Service
 class WebhookInvoker(
@@ -42,6 +41,11 @@ class WebhookInvoker(
         } else webhookRestClient.doPost(order.webhook, WebhookPayloadDto(transaction))
 
         webhookRestClient.doPost(order.webhook, webhookBody)
+    }
+
+    suspend fun invoke(webHook: String, transaction: Transaction) = runBlocking {
+        log.info("Invoking webhook $webHook")
+        webhookRestClient.doPost(webHook, WebhookPayloadDto(transaction))
     }
 
     companion object {

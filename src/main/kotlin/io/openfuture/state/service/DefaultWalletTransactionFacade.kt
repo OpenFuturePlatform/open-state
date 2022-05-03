@@ -1,5 +1,6 @@
 package io.openfuture.state.service
 
+import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.WalletTransactionDetail
 import org.springframework.stereotype.Service
 
@@ -19,5 +20,9 @@ class DefaultWalletTransactionFacade(
         val wallet = walletService.findByOrderKey(orderKey)
         val transactions = transactionService.findByAddress(wallet.identity.address)
         return WalletTransactionDetail(wallet, transactions)
+    }
+
+    override suspend fun getTransaction(address: String): List<Transaction> {
+        return transactionService.findByAddress(address)
     }
 }

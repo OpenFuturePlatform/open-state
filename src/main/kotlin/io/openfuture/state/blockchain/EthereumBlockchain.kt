@@ -13,7 +13,7 @@ import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.utils.Convert
 
 @Component
-//@ConditionalOnProperty(value = ["production.mode.enabled"], havingValue = "true")
+@ConditionalOnProperty(value = ["production.mode.enabled"], havingValue = "true")
 class EthereumBlockchain(private val web3j: Web3j) : Blockchain() {
 
     override suspend fun getLastBlockNumber(): Int = web3j.ethBlockNumber()
@@ -39,7 +39,7 @@ class EthereumBlockchain(private val web3j: Web3j) : Blockchain() {
         .map { tx ->
             val to = tx.to ?: findContractAddress(tx.hash)
             val amount = Convert.fromWei(tx.value.toBigDecimal(), Convert.Unit.ETHER)
-            UnifiedTransaction(tx.hash, tx.from, to, amount)
+            UnifiedTransaction(tx.hash, tx.from, to, amount, true, to)
         }
 
     private suspend fun findContractAddress(transactionHash: String) = web3j.ethGetTransactionReceipt(transactionHash)

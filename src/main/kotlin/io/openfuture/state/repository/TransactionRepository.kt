@@ -8,5 +8,6 @@ import reactor.core.publisher.Flux
 
 @Repository
 interface TransactionRepository : ReactiveMongoRepository<Transaction, String>{
-    suspend fun findAllByWalletIdentityAddress(walletIdentity_address: String): Flux<Transaction>
+    suspend fun findAllByWalletIdentityAddress(walletIdentityAddress: String): Flux<Transaction>
+    suspend fun existsTransactionByHash(trxHash: String): Boolean
 }

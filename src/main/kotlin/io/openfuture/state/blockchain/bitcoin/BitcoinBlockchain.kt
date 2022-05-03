@@ -49,7 +49,7 @@ class BitcoinBlockchain(private val client: BitcoinClient) : Blockchain() {
         return transaction.outputs
             .filter { it.addresses.isNotEmpty() }
             .filter { !containsChangeAddresses(inputAddresses, it.addresses) }
-            .map { UnifiedTransaction(transaction.hash, inputAddresses, it.addresses.first(), it.value) }
+            .map { UnifiedTransaction(transaction.hash, inputAddresses, it.addresses.first(), it.value, true, it.addresses.first()) }
     }
 
     private fun containsChangeAddresses(inputAddresses: Set<String>, outputAddresses: Set<String>): Boolean {

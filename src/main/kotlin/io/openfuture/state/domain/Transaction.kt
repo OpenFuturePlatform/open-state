@@ -18,6 +18,8 @@ data class Transaction(
     val date: LocalDateTime,
     val blockHeight: Long,
     val blockHash: String,
+    val native: Boolean?,
+    val token: String?,
     @MongoId
     val id: String = ObjectId().toHexString()
 )

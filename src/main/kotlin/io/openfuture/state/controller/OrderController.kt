@@ -43,15 +43,16 @@ class OrderController(
         val transactionsResponse = transactions.map {
             TransactionResponse(
                 it.hash,
-                it.from.first(),
+                it.from,
                 it.to, it.amount,
                 it.date,
                 it.blockHeight,
                 it.blockHash,
-                wallet.rate
+                wallet.rate,
+                it.native
             )
         }
-        return WalletResponse(wallet.identity.address, wallet.identity.blockchain, transactionsResponse)
+        return WalletResponse(wallet.identity.address, wallet.identity.blockchain, wallet.rate, transactionsResponse)
     }
 
 }

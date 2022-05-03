@@ -13,7 +13,7 @@ import org.web3j.protocol.core.DefaultBlockParameterNumber
 import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.utils.Convert
 
-@Component
+//@Component
 class BinanceTestnetBlockchain(@Qualifier("web3jBinanceTestnet") private val web3jBinanceTestnet: Web3j): Blockchain() {
 
     override suspend fun getLastBlockNumber(): Int = web3jBinanceTestnet.ethBlockNumber()
@@ -39,7 +39,7 @@ class BinanceTestnetBlockchain(@Qualifier("web3jBinanceTestnet") private val web
         .map { tx ->
             val to = tx.to ?: findContractAddress(tx.hash)
             val amount = Convert.fromWei(tx.value.toBigDecimal(), Convert.Unit.ETHER)
-            UnifiedTransaction(tx.hash, tx.from, to, amount)
+            UnifiedTransaction(tx.hash, tx.from, to, amount, true, to)
         }
 
     private suspend fun findContractAddress(transactionHash: String) = web3jBinanceTestnet.ethGetTransactionReceipt(transactionHash)
