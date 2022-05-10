@@ -17,6 +17,8 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
+import kotlin.math.pow
 
 @Service
 class DefaultWalletService(
@@ -107,16 +109,27 @@ class DefaultWalletService(
             val tokens = openApi.getTokens()
 
             var tokenType = ""
+            var amount = unifiedTransaction.amount
 
-            if (!unifiedTransaction.native)
-                tokenType = tokens.firstOrNull { customToken -> customToken.address.equals(unifiedTransaction.contractAddress, ignoreCase = true) }?.symbol.toString()
+            if (!unifiedTransaction.native) {
+                val customToken = tokens.first { customToken ->
+                    customToken.address.equals(
+                        unifiedTransaction.contractAddress,
+                        ignoreCase = true
+                    )
+                }
+                tokenType = customToken.symbol
+                val result = customToken.decimal.let { 10.0.pow(it.toDouble()) }
+                amount = amount.divide(result.toBigDecimal())
+
+            }
 
             val transaction = Transaction(
                 wallet.identity,
                 unifiedTransaction.hash,
                 unifiedTransaction.from,
                 unifiedTransaction.to,
-                unifiedTransaction.amount,
+                amount,
                 block.date,
                 block.number,
                 block.hash,
@@ -130,6 +143,8 @@ class DefaultWalletService(
             if (unifiedTransaction.native) {
                 val lastPaidUsd = wallet.rate.multiply(unifiedTransaction.amount)
                 order.paid = order.paid.add(lastPaidUsd)
+            } else {
+                order.paid = order.paid.add(amount)
             }
             val updatedOrder = orderRepository.save(order).awaitSingle()
             webhookInvoker.invoke(wallet, transaction, updatedOrder)

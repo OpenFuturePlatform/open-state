@@ -26,5 +26,6 @@ data class TransactionResponse(
     val blockHeight: Long,
     val blockHash: String,
     val rate: BigDecimal,
-    val native: Boolean?
+    val native: Boolean?,
+    val token: String?
 )

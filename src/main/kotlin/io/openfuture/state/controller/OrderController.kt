@@ -49,7 +49,8 @@ class OrderController(
                 it.blockHeight,
                 it.blockHash,
                 wallet.rate,
-                it.native
+                it.native,
+                it.token
             )
         }
         return WalletResponse(wallet.identity.address, wallet.identity.blockchain, wallet.rate, transactionsResponse)
