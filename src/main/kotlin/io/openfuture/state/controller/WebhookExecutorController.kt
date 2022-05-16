@@ -1,6 +1,5 @@
 package io.openfuture.state.controller
 
-import io.openfuture.state.webhook.DefaultWebhookExecutor
 import io.openfuture.state.webhook.WebhookExecutor
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

@@ -1,6 +1,7 @@
 package io.openfuture.state.controller
 
 import io.openfuture.state.controller.request.ManualTransactionRequest
+import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.WalletTransactionDetail
 import io.openfuture.state.service.BlockchainLookupService
 import io.openfuture.state.service.DefaultWalletService
@@ -23,6 +24,11 @@ class TransactionController(
     @GetMapping("/order/{orderKey}")
     suspend fun findByOrder(@PathVariable orderKey: String): WalletTransactionDetail {
         return walletTransactionFacade.findByOrder(orderKey)
+    }
+
+    @GetMapping("/{address}")
+    suspend fun getTransaction(@PathVariable address: String): List<Transaction> {
+        return walletTransactionFacade.getTransaction(address)
     }
 
     @PostMapping("/admin/sendManualTransaction")

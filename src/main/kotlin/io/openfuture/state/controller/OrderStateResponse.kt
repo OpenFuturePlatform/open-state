@@ -13,16 +13,19 @@ data class OrderStateResponse(
 data class WalletResponse(
     val address: String,
     val blockchain: String,
+    val rate: BigDecimal,
     val transactions: List<TransactionResponse>
 )
 
 data class TransactionResponse(
     val hash: String,
-    val from: String,
+    val from: Set<String>,
     val to: String,
     val amount: BigDecimal,
     val date: LocalDateTime,
     val blockHeight: Long,
     val blockHash: String,
-    val rate: BigDecimal
+    val rate: BigDecimal,
+    val native: Boolean?,
+    val token: String?
 )

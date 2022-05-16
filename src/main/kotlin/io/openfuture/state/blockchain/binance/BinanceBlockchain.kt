@@ -42,7 +42,7 @@ class BinanceBlockchain(@Qualifier("web3jBinance") private val web3jBinance: Web
         .map { tx ->
             val to = tx.to ?: findContractAddress(tx.hash)
             val amount = Convert.fromWei(tx.value.toBigDecimal(), Convert.Unit.ETHER)
-            UnifiedTransaction(tx.hash, tx.from, to, amount)
+            UnifiedTransaction(tx.hash, tx.from, to, amount, true, to)
         }
 
     private suspend fun findContractAddress(transactionHash: String) = web3jBinance.ethGetTransactionReceipt(transactionHash)

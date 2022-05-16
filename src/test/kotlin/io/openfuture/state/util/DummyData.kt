@@ -34,8 +34,10 @@ fun createDummyTransaction(
     date: LocalDateTime = LocalDateTime.of(2020, 9, 9, 9, 9),
     blockHeight: Long = 1,
     blockHash: String = "block hash",
+    native: Boolean = true,
+    token: String = "USDT",
     id: String = ObjectId().toHexString()
-) = Transaction(WalletIdentity(blockchain, address), hash, from, to, amount, date, blockHeight, blockHash, id)
+) = Transaction(WalletIdentity(blockchain, address), hash, from, to, amount, date, blockHeight, blockHash, native, token, id)
 
 fun createDummyTransactionQueueTask(
     transactionId: String = "transactionId",
@@ -59,8 +61,10 @@ fun createDummyUnifiedTransaction(
     hash: String = "hash",
     from: Set<String> = setOf("from"),
     to: String = "to",
-    amount: BigDecimal = BigDecimal.ONE
-) = UnifiedTransaction(hash, from, to, amount)
+    amount: BigDecimal = BigDecimal.ONE,
+    native: Boolean = false,
+    contractAddress: String = "contractAddress"
+) = UnifiedTransaction(hash, from, to, amount, native, contractAddress)
 
 fun createDummyBitcoinBlock(
     hash: String = "hash",
