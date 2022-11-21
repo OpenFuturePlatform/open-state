@@ -2,12 +2,14 @@ package io.openfuture.state.service
 
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.WalletTransactionDetail
+import io.openfuture.state.repository.OrderRepository
 import org.springframework.stereotype.Service
 
 @Service
 class DefaultWalletTransactionFacade(
     private val transactionService: DefaultTransactionService,
-    private val walletService: DefaultWalletService
+    private val walletService: DefaultWalletService,
+    val orderRepository: OrderRepository
 ) : WalletTransactionFacade {
 
     override suspend fun findByAddress(address: String): WalletTransactionDetail {

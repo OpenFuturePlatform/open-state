@@ -16,23 +16,20 @@ data class Order(
     var lastUpdate: LocalDateTime = LocalDateTime.now(),
     var placedAt: LocalDateTime = LocalDateTime.now(),
     @Indexed
-    val orderId: String,
-    @Indexed
     val orderKey: String,
+    val applicationId: String,
     val amount: BigDecimal,//in USD
     val productCurrency: String,//USD
     var paid: BigDecimal = BigDecimal.ZERO,//USD
-    val source: String,
-    val webhook: String
+    val source: String
 ) {
     constructor(
-        orderId: String,
         orderKey: String,
+        applicationId: String,
         amount: BigDecimal,
         productCurrency: String,
-        source: String,
-        webhook: String
+        source: String
     ) : this(
-        ObjectId().toHexString(), LocalDateTime.now(), LocalDateTime.now(), orderId, orderKey, amount, productCurrency, BigDecimal.ZERO, source, webhook
+        ObjectId().toHexString(), LocalDateTime.now(), LocalDateTime.now(), orderKey, applicationId, amount, productCurrency, BigDecimal.ZERO, source
     )
 }

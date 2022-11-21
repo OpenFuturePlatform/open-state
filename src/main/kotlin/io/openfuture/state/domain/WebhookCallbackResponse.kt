@@ -3,7 +3,7 @@ package io.openfuture.state.domain
 import java.math.BigDecimal
 
 data class WebhookCallbackResponse(
-    val orderId: String,
+    val orderKey: String,
     val lastPaid: BigDecimal,
     val totalPaid: BigDecimal,
     val remaining: BigDecimal,

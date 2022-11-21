@@ -18,9 +18,9 @@ class WebhookInvoker(
 ) {
 
     suspend fun invoke(wallet: Wallet, transaction: Transaction, order: Order) = runBlocking {
-        log.info("Invoking webhook ${order.webhook}")
+        log.info("Invoking webhook ${wallet.webhook}")
         val webhookBody = WebhookCallbackResponse(
-            order.orderId,
+            order.orderKey,
             transaction.amount,//in crypto
             order.amount,//USD
             order.amount - order.paid, //0,0006 - 0.001 = -0.0003219200
@@ -37,10 +37,10 @@ class WebhookInvoker(
             )
             val signature = openApi.generateSignature(wallet.identity.address, woocommerceDto)
             log.info("Invoking webhook signature $signature")
-            webhookRestClient.doPostWoocommerce(order.webhook, signature, woocommerceDto)
-        } else webhookRestClient.doPost(order.webhook, WebhookPayloadDto(transaction))
+            webhookRestClient.doPostWoocommerce(wallet.webhook, signature, woocommerceDto)
+        } else webhookRestClient.doPost(wallet.webhook, WebhookPayloadDto(transaction))
 
-        webhookRestClient.doPost(order.webhook, webhookBody)
+        webhookRestClient.doPost(wallet.webhook, webhookBody)
     }
 
     suspend fun invoke(webHook: String, transaction: Transaction) = runBlocking {
