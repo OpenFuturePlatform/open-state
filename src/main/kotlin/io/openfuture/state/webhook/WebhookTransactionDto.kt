@@ -40,12 +40,12 @@ data class WebhookPayloadDto(
 
     data class WebhookWoocommerceDto(
         val address: String,
-        val order_id: Int,
+        val order_key: String,
         val status: String
     ) {
         constructor(wallet: Wallet, status: String) : this(
             wallet.identity.address,
-            wallet.order.orderId.toInt(),
+            wallet.order!!.orderKey,
             status
         )
     }

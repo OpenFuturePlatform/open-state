@@ -17,6 +17,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import java.math.BigDecimal
 import kotlin.math.pow
 
@@ -33,18 +34,18 @@ class DefaultWalletService(
 ) : WalletService {
 
     override suspend fun findByIdentity(blockchain: String, address: String): Wallet {
-        val identity = WalletIdentity(blockchain, address)
+        val identity = WalletIdentity(blockchain, address.toUpperCase())
         return walletRepository.findByIdentity(identity).awaitFirstOrNull()
             ?: throw NotFoundException("Wallet not found: $blockchain - $address")
     }
 
     override suspend fun deleteByIdentity(blockchain: String, address: String) {
-        val identity = WalletIdentity(blockchain, address)
+        val identity = WalletIdentity(blockchain, address.toUpperCase())
         walletRepository.deleteByIdentity(identity)
     }
 
     override suspend fun findByIdentityAddress(address: String): Wallet {
-        return walletRepository.findFirstByIdentityAddress(address).awaitFirstOrNull()
+        return walletRepository.findFirstByIdentityAddress(address.toUpperCase()).awaitFirstOrNull()
             ?: throw NotFoundException("Wallet not found: $address")
     }
 
@@ -62,39 +63,67 @@ class DefaultWalletService(
             ?: throw NotFoundException("Wallet not found: $id")
     }
 
-    override suspend fun save(request: WalletController.SaveWalletRequest): PlaceOrderResponse {
+    override suspend fun saveOrder(request: WalletController.SaveOrderWalletRequest): PlaceOrderResponse {
         val order = Order(
-            request.metadata.orderId,
             request.metadata.orderKey,
+            request.applicationId,
             request.metadata.amount,
             request.metadata.productCurrency,
-            request.metadata.source,
-            request.webhook
+            request.metadata.source
         )
-        orderRepository.save(order).awaitSingle()
+        val existOrder = orderRepository.existsByOrderKey(request.metadata.orderKey).awaitSingle()
+        if (!existOrder)
+            orderRepository.save(order).awaitSingle()
         val savedWallets = mutableListOf<Wallet>()
         request.blockchains.forEach {
             val blockchain: Blockchain = blockchainLookupService.findBlockchain(it.blockchain)
-            val walletIdentity = WalletIdentity(blockchain.getName(), it.address)
+            val walletIdentity = WalletIdentity(blockchain.getName(), it.address.toUpperCase())
             val rate = binanceHttpClientApi.getExchangeRate(blockchain).price.stripTrailingZeros()
-            val wallet = Wallet(walletIdentity, rate = rate, order = order)
+            val wallet = Wallet(walletIdentity, request.webhook, rate = rate, order = order, applicationId = request.applicationId)
             savedWallets.add(walletRepository.save(wallet).awaitSingle())
         }
         val wallets = savedWallets.map { WalletCreateResponse(it.identity.blockchain, it.identity.address, it.rate) }
         return PlaceOrderResponse(
             request.webhook,
-            request.metadata.orderId,
             request.metadata.orderKey,
             request.metadata.amount,
             wallets
         )
     }
 
+    override suspend fun updateOrder(request: WalletController.UpdateOrderWalletRequest) {
+        val order = Order(
+            request.metadata.orderKey,
+            request.applicationId,
+            request.metadata.amount,
+            request.metadata.productCurrency,
+            request.metadata.source
+        )
+        val existOrder = orderRepository.existsByOrderKey(request.metadata.orderKey).awaitSingle()
+        println("Order exists: $existOrder")
+
+        if (!existOrder)
+            orderRepository.save(order).awaitSingle()
+
+        val wallets = walletRepository.findAllByApplicationId(request.applicationId).collectList().awaitSingle()
+
+        wallets.forEach { wallet ->
+            wallet.order = order
+            walletRepository.save(wallet).awaitSingle()
+        }
+    }
+
+    override suspend fun save(blockchain: Blockchain, address: String, webhook: String, applicationId: String): Wallet {
+        val wallet = Wallet(WalletIdentity(blockchain.getName(), address.toUpperCase()), webhook, applicationId)
+        return walletRepository.save(wallet).awaitSingle()
+    }
+
     override suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock) {
         for (transaction in block.transactions) {
-            val identity = WalletIdentity(blockchain.getName(), transaction.to)
-            val wallet = walletRepository.findFirstByIdentity(identity)
-                .awaitFirstOrNull()//walletRepository.findByIdentity(identity.blockchain, identity.address).awaitFirstOrNull()
+            val identity = WalletIdentity(blockchain.getName(), transaction.to.toUpperCase())
+
+            val wallet = walletRepository.findByIdentity(identity).awaitFirstOrNull()//walletRepository.findByIdentity(identity.blockchain, identity.address).awaitFirstOrNull()
+            //val wallet = walletRepository.findByIdentity(identity.blockchain, identity.address).awaitFirstOrNull()
 
             wallet?.let { saveTransaction(it, block, transaction) }
         }
@@ -105,6 +134,7 @@ class DefaultWalletService(
     }
 
     private suspend fun saveTransaction(wallet: Wallet, block: UnifiedBlock, unifiedTransaction: UnifiedTransaction) {
+        log.info("Saving Transaction")
         if (!transactionRepository.existsTransactionByHash(unifiedTransaction.hash)) {
             val tokens = openApi.getTokens()
 
@@ -138,16 +168,29 @@ class DefaultWalletService(
             )
             transactionRepository.save(transaction).awaitSingle()
             log.info("Saved transaction ${transaction.id}")
-            val orderId = wallet.order.orderId
-            val order = orderRepository.findFirstByOrderId(orderId).awaitSingle()
-            if (unifiedTransaction.native) {
-                val lastPaidUsd = wallet.rate.multiply(unifiedTransaction.amount)
-                order.paid = order.paid.add(lastPaidUsd)
+
+            val nonce = wallet.nonce + 1
+            log.info("Wallet nonce: $nonce")
+            wallet.nonce = nonce
+            walletRepository.save(wallet).awaitSingle()
+
+            if (wallet.order != null) {
+                val orderKey = wallet.order!!.orderKey
+                val order = orderRepository.findByOrderKey(orderKey).awaitSingle()
+                if (unifiedTransaction.native) {
+                    val lastPaidUsd = wallet.rate.multiply(unifiedTransaction.amount)
+                    order.paid = order.paid.add(lastPaidUsd)
+                } else {
+                    order.paid = order.paid.add(amount)
+                }
+
+                val updatedOrder = orderRepository.save(order).awaitSingle()
+                webhookInvoker.invoke(wallet, transaction, updatedOrder)
+
             } else {
-                order.paid = order.paid.add(amount)
+                webhookInvoker.invoke(wallet.webhook, transaction)
             }
-            val updatedOrder = orderRepository.save(order).awaitSingle()
-            webhookInvoker.invoke(wallet, transaction, updatedOrder)
+
         }
     }
 
