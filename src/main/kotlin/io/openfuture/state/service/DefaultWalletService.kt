@@ -25,7 +25,6 @@ import kotlin.math.pow
 class DefaultWalletService(
     private val walletRepository: WalletRepository,
     private val transactionRepository: TransactionRepository,
-    private val webhookService: WebhookService,
     private val webhookInvoker: WebhookInvoker,
     private val binanceHttpClientApi: BinanceHttpClientApi,
     private val orderRepository: OrderRepository,
@@ -34,18 +33,18 @@ class DefaultWalletService(
 ) : WalletService {
 
     override suspend fun findByIdentity(blockchain: String, address: String): Wallet {
-        val identity = WalletIdentity(blockchain, address.toUpperCase())
+        val identity = WalletIdentity(blockchain, address)
         return walletRepository.findByIdentity(identity).awaitFirstOrNull()
             ?: throw NotFoundException("Wallet not found: $blockchain - $address")
     }
 
     override suspend fun deleteByIdentity(blockchain: String, address: String) {
-        val identity = WalletIdentity(blockchain, address.toUpperCase())
+        val identity = WalletIdentity(blockchain, address)
         walletRepository.deleteByIdentity(identity)
     }
 
     override suspend fun findByIdentityAddress(address: String): Wallet {
-        return walletRepository.findFirstByIdentityAddress(address.toUpperCase()).awaitFirstOrNull()
+        return walletRepository.findFirstByIdentityAddress(address).awaitFirstOrNull()
             ?: throw NotFoundException("Wallet not found: $address")
     }
 
@@ -56,6 +55,10 @@ class DefaultWalletService(
 
     override suspend fun findAllByOrderKey(orderKey: String): List<Wallet> {
         return walletRepository.findAllByOrder_OrderKey(orderKey).collectList().awaitSingle()
+    }
+
+    override suspend fun findAllByApplication(applicationId: String): List<Wallet> {
+        return walletRepository.findAllByApplicationId(applicationId).collectList().awaitSingle()
     }
 
     override suspend fun findById(id: String): Wallet {
@@ -77,7 +80,7 @@ class DefaultWalletService(
         val savedWallets = mutableListOf<Wallet>()
         request.blockchains.forEach {
             val blockchain: Blockchain = blockchainLookupService.findBlockchain(it.blockchain)
-            val walletIdentity = WalletIdentity(blockchain.getName(), it.address.toUpperCase())
+            val walletIdentity = WalletIdentity(blockchain.getName(), it.address)
             val rate = binanceHttpClientApi.getExchangeRate(blockchain).price.stripTrailingZeros()
             val wallet = Wallet(walletIdentity, request.webhook, rate = rate, order = order, applicationId = request.applicationId)
             savedWallets.add(walletRepository.save(wallet).awaitSingle())
@@ -114,16 +117,15 @@ class DefaultWalletService(
     }
 
     override suspend fun save(blockchain: Blockchain, address: String, webhook: String, applicationId: String): Wallet {
-        val wallet = Wallet(WalletIdentity(blockchain.getName(), address.toUpperCase()), webhook, applicationId)
+        val wallet = Wallet(WalletIdentity(blockchain.getName(), address), webhook, applicationId)
         return walletRepository.save(wallet).awaitSingle()
     }
 
     override suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock) {
         for (transaction in block.transactions) {
-            val identity = WalletIdentity(blockchain.getName(), transaction.to.toUpperCase())
+            val identity = WalletIdentity(blockchain.getName(), transaction.to)
 
-            val wallet = walletRepository.findByIdentity(identity).awaitFirstOrNull()//walletRepository.findByIdentity(identity.blockchain, identity.address).awaitFirstOrNull()
-            //val wallet = walletRepository.findByIdentity(identity.blockchain, identity.address).awaitFirstOrNull()
+            val wallet = walletRepository.findByIdentity(identity).awaitFirstOrNull()
 
             wallet?.let { saveTransaction(it, block, transaction) }
         }
@@ -170,7 +172,6 @@ class DefaultWalletService(
             log.info("Saved transaction ${transaction.id}")
 
             val nonce = wallet.nonce + 1
-            log.info("Wallet nonce: $nonce")
             wallet.nonce = nonce
             walletRepository.save(wallet).awaitSingle()
 

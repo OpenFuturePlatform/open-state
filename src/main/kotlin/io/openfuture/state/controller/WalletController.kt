@@ -2,21 +2,33 @@ package io.openfuture.state.controller
 
 import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.domain.Wallet
+import io.openfuture.state.domain.WalletPaymentDetail
+import io.openfuture.state.repository.OrderRepository
 import io.openfuture.state.service.WalletService
+import io.openfuture.state.service.WalletTransactionFacade
 import io.openfuture.state.service.dto.PlaceOrderResponse
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
+import java.util.stream.Collector
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
+import kotlin.streams.toList
 
 @RestController
 @RequestMapping("/api/wallets")
-class WalletController(private val walletService: WalletService, private val blockchains: List<Blockchain>) {
+class WalletController(
+    private val walletService: WalletService,
+    private val walletTransactionFacade: WalletTransactionFacade,
+    private val blockchains: List<Blockchain>
+) {
 
     @PostMapping
-    suspend fun save(@Valid @RequestBody request: SaveOrderWalletRequest): PlaceOrderResponse {
+    suspend fun saveMultiple(@Valid @RequestBody request: SaveOrderWalletRequest): PlaceOrderResponse {
         return walletService.saveOrder(request)
     }
 
@@ -36,6 +48,11 @@ class WalletController(private val walletService: WalletService, private val blo
     suspend fun findByIdentity(@PathVariable blockchain: String, @PathVariable address: String): WalletDto {
         val wallet = walletService.findByIdentity(blockchain, address)
         return WalletDto(wallet)
+    }
+
+    @GetMapping("/application/{applicationId}")
+    suspend fun findByApplication(@PathVariable applicationId: String): List<WalletPaymentDetail> {
+        return walletTransactionFacade.getOrderByApplication(applicationId)
     }
 
     @DeleteMapping("/blockchain/{blockchain}/address/{address}")

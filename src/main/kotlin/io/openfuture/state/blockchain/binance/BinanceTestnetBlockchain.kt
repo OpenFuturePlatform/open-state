@@ -13,7 +13,7 @@ import org.web3j.protocol.core.DefaultBlockParameterNumber
 import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.utils.Convert
 
-//@Component
+@Component
 class BinanceTestnetBlockchain(@Qualifier("web3jBinanceTestnet") private val web3jBinanceTestnet: Web3j): Blockchain() {
 
     override suspend fun getLastBlockNumber(): Int = web3jBinanceTestnet.ethBlockNumber()

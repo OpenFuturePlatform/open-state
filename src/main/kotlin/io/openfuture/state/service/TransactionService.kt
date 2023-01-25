@@ -8,4 +8,6 @@ interface TransactionService {
     suspend fun findById(id: String): Transaction
 
     suspend fun findByAddress(address: String): List<Transaction>
+
+    suspend fun findAll(): List<Transaction>
 }

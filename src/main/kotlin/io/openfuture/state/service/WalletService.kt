@@ -20,6 +20,8 @@ interface WalletService {
 
     suspend fun findAllByOrderKey(orderKey: String): List<Wallet>
 
+    suspend fun findAllByApplication(applicationId: String): List<Wallet>
+
     suspend fun findById(id: String): Wallet
 
     suspend fun saveOrder(request: WalletController.SaveOrderWalletRequest): PlaceOrderResponse
