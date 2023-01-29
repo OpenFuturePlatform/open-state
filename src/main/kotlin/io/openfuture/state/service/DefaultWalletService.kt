@@ -18,6 +18,7 @@ import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import kotlin.math.pow
 
@@ -45,12 +46,12 @@ class DefaultWalletService(
 
     override suspend fun findByIdentityAddress(address: String): Wallet {
         return walletRepository.findFirstByIdentityAddress(address).awaitFirstOrNull()
-            ?: throw NotFoundException("Wallet not found: $address")
+            ?: throw NotFoundException("Wallet not found by address: $address")
     }
 
     override suspend fun findByOrderKey(orderKey: String): Wallet {
         return walletRepository.findFirstByOrder_orderKey(orderKey).awaitFirstOrNull()
-            ?: throw NotFoundException("Wallet not found: $orderKey")
+            ?: throw NotFoundException("Wallet not found by order: $orderKey")
     }
 
     override suspend fun findAllByOrderKey(orderKey: String): List<Wallet> {
@@ -118,7 +119,11 @@ class DefaultWalletService(
 
     override suspend fun save(blockchain: Blockchain, address: String, webhook: String, applicationId: String): Wallet {
         val wallet = Wallet(WalletIdentity(blockchain.getName(), address), webhook, applicationId)
-        return walletRepository.save(wallet).awaitSingle()
+        return walletRepository.findByIdentity(WalletIdentity(blockchain.getName(), address))
+            .map { w -> w}
+            .switchIfEmpty(walletRepository.save(wallet))
+            .awaitSingle()
+
     }
 
     override suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock) {

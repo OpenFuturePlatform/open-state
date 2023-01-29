@@ -13,6 +13,5 @@ data class WalletPaymentDetail(
 data class BlockchainWallets(
     val address: String,
     val blockchain: String,
-    val rate: BigDecimal,
-    val totalValue: BigDecimal
+    val rate: BigDecimal
 )
