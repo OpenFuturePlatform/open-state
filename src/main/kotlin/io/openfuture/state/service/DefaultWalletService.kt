@@ -5,7 +5,12 @@ import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.client.BinanceHttpClientApi
 import io.openfuture.state.component.open.DefaultOpenApi
-import io.openfuture.state.controller.WalletController
+import io.openfuture.state.controller.WoocommerceController
+import io.openfuture.state.controller.request.GenericWalletResponse
+import io.openfuture.state.controller.request.RegisterNewWalletRequest
+import io.openfuture.state.controller.request.RemoveWalletRequest
+import io.openfuture.state.controller.request.UpdateWalletRequest
+import io.openfuture.state.controller.response.RegisterNewWalletResponse
 import io.openfuture.state.domain.*
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.OrderRepository
@@ -17,8 +22,6 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Flux
-import java.math.BigDecimal
 import kotlin.math.pow
 
 @Service
@@ -63,7 +66,7 @@ class DefaultWalletService(
             ?: throw NotFoundException("Wallet not found: $id")
     }
 
-    override suspend fun saveOrder(request: WalletController.SaveOrderWalletRequest): PlaceOrderResponse {
+    override suspend fun saveOrder(request: WoocommerceController.SaveOrderWalletRequest): PlaceOrderResponse {
         val order = Order(
             request.metadata.orderKey,
             request.applicationId,
@@ -91,7 +94,7 @@ class DefaultWalletService(
         )
     }
 
-    override suspend fun updateOrder(request: WalletController.UpdateOrderWalletRequest) {
+    override suspend fun updateOrder(request: WoocommerceController.UpdateOrderWalletRequest) {
         val order = Order(
             request.metadata.orderKey,
             request.applicationId,
@@ -131,6 +134,18 @@ class DefaultWalletService(
 
     override suspend fun updateWebhookStatus(wallet: Wallet, status: WebhookStatus) {
         //do nothing
+    }
+
+    override suspend fun register(request: RegisterNewWalletRequest): RegisterNewWalletResponse {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun remove(request: RemoveWalletRequest): GenericWalletResponse {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun update(request: UpdateWalletRequest): GenericWalletResponse {
+        TODO("Not yet implemented")
     }
 
     private suspend fun saveTransaction(wallet: Wallet, block: UnifiedBlock, unifiedTransaction: UnifiedTransaction) {

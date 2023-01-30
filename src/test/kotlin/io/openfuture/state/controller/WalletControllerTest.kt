@@ -6,7 +6,7 @@ import io.openfuture.state.service.WalletService
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
 
-@WebFluxTest(WalletController::class, ExceptionHandler::class)
+@WebFluxTest(WoocommerceController::class, ExceptionHandler::class)
 class WalletControllerTest : ControllerTests() {
 
     @MockBean
