@@ -5,22 +5,25 @@ import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.client.BinanceHttpClientApi
 import io.openfuture.state.component.open.DefaultOpenApi
+import io.openfuture.state.controller.Request
 import io.openfuture.state.controller.WalletController
 import io.openfuture.state.domain.*
+import io.openfuture.state.exception.DuplicateEntityException
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.OrderRepository
 import io.openfuture.state.repository.TransactionRepository
 import io.openfuture.state.repository.WalletRepository
-import io.openfuture.state.service.dto.PlaceOrderResponse
-import io.openfuture.state.service.dto.WalletCreateResponse
+import io.openfuture.state.repository.WatchRepository
+import io.openfuture.state.service.dto.*
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
+import lombok.extern.slf4j.Slf4j
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Flux
 import java.math.BigDecimal
 import kotlin.math.pow
 
+@Slf4j
 @Service
 class DefaultWalletService(
     private val walletRepository: WalletRepository,
@@ -30,7 +33,9 @@ class DefaultWalletService(
     private val binanceHttpClientApi: BinanceHttpClientApi,
     private val orderRepository: OrderRepository,
     private val blockchainLookupService: BlockchainLookupService,
-    private val openApi: DefaultOpenApi
+    private val openApi: DefaultOpenApi,
+
+    private val watchRepository: WatchRepository
 ) : WalletService {
 
     override suspend fun findByIdentity(blockchain: String, address: String): Wallet {
@@ -79,7 +84,7 @@ class DefaultWalletService(
             val blockchain: Blockchain = blockchainLookupService.findBlockchain(it.blockchain)
             val walletIdentity = WalletIdentity(blockchain.getName(), it.address.toUpperCase())
             val rate = binanceHttpClientApi.getExchangeRate(blockchain).price.stripTrailingZeros()
-            val wallet = Wallet(walletIdentity, request.webhook, rate = rate, order = order, applicationId = request.applicationId)
+            val wallet = Wallet(walletIdentity, request.webhook, rate = rate, order = order, applicationId = request.applicationId, watch = null)
             savedWallets.add(walletRepository.save(wallet).awaitSingle())
         }
         val wallets = savedWallets.map { WalletCreateResponse(it.identity.blockchain, it.identity.address, it.rate) }
@@ -89,6 +94,26 @@ class DefaultWalletService(
             request.metadata.amount,
             wallets
         )
+    }
+
+    override suspend fun addWallet(request: Request): AddWatchResponse {
+        val exists = watchRepository.existsByWatchId(request.metadata.id).awaitSingle()
+        if (exists) throw DuplicateEntityException("Watch with id = ${request.metadata.id} already exists")
+
+        val watch = Watch(request.metadata.id, request.applicationId, request.metadata.body)
+        val savedWatch = watchRepository.save(watch).awaitSingle()
+
+        val savedWallets = mutableListOf<Wallet>()
+
+        request.blockchains.forEach {
+            val blockchain = blockchainLookupService.findBlockchain(it.blockchain)
+            val walletIdentity = WalletIdentity(blockchain.getName(), it.address.toUpperCase())
+            val wallet = Wallet(walletIdentity, request.webhook, request.applicationId, watch = savedWatch)
+            val savedWallet = walletRepository.save(wallet).awaitSingle()
+            savedWallets.add(savedWallet)
+        }
+        val wallets = savedWallets.map { WatchWalletResponse(it.identity.blockchain, it.identity.address) }
+        return AddWatchResponse(request.webhook, watch, wallets)
     }
 
     override suspend fun updateOrder(request: WalletController.UpdateOrderWalletRequest) {
@@ -123,7 +148,6 @@ class DefaultWalletService(
             val identity = WalletIdentity(blockchain.getName(), transaction.to.toUpperCase())
 
             val wallet = walletRepository.findByIdentity(identity).awaitFirstOrNull()//walletRepository.findByIdentity(identity.blockchain, identity.address).awaitFirstOrNull()
-            //val wallet = walletRepository.findByIdentity(identity.blockchain, identity.address).awaitFirstOrNull()
 
             wallet?.let { saveTransaction(it, block, transaction) }
         }
@@ -136,23 +160,24 @@ class DefaultWalletService(
     private suspend fun saveTransaction(wallet: Wallet, block: UnifiedBlock, unifiedTransaction: UnifiedTransaction) {
         log.info("Saving Transaction")
         if (!transactionRepository.existsTransactionByHash(unifiedTransaction.hash)) {
-            val tokens = openApi.getTokens()
 
-            var tokenType = ""
             var amount = unifiedTransaction.amount
 
-            if (!unifiedTransaction.native) {
-                val customToken = tokens.first { customToken ->
-                    customToken.address.equals(
-                        unifiedTransaction.contractAddress,
-                        ignoreCase = true
-                    )
-                }
-                tokenType = customToken.symbol
-                val result = customToken.decimal.let { 10.0.pow(it.toDouble()) }
-                amount = amount.divide(result.toBigDecimal())
-
-            }
+            var tokenType = ""
+//            if (!unifiedTransaction.native) {
+//                val tokens = openApi.getTokens()
+//
+//                val customToken = tokens.first { customToken ->
+//                    customToken.address.equals(
+//                        unifiedTransaction.contractAddress,
+//                        ignoreCase = true
+//                    )
+//                }
+//                tokenType = customToken.symbol
+//                val result = customToken.decimal.let { 10.0.pow(it.toDouble()) }
+//                amount = amount.divide(result.toBigDecimal())
+//
+//            }
 
             val transaction = Transaction(
                 wallet.identity,
@@ -175,23 +200,33 @@ class DefaultWalletService(
             walletRepository.save(wallet).awaitSingle()
 
             if (wallet.order != null) {
-                val orderKey = wallet.order!!.orderKey
-                val order = orderRepository.findByOrderKey(orderKey).awaitSingle()
-                if (unifiedTransaction.native) {
-                    val lastPaidUsd = wallet.rate.multiply(unifiedTransaction.amount)
-                    order.paid = order.paid.add(lastPaidUsd)
-                } else {
-                    order.paid = order.paid.add(amount)
-                }
-
-                val updatedOrder = orderRepository.save(order).awaitSingle()
-                webhookInvoker.invoke(wallet, transaction, updatedOrder)
-
+                processOrder(wallet, unifiedTransaction, amount, transaction)
+            } else if (wallet.watch != null) {
+                processWatch(wallet, transaction)
             } else {
                 webhookInvoker.invoke(wallet.webhook, transaction)
             }
 
         }
+    }
+
+    private suspend fun processWatch(wallet: Wallet, transaction: Transaction) {
+        val watch: Watch = wallet.watch!!
+        webhookInvoker.invoke(wallet.webhook, transaction, watch)
+    }
+
+    private suspend fun processOrder(wallet: Wallet, unifiedTransaction: UnifiedTransaction, amount: BigDecimal, transaction: Transaction) {
+        val orderKey = wallet.order!!.orderKey
+        val order = orderRepository.findByOrderKey(orderKey).awaitSingle()
+        if (unifiedTransaction.native) {
+            val lastPaidUsd = wallet.rate.multiply(unifiedTransaction.amount)
+            order.paid = order.paid.add(lastPaidUsd)
+        } else {
+            order.paid = order.paid.add(amount)
+        }
+
+        val updatedOrder = orderRepository.save(order).awaitSingle()
+        webhookInvoker.invoke(wallet, transaction, updatedOrder)
     }
 
     companion object {

@@ -5,6 +5,7 @@ import io.openfuture.state.domain.Order
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WebhookCallbackResponse
+import io.openfuture.state.service.dto.Watch
 import io.openfuture.state.webhook.WebhookPayloadDto
 import io.openfuture.state.webhook.WebhookRestClient
 import kotlinx.coroutines.runBlocking
@@ -41,6 +42,11 @@ class WebhookInvoker(
         } else webhookRestClient.doPost(wallet.webhook, WebhookPayloadDto(transaction))
 
         webhookRestClient.doPost(wallet.webhook, webhookBody)
+    }
+
+    suspend fun invoke(webHook: String, transaction: Transaction, watch: Watch) = runBlocking {
+        log.info("Invoking webhook $webHook $watch")
+//        webhookRestClient.doPost(webHook, WebhookPayloadDto(transaction))
     }
 
     suspend fun invoke(webHook: String, transaction: Transaction) = runBlocking {

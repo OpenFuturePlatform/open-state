@@ -1,5 +1,6 @@
 package io.openfuture.state.domain
 
+import io.openfuture.state.service.dto.Watch
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.mongodb.core.index.Indexed
@@ -8,7 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.data.mongodb.core.mapping.MongoId
 import java.math.BigDecimal
 import java.time.LocalDateTime
-import javax.validation.constraints.NotBlank
 
 @Document
 data class Wallet(
@@ -23,5 +23,6 @@ data class Wallet(
     val rate: BigDecimal = BigDecimal.ZERO,
     var nonce: Int = 0,
     @Field("order")
-    var order: Order? = null
+    var order: Order? = null,
+    var watch: Watch? = null
 )

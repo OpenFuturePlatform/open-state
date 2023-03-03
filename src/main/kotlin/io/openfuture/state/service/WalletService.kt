@@ -2,9 +2,11 @@ package io.openfuture.state.service
 
 import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.blockchain.dto.UnifiedBlock
+import io.openfuture.state.controller.Request
 import io.openfuture.state.controller.WalletController
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WebhookStatus
+import io.openfuture.state.service.dto.AddWatchResponse
 import io.openfuture.state.service.dto.PlaceOrderResponse
 import reactor.core.publisher.Flux
 
@@ -23,6 +25,9 @@ interface WalletService {
     suspend fun findById(id: String): Wallet
 
     suspend fun saveOrder(request: WalletController.SaveOrderWalletRequest): PlaceOrderResponse
+
+    //V2
+    suspend fun addWallet(request: Request): AddWatchResponse
 
     suspend fun updateOrder(request: WalletController.UpdateOrderWalletRequest)
 
