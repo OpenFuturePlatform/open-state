@@ -5,7 +5,7 @@ import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.client.BinanceHttpClientApi
 import io.openfuture.state.component.open.DefaultOpenApi
-import io.openfuture.state.controller.Request
+import io.openfuture.state.controller.AddWalletStateRequest
 import io.openfuture.state.controller.WalletController
 import io.openfuture.state.domain.*
 import io.openfuture.state.exception.DuplicateEntityException
@@ -96,11 +96,11 @@ class DefaultWalletService(
         )
     }
 
-    override suspend fun addWallet(request: Request): AddWatchResponse {
-        val exists = watchRepository.existsByWatchId(request.metadata.id).awaitSingle()
-        if (exists) throw DuplicateEntityException("Watch with id = ${request.metadata.id} already exists")
+    override suspend fun addWallet(request: AddWalletStateRequest): AddWatchResponse {
+        val exists = watchRepository.existsByWatchId(request.id).awaitSingle()
+        if (exists) throw DuplicateEntityException("Watch with id = ${request.id} already exists")
 
-        val watch = Watch(request.metadata.id, request.applicationId, request.metadata.body)
+        val watch = Watch(request.id, request.applicationId, request.metadata.body)
         val savedWatch = watchRepository.save(watch).awaitSingle()
 
         val savedWallets = mutableListOf<Wallet>()
@@ -113,7 +113,7 @@ class DefaultWalletService(
             savedWallets.add(savedWallet)
         }
         val wallets = savedWallets.map { WatchWalletResponse(it.identity.blockchain, it.identity.address) }
-        return AddWatchResponse(request.webhook, watch, wallets)
+        return AddWatchResponse(request.id, request.webhook, request.metadata.body, wallets)
     }
 
     override suspend fun updateOrder(request: WalletController.UpdateOrderWalletRequest) {
