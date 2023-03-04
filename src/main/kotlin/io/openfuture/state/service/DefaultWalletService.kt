@@ -164,20 +164,20 @@ class DefaultWalletService(
             var amount = unifiedTransaction.amount
 
             var tokenType = ""
-//            if (!unifiedTransaction.native) {
-//                val tokens = openApi.getTokens()
-//
-//                val customToken = tokens.first { customToken ->
-//                    customToken.address.equals(
-//                        unifiedTransaction.contractAddress,
-//                        ignoreCase = true
-//                    )
-//                }
-//                tokenType = customToken.symbol
-//                val result = customToken.decimal.let { 10.0.pow(it.toDouble()) }
-//                amount = amount.divide(result.toBigDecimal())
-//
-//            }
+            if (!unifiedTransaction.native) {
+                val tokens = openApi.getTokens()
+
+                val customToken = tokens.first { customToken ->
+                    customToken.address.equals(
+                        unifiedTransaction.contractAddress,
+                        ignoreCase = true
+                    )
+                }
+                tokenType = customToken.symbol
+                val result = customToken.decimal.let { 10.0.pow(it.toDouble()) }
+                amount = amount.divide(result.toBigDecimal())
+
+            }
 
             val transaction = Transaction(
                 wallet.identity,
