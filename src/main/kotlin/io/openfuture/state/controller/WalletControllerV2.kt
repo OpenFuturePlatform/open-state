@@ -14,23 +14,20 @@ class WalletControllerV2(
 ) {
 
     @PostMapping("add")
-    suspend fun addWallet(@RequestBody request: AddWalletStateRequest): AddWatchResponse {
+    suspend fun addWallet(@RequestBody request: AddWalletStateForUserRequest): AddWatchResponse {
         return walletService.addWallet(request)
     }
 
 }
 
-data class AddWalletStateRequest(
+data class AddWalletStateForUserRequest(
     val id: String,
     val webhook: String,
     val blockchains: ArrayList<BlockChain>,
     val applicationId: String,
-    val metadata: MetaData
-)
-
-data class MetaData(
-    var body: Any,
-    var test: Boolean
+    val userId: String,
+    val test: Boolean,
+    val metadata: Any?
 )
 
 data class BlockChain(

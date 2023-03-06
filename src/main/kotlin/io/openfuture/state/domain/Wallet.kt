@@ -1,6 +1,5 @@
 package io.openfuture.state.domain
 
-import io.openfuture.state.service.dto.Watch
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.mongodb.core.index.Indexed
@@ -24,5 +23,6 @@ data class Wallet(
     var nonce: Int = 0,
     @Field("order")
     var order: Order? = null,
-    var watch: Watch? = null
+    var metadata: Any? = null,
+    var userId: String? = null
 )

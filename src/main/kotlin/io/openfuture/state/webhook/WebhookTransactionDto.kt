@@ -8,12 +8,16 @@ import java.time.LocalDateTime
 data class WebhookPayloadDto(
     val blockchain: String,
     val walletAddress: String,
+    val userId: String?,//omit from JSON if null
+    val metadata: Any?,//omit from JSON if null
     val transaction: WebhookTransactionDto
 ) {
 
-    constructor(transaction: Transaction) : this(
+    constructor(transaction: Transaction, userId: String?, metadata: Any?) : this(
         transaction.walletIdentity.blockchain,
         transaction.walletIdentity.address,
+        userId,
+        metadata,
         WebhookTransactionDto(transaction)
     )
 

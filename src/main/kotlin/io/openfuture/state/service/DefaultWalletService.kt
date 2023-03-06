@@ -5,16 +5,17 @@ import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.client.BinanceHttpClientApi
 import io.openfuture.state.component.open.DefaultOpenApi
-import io.openfuture.state.controller.AddWalletStateRequest
+import io.openfuture.state.controller.AddWalletStateForUserRequest
 import io.openfuture.state.controller.WalletController
 import io.openfuture.state.domain.*
-import io.openfuture.state.exception.DuplicateEntityException
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.OrderRepository
 import io.openfuture.state.repository.TransactionRepository
 import io.openfuture.state.repository.WalletRepository
-import io.openfuture.state.repository.WatchRepository
-import io.openfuture.state.service.dto.*
+import io.openfuture.state.service.dto.AddWatchResponse
+import io.openfuture.state.service.dto.PlaceOrderResponse
+import io.openfuture.state.service.dto.WalletCreateResponse
+import io.openfuture.state.service.dto.WatchWalletResponse
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import lombok.extern.slf4j.Slf4j
@@ -28,14 +29,11 @@ import kotlin.math.pow
 class DefaultWalletService(
     private val walletRepository: WalletRepository,
     private val transactionRepository: TransactionRepository,
-    private val webhookService: WebhookService,
     private val webhookInvoker: WebhookInvoker,
     private val binanceHttpClientApi: BinanceHttpClientApi,
     private val orderRepository: OrderRepository,
     private val blockchainLookupService: BlockchainLookupService,
-    private val openApi: DefaultOpenApi,
-
-    private val watchRepository: WatchRepository
+    private val openApi: DefaultOpenApi
 ) : WalletService {
 
     override suspend fun findByIdentity(blockchain: String, address: String): Wallet {
@@ -74,17 +72,26 @@ class DefaultWalletService(
             request.applicationId,
             request.metadata.amount,
             request.metadata.productCurrency,
-            request.metadata.source
+            request.metadata.source,
         )
         val existOrder = orderRepository.existsByOrderKey(request.metadata.orderKey).awaitSingle()
-        if (!existOrder)
+        if (!existOrder) {
             orderRepository.save(order).awaitSingle()
+        }
+
         val savedWallets = mutableListOf<Wallet>()
         request.blockchains.forEach {
             val blockchain: Blockchain = blockchainLookupService.findBlockchain(it.blockchain)
             val walletIdentity = WalletIdentity(blockchain.getName(), it.address.toUpperCase())
             val rate = binanceHttpClientApi.getExchangeRate(blockchain).price.stripTrailingZeros()
-            val wallet = Wallet(walletIdentity, request.webhook, rate = rate, order = order, applicationId = request.applicationId, watch = null)
+            val wallet = Wallet(
+                walletIdentity,
+                request.webhook,
+                rate = rate,
+                order = order,
+                applicationId = request.applicationId,
+                metadata = request.metadata.metadata
+                )
             savedWallets.add(walletRepository.save(wallet).awaitSingle())
         }
         val wallets = savedWallets.map { WalletCreateResponse(it.identity.blockchain, it.identity.address, it.rate) }
@@ -96,24 +103,19 @@ class DefaultWalletService(
         )
     }
 
-    override suspend fun addWallet(request: AddWalletStateRequest): AddWatchResponse {
-        val exists = watchRepository.existsByWatchId(request.id).awaitSingle()
-        if (exists) throw DuplicateEntityException("Watch with id = ${request.id} already exists")
-
-        val watch = Watch(request.id, request.applicationId, request.metadata.body)
-        val savedWatch = watchRepository.save(watch).awaitSingle()
-
+    //add wallet to the state for user
+    override suspend fun addWallet(request: AddWalletStateForUserRequest): AddWatchResponse {
         val savedWallets = mutableListOf<Wallet>()
 
         request.blockchains.forEach {
             val blockchain = blockchainLookupService.findBlockchain(it.blockchain)
             val walletIdentity = WalletIdentity(blockchain.getName(), it.address.toUpperCase())
-            val wallet = Wallet(walletIdentity, request.webhook, request.applicationId, watch = savedWatch)
+            val wallet = Wallet(walletIdentity, request.webhook, request.applicationId, userId = request.userId, metadata = request.metadata)
             val savedWallet = walletRepository.save(wallet).awaitSingle()
             savedWallets.add(savedWallet)
         }
         val wallets = savedWallets.map { WatchWalletResponse(it.identity.blockchain, it.identity.address) }
-        return AddWatchResponse(request.id, request.webhook, request.metadata.body, wallets)
+        return AddWatchResponse(request.id, request.webhook, request.userId, request.metadata, wallets)
     }
 
     override suspend fun updateOrder(request: WalletController.UpdateOrderWalletRequest) {
@@ -201,18 +203,17 @@ class DefaultWalletService(
 
             if (wallet.order != null) {
                 processOrder(wallet, unifiedTransaction, amount, transaction)
-            } else if (wallet.watch != null) {
-                processWatch(wallet, transaction)
             } else {
-                webhookInvoker.invoke(wallet.webhook, transaction)
+                process(wallet, transaction)
             }
 
         }
     }
 
-    private suspend fun processWatch(wallet: Wallet, transaction: Transaction) {
-        val watch: Watch = wallet.watch!!
-        webhookInvoker.invoke(wallet.webhook, transaction, watch)
+    private suspend fun process(wallet: Wallet, transaction: Transaction) {
+        val metadata = wallet.metadata!!
+        val userId: String? = wallet.userId
+        webhookInvoker.invoke(wallet.webhook, transaction, metadata, userId)
     }
 
     private suspend fun processOrder(wallet: Wallet, unifiedTransaction: UnifiedTransaction, amount: BigDecimal, transaction: Transaction) {

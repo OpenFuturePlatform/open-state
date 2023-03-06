@@ -2,7 +2,7 @@ package io.openfuture.state.service
 
 import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.blockchain.dto.UnifiedBlock
-import io.openfuture.state.controller.AddWalletStateRequest
+import io.openfuture.state.controller.AddWalletStateForUserRequest
 import io.openfuture.state.controller.WalletController
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WebhookStatus
@@ -26,7 +26,7 @@ interface WalletService {
     suspend fun saveOrder(request: WalletController.SaveOrderWalletRequest): PlaceOrderResponse
 
     //V2
-    suspend fun addWallet(request: AddWalletStateRequest): AddWatchResponse
+    suspend fun addWallet(request: AddWalletStateForUserRequest): AddWatchResponse
 
     suspend fun updateOrder(request: WalletController.UpdateOrderWalletRequest)
 

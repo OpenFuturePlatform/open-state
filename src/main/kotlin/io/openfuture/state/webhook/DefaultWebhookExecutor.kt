@@ -1,6 +1,5 @@
 package io.openfuture.state.webhook
 
-import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.component.open.DefaultOpenApi
 import io.openfuture.state.domain.TransactionQueueTask
 import io.openfuture.state.domain.Wallet
@@ -30,7 +29,10 @@ class DefaultWebhookExecutor(
 
         val woocommerceDto = WebhookPayloadDto.WebhookWoocommerceDto(wallet, "PROCESSING")
         val signature = openApi.generateSignature(wallet.identity.address, woocommerceDto)
-        val response = if(wallet.order!!.source == "woocommerce")  restClient.doPostWoocommerce(wallet.webhook, signature, woocommerceDto) else restClient.doPost(wallet.webhook, WebhookPayloadDto(transaction))
+        val response =
+            if (wallet.order!!.source == "woocommerce")
+                restClient.doPostWoocommerce(wallet.webhook, signature, woocommerceDto)
+            else restClient.doPost(wallet.webhook, WebhookPayloadDto(transaction, wallet.userId, wallet.metadata))
         webhookInvocationService.registerInvocation(wallet, transactionTask, response)
 
         if (response.status.is2xxSuccessful) {

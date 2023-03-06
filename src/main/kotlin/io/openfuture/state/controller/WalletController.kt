@@ -124,7 +124,9 @@ class WalletController(private val walletService: WalletService, private val blo
         var source: String = UUID.randomUUID().toString(),
 
         @field:NotBlank
-        val test: Boolean = true
+        val test: Boolean = true,
+
+        var metadata: Any? = null
     )
 
 }

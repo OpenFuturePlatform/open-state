@@ -5,7 +5,6 @@ import io.openfuture.state.domain.Order
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
 import io.openfuture.state.domain.WebhookCallbackResponse
-import io.openfuture.state.service.dto.Watch
 import io.openfuture.state.webhook.WebhookPayloadDto
 import io.openfuture.state.webhook.WebhookRestClient
 import kotlinx.coroutines.runBlocking
@@ -27,7 +26,8 @@ class WebhookInvoker(
             order.amount - order.paid, //0,0006 - 0.001 = -0.0003219200
             (order.paid >= order.amount).toString(), //0.0006 - 0.001 > -0.0003219200
             transaction.to,
-            wallet.identity.blockchain
+            wallet.identity.blockchain,
+            wallet.metadata
         )
         log.info("Invoking webhook $webhookBody")
 
@@ -39,19 +39,14 @@ class WebhookInvoker(
             val signature = openApi.generateSignature(wallet.identity.address, woocommerceDto)
             log.info("Invoking webhook signature $signature")
             webhookRestClient.doPostWoocommerce(wallet.webhook, signature, woocommerceDto)
-        } else webhookRestClient.doPost(wallet.webhook, WebhookPayloadDto(transaction))
+        } else webhookRestClient.doPost(wallet.webhook, WebhookPayloadDto(transaction, userId = wallet.userId, metadata = wallet.metadata))
 
         webhookRestClient.doPost(wallet.webhook, webhookBody)
     }
 
-    suspend fun invoke(webHook: String, transaction: Transaction, watch: Watch) = runBlocking {
-        log.info("Invoking webhook $webHook $watch")
-//        webhookRestClient.doPost(webHook, WebhookPayloadDto(transaction))
-    }
-
-    suspend fun invoke(webHook: String, transaction: Transaction) = runBlocking {
-        log.info("Invoking webhook $webHook")
-        webhookRestClient.doPost(webHook, WebhookPayloadDto(transaction))
+    suspend fun invoke(webHook: String, transaction: Transaction, metadata: Any, userId: String?) = runBlocking {
+        log.info("Invoking webhook $webHook $metadata $userId")
+        webhookRestClient.doPost(webHook, WebhookPayloadDto(transaction, userId, metadata))
     }
 
     companion object {
