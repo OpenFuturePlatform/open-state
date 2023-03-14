@@ -1,7 +1,6 @@
 package io.openfuture.state.service.dto
 
 data class AddWatchResponse(
-    val id: String,
     val webhook: String,
     val userId: String,
     val metadata: Any?,

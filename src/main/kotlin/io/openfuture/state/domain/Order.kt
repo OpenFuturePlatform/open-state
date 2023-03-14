@@ -20,16 +20,14 @@ data class Order(
     val applicationId: String,
     val amount: BigDecimal,//in USD
     val productCurrency: String,//USD
-    var paid: BigDecimal = BigDecimal.ZERO,//USD
-    val source: String
+    var paid: BigDecimal = BigDecimal.ZERO//USD
 ) {
     constructor(
         orderKey: String,
         applicationId: String,
         amount: BigDecimal,
-        productCurrency: String,
-        source: String
+        productCurrency: String
     ) : this(
-        ObjectId().toHexString(), LocalDateTime.now(), LocalDateTime.now(), orderKey, applicationId, amount, productCurrency, BigDecimal.ZERO, source
+        ObjectId().toHexString(), LocalDateTime.now(), LocalDateTime.now(), orderKey, applicationId, amount, productCurrency, BigDecimal.ZERO
     )
 }

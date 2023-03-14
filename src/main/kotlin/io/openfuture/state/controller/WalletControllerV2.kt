@@ -21,7 +21,6 @@ class WalletControllerV2(
 }
 
 data class AddWalletStateForUserRequest(
-    val id: String,
     val webhook: String,
     val blockchains: ArrayList<BlockChain>,
     val applicationId: String,

@@ -68,7 +68,7 @@ class WalletController(private val walletService: WalletService, private val blo
             wallet.webhook,
             wallet.identity.blockchain,
             wallet.applicationId,
-            wallet.nonce,
+            wallet.userData.nonce,
             wallet.lastUpdate,
         )
     }

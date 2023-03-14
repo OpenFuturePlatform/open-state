@@ -1,5 +1,6 @@
 package io.openfuture.state.webhook
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.openfuture.state.domain.Transaction
 import io.openfuture.state.domain.Wallet
 import java.math.BigDecimal
@@ -44,12 +45,13 @@ data class WebhookPayloadDto(
 
     data class WebhookWoocommerceDto(
         val address: String,
-        val order_key: String,
+        @JsonProperty("order_key")
+        val orderKey: String,
         val status: String
     ) {
         constructor(wallet: Wallet, status: String) : this(
             wallet.identity.address,
-            wallet.order!!.orderKey,
+            wallet.userData.order!!.orderKey,
             status
         )
     }

@@ -48,12 +48,12 @@ class OrderController(
                 it.date,
                 it.blockHeight,
                 it.blockHash,
-                wallet.rate,
+                wallet.userData.rate,
                 it.native,
                 it.token
             )
         }
-        return WalletResponse(wallet.identity.address, wallet.identity.blockchain, wallet.rate, transactionsResponse)
+        return WalletResponse(wallet.identity.address, wallet.identity.blockchain, wallet.userData.rate, transactionsResponse)
     }
 
 }
