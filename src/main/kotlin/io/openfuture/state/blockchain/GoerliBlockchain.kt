@@ -19,7 +19,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 @Component
-class RopstenBlockchain(private val web3jTest: Web3j): Blockchain() {
+class GoerliBlockchain(private val web3jTest: Web3j): Blockchain() {
 
     override suspend fun getLastBlockNumber(): Int = web3jTest.ethBlockNumber()
         .sendAsync().await()
@@ -80,7 +80,7 @@ class RopstenBlockchain(private val web3jTest: Web3j): Blockchain() {
             .sendAsync().await()
             .transactionReceipt
 
-        var address = "";
+        var address = ""
         transactionReceipt.get().logs.forEach{
             address = it.address
         }

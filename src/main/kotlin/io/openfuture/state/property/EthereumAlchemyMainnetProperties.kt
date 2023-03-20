@@ -1,4 +1,4 @@
-package io.openfuture.state.config.property
+package io.openfuture.state.property
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
@@ -8,8 +8,8 @@ import javax.validation.constraints.NotNull
 
 @Validated
 @ConstructorBinding
-@ConfigurationProperties(prefix = "alchemy")
-data class AlchemyProperties (
-    @field:NotNull @field:NotBlank val mainnetAddress: String?,
-    @field:NotNull @field:NotBlank val mainnetApiKey: String?
+@ConfigurationProperties(prefix = "ethereum.alchemy.mainnet")
+data class EthereumAlchemyMainnetProperties (
+    @field:NotNull @field:NotBlank val address: String?,
+    @field:NotNull @field:NotBlank val apiKey: String?
 )
