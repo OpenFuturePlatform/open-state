@@ -85,7 +85,7 @@ class WalletController(
             wallet.webhook,
             wallet.identity.blockchain,
             wallet.applicationId,
-            wallet.nonce,
+            wallet.userData.nonce,
             wallet.lastUpdate,
         )
     }
@@ -141,7 +141,9 @@ class WalletController(
         var source: String = UUID.randomUUID().toString(),
 
         @field:NotBlank
-        val test: Boolean = true
+        val test: Boolean = true,
+
+        var metadata: Any? = null
     )
 
 }

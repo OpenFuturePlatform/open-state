@@ -1,6 +1,5 @@
 package io.openfuture.state.webhook
 
-import io.openfuture.state.domain.Wallet
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -17,6 +16,7 @@ class WebhookRestClient(builder: WebClient.Builder) {
 
 
     suspend fun doPost(url: String, body: Any): WebhookResponse {
+        println("webhook body $body")
         return try {
             val response = client.post()
                 .uri(url)

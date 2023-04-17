@@ -11,6 +11,6 @@ data class WalletTransactionDetail(
 )
 {
     constructor(wallet: Wallet, transactions: List<Transaction>) : this(
-        wallet.order!!.orderKey, wallet.order!!.amount, wallet.order!!.paid, wallet.rate, transactions
+        wallet.userData.order!!.orderKey, wallet.userData.order!!.amount, wallet.userData.order!!.paid, wallet.userData.rate, transactions
     )
 }

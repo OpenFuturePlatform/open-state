@@ -6,7 +6,10 @@ import org.springframework.validation.annotation.Validated
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
-@ConstructorBinding
-@ConfigurationProperties(prefix = "ropsten")
 @Validated
-data class EthereumTestProperties(@field:NotNull @field:NotBlank val nodeAddress: String?)
+@ConstructorBinding
+@ConfigurationProperties(prefix = "ethereum.alchemy.testnet")
+data class EthereumAlchemyTestnetProperties (
+    @field:NotNull @field:NotBlank val address: String?,
+    @field:NotNull @field:NotBlank val apiKey: String?
+)
