@@ -36,12 +36,12 @@ class DefaultWalletTransactionFacade(
 
         orders.forEach{ o ->
             val blockchainWallets = mutableListOf<BlockchainWallets>()
-            val orderWallets = wallets.filter { w -> w.order?.orderKey.equals(o.orderKey) } // every order wallets
+            val orderWallets = wallets.filter { w -> w.userData.order?.orderKey.equals(o.orderKey) } // every order wallets
             orderWallets.forEach { w ->
                 run {
                     /*val transactions = transactionService.findByAddress(w.identity.address)
                     val sum = transactions.sumOf { w -> w.amount  }*/
-                    blockchainWallets.add(BlockchainWallets(w.identity.address, w.identity.blockchain, w.rate))
+                    blockchainWallets.add(BlockchainWallets(w.identity.address, w.identity.blockchain, w.userData.rate))
                 }
 
             }

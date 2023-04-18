@@ -54,8 +54,6 @@ class DefaultWalletService(
     }
 
     override suspend fun findByOrderKey(orderKey: String): Wallet {
-        return walletRepository.findFirstByOrder_orderKey(orderKey).awaitFirstOrNull()
-            ?: throw NotFoundException("Wallet not found by order: $orderKey")
         return walletRepository.findFirstByUserData_Order_OrderKey(orderKey).awaitFirstOrNull()
             ?: throw NotFoundException("Wallet not found: $orderKey")
     }
@@ -115,8 +113,9 @@ class DefaultWalletService(
 
         request.blockchains.forEach {
             val blockchain = blockchainLookupService.findBlockchain(it.blockchain)
-            val walletIdentity = WalletIdentity(blockchain.getName(), it.address.toUpperCase())
-            val userData = UserData(userId = request.userId, metadata = request.metadata)
+            val walletIdentity = WalletIdentity(blockchain.getName(), it.address)
+            val rate = binanceHttpClientApi.getExchangeRate(blockchain).price.stripTrailingZeros()
+            val userData = UserData(userId = request.userId, metadata = request.metadata, rate = rate)
             val wallet = Wallet(walletIdentity, request.webhook, request.applicationId, userData = userData, walletType = WalletType.FOR_USER)
             val savedWallet = walletRepository.save(wallet).awaitSingle()
             savedWallets.add(savedWallet)
@@ -147,7 +146,7 @@ class DefaultWalletService(
     }
 
     override suspend fun save(blockchain: Blockchain, address: String, webhook: String, applicationId: String): Wallet {
-        val wallet = Wallet(WalletIdentity(blockchain.getName(), address.toUpperCase()), webhook, applicationId, userData = UserData(), walletType = WalletType.CUSTOM)
+        val wallet = Wallet(WalletIdentity(blockchain.getName(), address), webhook, applicationId, userData = UserData(), walletType = WalletType.CUSTOM)
         return walletRepository.save(wallet).awaitSingle()
     }
 
@@ -156,7 +155,6 @@ class DefaultWalletService(
             val identity = WalletIdentity(blockchain.getName(), transaction.to)
 
             val wallet = walletRepository.findByIdentity(identity).awaitFirstOrNull()//walletRepository.findByIdentity(identity.blockchain, identity.address).awaitFirstOrNull()
-            val wallet = walletRepository.findByIdentity(identity).awaitFirstOrNull()
 
             wallet?.let { saveTransaction(it, block, transaction) }
         }

@@ -17,6 +17,7 @@ import java.util.*
 import java.util.stream.Collector
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotEmpty
 import kotlin.streams.toList
 
 @RestController
@@ -73,36 +74,37 @@ class WalletController(
     data class WalletDto(
         val id: String,
         val address: String,
-        val webhook: String,
-        val blockchain: String,
         val applicationId: String,
+        val blockchain: String,
+        val lastUpdateDate: LocalDateTime,
         val nonce: Int,
-        val lastUpdateDate: LocalDateTime
+        val webhook: String,
     ) {
         constructor(wallet: Wallet) : this(
             wallet.id,
             wallet.identity.address,
-            wallet.webhook,
-            wallet.identity.blockchain,
             wallet.applicationId,
-            wallet.userData.nonce,
+            wallet.identity.blockchain,
             wallet.lastUpdate,
+            wallet.userData.nonce,
+            wallet.webhook
         )
     }
 
     data class SaveOrderWalletRequest(
-        @field:NotBlank
-        val webhook: String,
-        val blockchains: ArrayList<BlockChainDataRequest>,
         val applicationId: String,
-        var metadata: WalletMetaDataRequest = WalletMetaDataRequest()
+        @field:NotEmpty
+        val blockchains: ArrayList<BlockChainDataRequest>,
+        var metadata: WalletMetaDataRequest = WalletMetaDataRequest(),
+        @field:NotBlank
+        val webhook: String
     )
 
     data class UpdateOrderWalletRequest(
-        @field:NotBlank
-        val webhook: String,
         val applicationId: String,
-        var metadata: WalletMetaDataRequest = WalletMetaDataRequest()
+        var metadata: WalletMetaDataRequest = WalletMetaDataRequest(),
+        @field:NotBlank
+        val webhook: String
     )
 
     data class BlockChainDataRequest(
@@ -113,15 +115,12 @@ class WalletController(
     data class SaveWalletRequest(
         @field:NotBlank
         val address: String,
-
-        @field:NotBlank
-        val webhook: String?,
-
         @field:NotBlank
         val applicationId: String,
-
         @field:NotBlank
-        val blockchain: String
+        val blockchain: String,
+        @field:NotBlank
+        val webhook: String?
     )
 
     data class WalletMetaDataRequest(
