@@ -7,6 +7,7 @@ import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.TransactionRepository
 import io.openfuture.state.util.createDummyTransaction
 import kotlinx.coroutines.runBlocking
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -41,7 +42,7 @@ internal class TransactionServiceTest : ServiceTests() {
 
         val result = transactionService.findById("transactionId")
 
-        org.assertj.core.api.Assertions.assertThat(result).isEqualTo(transaction)
+        assertThat(result).isEqualTo(transaction)
     }
 
 }

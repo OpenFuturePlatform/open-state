@@ -2,21 +2,34 @@ package io.openfuture.state.controller
 
 import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.domain.Wallet
+import io.openfuture.state.domain.WalletPaymentDetail
+import io.openfuture.state.repository.OrderRepository
 import io.openfuture.state.service.WalletService
+import io.openfuture.state.service.WalletTransactionFacade
 import io.openfuture.state.service.dto.PlaceOrderResponse
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
+import java.util.stream.Collector
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotEmpty
+import kotlin.streams.toList
 
 @RestController
 @RequestMapping("/api/wallets")
-class WalletController(private val walletService: WalletService, private val blockchains: List<Blockchain>) {
+class WalletController(
+    private val walletService: WalletService,
+    private val walletTransactionFacade: WalletTransactionFacade,
+    private val blockchains: List<Blockchain>
+) {
 
     @PostMapping
-    suspend fun save(@Valid @RequestBody request: SaveOrderWalletRequest): PlaceOrderResponse {
+    suspend fun saveMultiple(@Valid @RequestBody request: SaveOrderWalletRequest): PlaceOrderResponse {
         return walletService.saveOrder(request)
     }
 
@@ -38,6 +51,11 @@ class WalletController(private val walletService: WalletService, private val blo
         return WalletDto(wallet)
     }
 
+    @GetMapping("/application/{applicationId}")
+    suspend fun findByApplication(@PathVariable applicationId: String): List<WalletPaymentDetail> {
+        return walletTransactionFacade.getOrderByApplication(applicationId)
+    }
+
     @DeleteMapping("/blockchain/{blockchain}/address/{address}")
     suspend fun deleteStateBynAddress(@PathVariable blockchain: String, @PathVariable address: String): Boolean {
         walletService.deleteByIdentity(blockchain, address)
@@ -56,36 +74,37 @@ class WalletController(private val walletService: WalletService, private val blo
     data class WalletDto(
         val id: String,
         val address: String,
-        val webhook: String,
-        val blockchain: String,
         val applicationId: String,
+        val blockchain: String,
+        val lastUpdateDate: LocalDateTime,
         val nonce: Int,
-        val lastUpdateDate: LocalDateTime
+        val webhook: String,
     ) {
         constructor(wallet: Wallet) : this(
             wallet.id,
             wallet.identity.address,
-            wallet.webhook,
-            wallet.identity.blockchain,
             wallet.applicationId,
-            wallet.nonce,
+            wallet.identity.blockchain,
             wallet.lastUpdate,
+            wallet.userData.nonce,
+            wallet.webhook
         )
     }
 
     data class SaveOrderWalletRequest(
-        @field:NotBlank
-        val webhook: String,
-        val blockchains: ArrayList<BlockChainDataRequest>,
         val applicationId: String,
-        var metadata: WalletMetaDataRequest = WalletMetaDataRequest()
+        @field:NotEmpty
+        val blockchains: ArrayList<BlockChainDataRequest>,
+        var metadata: WalletMetaDataRequest = WalletMetaDataRequest(),
+        @field:NotBlank
+        val webhook: String
     )
 
     data class UpdateOrderWalletRequest(
-        @field:NotBlank
-        val webhook: String,
         val applicationId: String,
-        var metadata: WalletMetaDataRequest = WalletMetaDataRequest()
+        var metadata: WalletMetaDataRequest = WalletMetaDataRequest(),
+        @field:NotBlank
+        val webhook: String
     )
 
     data class BlockChainDataRequest(
@@ -96,15 +115,12 @@ class WalletController(private val walletService: WalletService, private val blo
     data class SaveWalletRequest(
         @field:NotBlank
         val address: String,
-
-        @field:NotBlank
-        val webhook: String?,
-
         @field:NotBlank
         val applicationId: String,
-
         @field:NotBlank
-        val blockchain: String
+        val blockchain: String,
+        @field:NotBlank
+        val webhook: String?
     )
 
     data class WalletMetaDataRequest(
@@ -124,7 +140,9 @@ class WalletController(private val walletService: WalletService, private val blo
         var source: String = UUID.randomUUID().toString(),
 
         @field:NotBlank
-        val test: Boolean = true
+        val test: Boolean = true,
+
+        var metadata: Any? = null
     )
 
 }

@@ -18,10 +18,10 @@ fun createDummyWallet(
     address: String = "address",
     rate: BigDecimal = BigDecimal.ONE,
     id: String,
-) = Wallet(WalletIdentity(blockchain, address), rate = rate, order = createDummyOrder(), id = id, nonce = 0, applicationId = "222", webhook = "webhook")
+) = Wallet(WalletIdentity(blockchain, address),  id = id, userData = UserData(rate = rate, order = createDummyOrder(), nonce = 0),applicationId = "222", webhook = "webhook", walletType = WalletType.FOR_ORDER)
 
 fun createDummyOrder(): Order {
-    return Order("111", "222", BigDecimal.valueOf(1000), "USD", "localhost")
+    return Order("111", "222", BigDecimal.valueOf(1000), "USD")
 }
 
 fun createDummyTransaction(

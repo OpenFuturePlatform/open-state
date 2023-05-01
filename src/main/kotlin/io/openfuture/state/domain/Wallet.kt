@@ -1,14 +1,13 @@
 package io.openfuture.state.domain
 
 import org.bson.types.ObjectId
+import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.data.mongodb.core.mapping.MongoId
 import java.math.BigDecimal
 import java.time.LocalDateTime
-import javax.validation.constraints.NotBlank
 
 @Document
 data class Wallet(
@@ -18,10 +17,19 @@ data class Wallet(
     val applicationId: String,
     @LastModifiedDate
     var lastUpdate: LocalDateTime = LocalDateTime.now(),
+    @CreatedDate
+    var createdDate: LocalDateTime =  LocalDateTime.now(),
     @MongoId
     val id: String = ObjectId().toHexString(),
-    val rate: BigDecimal = BigDecimal.ZERO,
+    var userData: UserData,
+    var walletType: WalletType
+)
+
+data class UserData(
+    val id: String = ObjectId().toHexString(),
     var nonce: Int = 0,
-    @Field("order")
-    var order: Order? = null
+    var order: Order? = null,
+    var userId: String? = null,
+    val rate: BigDecimal = BigDecimal.ZERO,
+    val metadata: Any? = null
 )

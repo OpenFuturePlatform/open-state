@@ -10,4 +10,5 @@ import reactor.core.publisher.Mono
 interface OrderRepository : ReactiveMongoRepository<Order, String>{
     suspend fun findByOrderKey(orderKey: String): Mono<Order>
     suspend fun existsByOrderKey(orderKey: String): Mono<Boolean>
+    suspend fun findAllByApplicationId(applicationId: String): Flux<Order>
 }
