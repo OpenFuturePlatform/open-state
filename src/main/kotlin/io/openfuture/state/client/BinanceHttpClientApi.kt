@@ -13,16 +13,15 @@ class BinanceHttpClientApi(builder: WebClient.Builder) {
 
     suspend fun getExchangeRate(blockchain: Blockchain): ExchangeRate {
         return when (blockchain.getName()) {
-            "EthereumBlockchain" ->
-                getRateFromApi("https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT")
-            "RopstenBlockchain" ->
-                getRateFromApi("https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT")
+            "EthereumBlockchain", "GoerliBlockchain" ->
+                getRateFromApi("https://api.coingate.com/v2/rates/merchant/ETH/USDT")
+
             "BitcoinBlockchain" ->
-                getRateFromApi("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT")
-            "BinanceBlockchain" ->
-                getRateFromApi("https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT")
-            "BinanceTestnetBlockchain" ->
-                getRateFromApi("https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT")
+                getRateFromApi("https://api.coingate.com/v2/rates/merchant/BTC/USDT")
+
+            "BinanceBlockchain", "BinanceTestnetBlockchain" ->
+                getRateFromApi("https://api.coingate.com/v2/rates/merchant/BNB/USDT")
+
             else -> {
                 ExchangeRate("UNKNOWN", BigDecimal.ONE)
             }
@@ -33,7 +32,9 @@ class BinanceHttpClientApi(builder: WebClient.Builder) {
         val response = client.get().uri(url)
             .exchange().awaitSingle()
 
-        return response.toEntity(ExchangeRate::class.java).awaitSingle().body!!
+        val rate: BigDecimal = response.toEntity(BigDecimal::class.java).awaitSingle().body!!
+
+        return ExchangeRate("", rate)
     }
 
 }
