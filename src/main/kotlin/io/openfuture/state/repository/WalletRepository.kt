@@ -12,13 +12,13 @@ interface WalletRepository : ReactiveMongoRepository<Wallet, String> {
 
     fun findByIdentity(identity: WalletIdentity): Mono<Wallet>
 
+    fun existsByIdentity(identity: WalletIdentity): Mono<Boolean>
+
     fun findFirstByIdentityAddress(address: String): Mono<Wallet>
 
     fun findAllByUserData_Order_OrderKey(orderKey: String): Flux<Wallet>
 
     fun findFirstByUserData_Order_OrderKey(orderKey: String): Mono<Wallet>
-
-    fun findByIdentityBlockchainAndIdentityAddress(blockchain: String, address: String): Mono<Wallet>
 
     fun deleteByIdentity(identity: WalletIdentity)
 

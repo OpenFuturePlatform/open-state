@@ -1,5 +1,6 @@
-package io.openfuture.state.blockchain
+package io.openfuture.state.blockchain.ethereum
 
+import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.domain.CurrencyCode
