@@ -78,7 +78,7 @@ class DefaultWalletService(
             request.metadata.amount,
             request.metadata.productCurrency
         )
-        val existOrder = orderRepository.existsByOrderKey(request.metadata.orderKey).awaitSingle()
+        val existOrder = orderRepository.existsByOrderKeyAndApplicationId(request.metadata.orderKey, request.applicationId).awaitSingle()
         if (!existOrder) {
             orderRepository.save(order).awaitSingle()
         }
@@ -96,7 +96,9 @@ class DefaultWalletService(
                 userData = userData,
                 walletType = WalletType.FOR_ORDER
             )
-            savedWallets.add(walletRepository.save(wallet).awaitSingle())
+            val existWallet = walletRepository.existsByIdentity(walletIdentity).awaitSingle()
+            if (!existWallet)
+                savedWallets.add(walletRepository.save(wallet).awaitSingle())
         }
         val wallets = savedWallets.map { WalletCreateResponse(it.identity.blockchain, it.identity.address, it.userData.rate) }
         return PlaceOrderResponse(
