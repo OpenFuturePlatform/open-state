@@ -9,6 +9,8 @@ import io.openfuture.state.domain.CurrencyCode
 import io.openfuture.state.util.toLocalDateTimeInSeconds
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
+import java.math.BigInteger
 
 @Component
 @ConditionalOnProperty(value = ["production.mode.enabled"], havingValue = "true")
@@ -24,6 +26,14 @@ class BitcoinBlockchain(private val client: BitcoinClient) : Blockchain() {
         val block = client.getBlock(blockHash)
 
         return toUnifiedBlock(block)
+    }
+
+    override suspend fun getBalance(address: String): BigDecimal {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getContractBalance(address: String): BigDecimal {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getCurrencyCode(): CurrencyCode {

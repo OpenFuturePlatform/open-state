@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
+import kotlin.math.pow
 
 @Slf4j
 @Service
@@ -172,21 +173,21 @@ class DefaultWalletService(
 
             var amount = unifiedTransaction.amount
 
-//            var tokenType = ""
-//            if (!unifiedTransaction.native) {
-//                val tokens = openApi.getTokens()
-//
-//                val customToken = tokens.first { customToken ->
-//                    customToken.address.equals(
-//                        unifiedTransaction.contractAddress,
-//                        ignoreCase = true
-//                    )
-//                }
-//                tokenType = customToken.symbol
-//                val result = customToken.decimal.let { 10.0.pow(it.toDouble()) }
-//                amount = amount.divide(result.toBigDecimal())
-//
-//            }
+            var tokenType = ""
+            if (!unifiedTransaction.native) {
+                val tokens = openApi.getTokens()
+
+                val customToken = tokens.first { customToken ->
+                    customToken.address.equals(
+                        unifiedTransaction.contractAddress,
+                        ignoreCase = true
+                    )
+                }
+                tokenType = customToken.symbol
+                val result = customToken.decimal.let { 10.0.pow(it.toDouble()) }
+                amount = amount.divide(result.toBigDecimal())
+
+            }
 
             val transaction = Transaction(
                 wallet.identity,
@@ -198,7 +199,7 @@ class DefaultWalletService(
                 block.number,
                 block.hash,
                 unifiedTransaction.native,
-                "tokenType"
+                tokenType
             )
             transactionRepository.save(transaction).awaitSingle()
             log.info("Saved transaction ${transaction.id}")

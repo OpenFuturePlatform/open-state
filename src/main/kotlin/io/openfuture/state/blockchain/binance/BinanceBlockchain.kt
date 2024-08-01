@@ -10,9 +10,11 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import org.web3j.protocol.Web3j
+import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.DefaultBlockParameterNumber
 import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.utils.Convert
+import java.math.BigDecimal
 
 
 @Component
@@ -35,6 +37,21 @@ class BinanceBlockchain(@Qualifier("web3jBinance") private val web3jBinance: Web
 
     override suspend fun getCurrencyCode(): CurrencyCode {
         return CurrencyCode.BINANCE
+    }
+
+    override suspend fun getBalance(address: String): BigDecimal {
+        val parameter = DefaultBlockParameterName.LATEST
+
+        val balanceWei = web3jBinance.ethGetBalance(address, parameter)
+            .sendAsync().await()
+            .balance
+
+        return Convert.fromWei(balanceWei.toString(), Convert.Unit.ETHER)
+
+    }
+
+    override suspend fun getContractBalance(address: String): BigDecimal {
+        TODO("Not yet implemented")
     }
 
     private suspend fun obtainTransactions(ethBlock: EthBlock.Block): List<UnifiedTransaction> = ethBlock.transactions

@@ -11,10 +11,11 @@ apply plugin: 'io.spring.dependency-management'
 
 group = "io.openfuture"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_11
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
+    jcenter()
     maven { url "https://jitpack.io" }
 }
 
@@ -24,6 +25,7 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-data-mongodb-reactive')
     implementation('org.springframework.boot:spring-boot-starter-data-redis-reactive')
     implementation('org.springframework.boot:spring-boot-starter-validation')
+    implementation('org.springframework.boot:spring-boot-starter-actuator')
 
     // Kotlin
     implementation('com.fasterxml.jackson.module:jackson-module-kotlin')
@@ -34,7 +36,17 @@ dependencies {
     implementation('org.jetbrains.kotlinx:kotlinx-coroutines-jdk8')
 
     // Ethereum
-    implementation('org.web3j:core:4.6.3')
+    implementation('org.web3j:core:5.0.0'){
+    //implementation('org.web3j:core:4.12.0'){
+        exclude group : 'org.bouncycastle', module : 'bcprov-jdk18on'
+        exclude group : 'org.bouncycastle', module : 'bcprov-jdk15on'
+        //exclude group : 'com.fasterxml.jackson.core', module : 'jackson-databind'
+        //exclude group : 'com.squareup.okio', module : 'okio'
+    }
+    //implementation 'com.squareup.okio:okio:3.4.0'
+    //implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
+    implementation('org.bouncycastle:bcprov-jdk18on:1.78')
+
     implementation('com.squareup.okhttp3:okhttp:4.8.1')
 
     // Binance
@@ -44,6 +56,9 @@ dependencies {
     // Utils
     implementation('commons-validator:commons-validator:1.7')
     implementation('org.apache.httpcomponents:httpclient:4.5.12')
+
+    // Monitoring
+    implementation('io.micrometer:micrometer-registry-prometheus')
 
     // DevTools
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
