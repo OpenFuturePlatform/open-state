@@ -23,6 +23,7 @@ data class PageRequest(
     override fun next(): Pageable = PageRequest(offset + limit, limit)
 
     override fun first(): Pageable = PageRequest(0, limit)
+    override fun withPage(pageNumber: Int): Pageable = PageRequest(pageNumber.toLong(), limit)
 
     override fun getOffset(): Long = offset
 

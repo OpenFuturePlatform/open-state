@@ -13,17 +13,15 @@ import org.web3j.abi.TypeReference
 import org.web3j.abi.Utils
 import org.web3j.abi.datatypes.Address
 import org.web3j.abi.datatypes.generated.Uint256
-import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.DefaultBlockParameterNumber
+import org.web3j.protocol.core.methods.request.Transaction
 import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.protocol.core.methods.response.EthCall
-import org.web3j.tx.gas.DefaultGasProvider
 import org.web3j.utils.Convert
 import java.math.BigDecimal
 import java.math.BigInteger
-import org.web3j.protocol.core.methods.request.Transaction
 
 @Component
 class GoerliBlockchain(private val web3jTest: Web3j): Blockchain() {
