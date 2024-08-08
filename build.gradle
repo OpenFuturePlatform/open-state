@@ -94,6 +94,10 @@ compileTestKotlin {
 test {
     useJUnitPlatform()
 
+    testLogging {
+        showStandardStreams = true
+    }
+
     if (project.hasProperty('maxParallelForks')) {
         maxParallelForks = project.maxParallelForks as int
     }
@@ -102,7 +106,7 @@ test {
     }
 }
 jacoco {
-    toolVersion = "0.8.8"
+    toolVersion = "0.8.7"
 }
 jacocoTestReport {
     reports {
