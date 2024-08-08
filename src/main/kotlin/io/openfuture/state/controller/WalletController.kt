@@ -63,9 +63,9 @@ class WalletController(
     }
 
     private fun findBlockchain(name: String): Blockchain {
-        val nameInLowerCase = name.toLowerCase()
+        val nameInLowerCase = name.lowercase()
         for (blockchain in blockchains) {
-            if (blockchain.getName().toLowerCase().startsWith(nameInLowerCase)) return blockchain
+            if (blockchain.getName().lowercase().startsWith(nameInLowerCase)) return blockchain
         }
 
         throw IllegalArgumentException("Can not find blockchain")
