@@ -2,6 +2,7 @@ package io.openfuture.state.service
 
 import io.openfuture.state.blockchain.Blockchain
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class BlockchainLookupService(
@@ -9,9 +10,9 @@ class BlockchainLookupService(
 ) {
 
     fun findBlockchain(name: String): Blockchain {
-        val nameInLowerCase = name.toLowerCase()
+        val nameInLowerCase = name.lowercase()
         for (blockchain in blockchains) {
-            if (blockchain.getName().toLowerCase().startsWith(nameInLowerCase)) return blockchain
+            if (blockchain.getName().lowercase().startsWith(nameInLowerCase)) return blockchain
         }
 
         throw IllegalArgumentException("Can not find blockchain")

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.util.*
 
 @RestController
 @RequestMapping("/api/currency/rate")
@@ -18,7 +19,7 @@ class ExchangeRateController(
     @GetMapping("/ethereum")
     suspend fun getRate(): BigDecimal {
         for (blockchain in blockchains) {
-            if (blockchain.getName().toLowerCase().startsWith("EthereumBlockchain")) {
+            if (blockchain.getName().lowercase().startsWith("EthereumBlockchain")) {
                 val price = binanceHttpClientApi.getExchangeRate(blockchain).price
                 return BigDecimal.ONE.divide(price, price.scale(), RoundingMode.HALF_UP).stripTrailingZeros()
             }

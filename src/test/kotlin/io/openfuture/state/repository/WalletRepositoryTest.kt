@@ -19,8 +19,7 @@ class WalletRepositoryTest : MongoRepositoryTests() {
         walletRepository.deleteAll().block()
     }
 
-    @Test
-    @Ignore
+    //@Test
     fun findByIdentityShouldReturnWallet() {
         var wallet = createDummyWallet(blockchain = "Ethereum", address = "address", id = "walletId")
         wallet = walletRepository.save(wallet).block()!!
