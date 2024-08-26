@@ -1,8 +1,8 @@
 package io.openfuture.state.controller
 
 import io.openfuture.state.controller.request.ManualTransactionRequest
-import io.openfuture.state.domain.Transaction
-import io.openfuture.state.domain.WalletTransactionDetail
+import io.openfuture.state.domain.transaction.Transaction
+import io.openfuture.state.domain.wallet.WalletTransactionDetail
 import io.openfuture.state.service.BlockchainLookupService
 import io.openfuture.state.service.DefaultWalletService
 import io.openfuture.state.service.WalletTransactionFacade

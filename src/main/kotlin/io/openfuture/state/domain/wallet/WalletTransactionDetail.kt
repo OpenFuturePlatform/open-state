@@ -1,5 +1,6 @@
-package io.openfuture.state.domain
+package io.openfuture.state.domain.wallet
 
+import io.openfuture.state.domain.transaction.Transaction
 import java.math.BigDecimal
 
 data class WalletTransactionDetail(

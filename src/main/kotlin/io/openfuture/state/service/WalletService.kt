@@ -4,8 +4,8 @@ import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.controller.AddWalletStateForUserRequest
 import io.openfuture.state.controller.WalletController
-import io.openfuture.state.domain.Wallet
-import io.openfuture.state.domain.WebhookStatus
+import io.openfuture.state.domain.wallet.Wallet
+import io.openfuture.state.domain.webhook.WebhookStatus
 import io.openfuture.state.service.dto.AddWatchResponse
 import io.openfuture.state.service.dto.PlaceOrderResponse
 

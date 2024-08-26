@@ -9,12 +9,20 @@ import kotlinx.coroutines.future.await
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
+import org.web3j.abi.FunctionEncoder
+import org.web3j.abi.FunctionReturnDecoder
+import org.web3j.abi.TypeReference
+import org.web3j.abi.datatypes.Address
+import org.web3j.abi.datatypes.generated.Uint256
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.DefaultBlockParameterNumber
+import org.web3j.protocol.core.methods.request.Transaction
 import org.web3j.protocol.core.methods.response.EthBlock
+import org.web3j.protocol.core.methods.response.EthCall
 import org.web3j.utils.Convert
 import java.math.BigDecimal
+import java.math.BigInteger
 
 
 @Component
@@ -50,8 +58,22 @@ class BinanceBlockchain(@Qualifier("web3jBinance") private val web3jBinance: Web
 
     }
 
-    override suspend fun getContractBalance(address: String): BigDecimal {
-        TODO("Not yet implemented")
+    override suspend fun getContractBalance(address: String, contractAddress: String): BigDecimal {
+        val functionBalance = org.web3j.abi.datatypes.Function(
+            "balanceOf",
+            listOf(Address(address)),
+            listOf(object : TypeReference<Uint256>() {})
+        )
+        val encodedFunction = FunctionEncoder.encode(functionBalance)
+        val ethCall: EthCall = web3jBinance.ethCall(
+            Transaction.createEthCallTransaction(address, contractAddress, encodedFunction),
+            DefaultBlockParameterName.LATEST
+        ).sendAsync().await()
+
+        val value = ethCall.value
+        val contractBalance = BigInteger(value.substring(2, value.length), 16)
+
+        return Convert.fromWei(contractBalance.toString(), Convert.Unit.ETHER)
     }
 
     private suspend fun obtainTransactions(ethBlock: EthBlock.Block): List<UnifiedTransaction> = ethBlock.transactions

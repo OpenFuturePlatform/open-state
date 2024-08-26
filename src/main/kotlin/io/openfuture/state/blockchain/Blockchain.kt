@@ -13,7 +13,7 @@ abstract class Blockchain {
 
     abstract suspend fun getBalance(address: String): BigDecimal
 
-    abstract suspend fun getContractBalance(address: String): BigDecimal
+    abstract suspend fun getContractBalance(address: String, contractAddress: String): BigDecimal
 
     open fun getName(): String = javaClass.simpleName
 

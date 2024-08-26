@@ -1,10 +1,10 @@
 package io.openfuture.state.webhook
 
 import io.openfuture.state.component.open.DefaultOpenApi
-import io.openfuture.state.domain.TransactionQueueTask
-import io.openfuture.state.domain.Wallet
-import io.openfuture.state.domain.WalletType
-import io.openfuture.state.domain.WebhookStatus
+import io.openfuture.state.domain.transaction.TransactionQueueTask
+import io.openfuture.state.domain.wallet.Wallet
+import io.openfuture.state.domain.wallet.WalletType
+import io.openfuture.state.domain.webhook.WebhookStatus
 import io.openfuture.state.property.WebhookProperties
 import io.openfuture.state.service.TransactionService
 import io.openfuture.state.service.WalletService

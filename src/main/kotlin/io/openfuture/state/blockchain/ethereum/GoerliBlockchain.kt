@@ -49,18 +49,16 @@ class GoerliBlockchain(private val web3jTest: Web3j): Blockchain() {
         return Convert.fromWei(balanceWei.toString(), Convert.Unit.ETHER)
     }
 
-    override suspend fun getContractBalance(address: String): BigDecimal {
-        val WALLET_ADDRESS = address
-        val CONTRACT_ADDRESS = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238" // USDC
+    override suspend fun getContractBalance(address: String, contractAddress: String): BigDecimal {
 
         val functionBalance: org.web3j.abi.datatypes.Function = org.web3j.abi.datatypes.Function(
             "balanceOf",
-            listOf(Address(WALLET_ADDRESS)),
+            listOf(Address(address)),
             listOf(object : TypeReference<Uint256>() {})
         )
         val encodedFunction = FunctionEncoder.encode(functionBalance)
         val ethCall: EthCall = web3jTest.ethCall(
-            Transaction.createEthCallTransaction(WALLET_ADDRESS, CONTRACT_ADDRESS, encodedFunction),
+            Transaction.createEthCallTransaction(address, contractAddress, encodedFunction),
             DefaultBlockParameterName.LATEST
         ).sendAsync().await()
 

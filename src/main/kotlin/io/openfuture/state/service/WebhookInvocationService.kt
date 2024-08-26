@@ -1,7 +1,7 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.domain.TransactionQueueTask
-import io.openfuture.state.domain.Wallet
+import io.openfuture.state.domain.transaction.TransactionQueueTask
+import io.openfuture.state.domain.wallet.Wallet
 import io.openfuture.state.webhook.WebhookRestClient
 
 interface WebhookInvocationService {

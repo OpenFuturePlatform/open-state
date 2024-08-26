@@ -6,6 +6,10 @@ import io.openfuture.state.blockchain.bitcoin.dto.BitcoinTransaction
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.domain.*
+import io.openfuture.state.domain.transaction.Transaction
+import io.openfuture.state.domain.transaction.TransactionDeadQueue
+import io.openfuture.state.domain.transaction.TransactionQueueTask
+import io.openfuture.state.domain.wallet.*
 import io.openfuture.state.webhook.WebhookRestClient
 import org.bson.types.ObjectId
 import org.springframework.http.HttpStatus

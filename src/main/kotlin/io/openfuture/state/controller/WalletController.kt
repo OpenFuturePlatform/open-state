@@ -1,24 +1,18 @@
 package io.openfuture.state.controller
 
 import io.openfuture.state.blockchain.Blockchain
-import io.openfuture.state.domain.Wallet
-import io.openfuture.state.domain.WalletPaymentDetail
-import io.openfuture.state.repository.OrderRepository
+import io.openfuture.state.domain.wallet.Wallet
+import io.openfuture.state.domain.wallet.WalletPaymentDetail
 import io.openfuture.state.service.WalletService
 import io.openfuture.state.service.WalletTransactionFacade
 import io.openfuture.state.service.dto.PlaceOrderResponse
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
-import java.util.stream.Collector
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotEmpty
-import kotlin.streams.toList
 
 @RestController
 @RequestMapping("/api/wallets")

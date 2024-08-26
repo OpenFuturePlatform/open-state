@@ -72,4 +72,14 @@ class BitcoinClient(
             .addresses
     }
 
+    suspend fun getAddressBalance(address: String): String {
+        val command = BitcoinCommand("getbalance")
+        val response = client.post()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(BodyInserters.fromValue(command))
+            .retrieve()
+            .awaitBody<BitcoinResponse<String>>()
+        return response.result
+    }
+
 }

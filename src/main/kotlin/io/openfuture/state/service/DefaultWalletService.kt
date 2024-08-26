@@ -8,6 +8,12 @@ import io.openfuture.state.component.open.DefaultOpenApi
 import io.openfuture.state.controller.AddWalletStateForUserRequest
 import io.openfuture.state.controller.WalletController
 import io.openfuture.state.domain.*
+import io.openfuture.state.domain.transaction.Transaction
+import io.openfuture.state.domain.wallet.UserData
+import io.openfuture.state.domain.wallet.Wallet
+import io.openfuture.state.domain.wallet.WalletIdentity
+import io.openfuture.state.domain.wallet.WalletType
+import io.openfuture.state.domain.webhook.WebhookStatus
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.OrderRepository
 import io.openfuture.state.repository.TransactionRepository
@@ -86,7 +92,7 @@ class DefaultWalletService(
         request.blockchains.forEach {
             val blockchain: Blockchain = blockchainLookupService.findBlockchain(it.blockchain)
             val walletIdentity = WalletIdentity(blockchain.getName(), it.address)
-            val rate = binanceHttpClientApi.getExchangeRate(blockchain).price.stripTrailingZeros()
+            val rate = binanceHttpClientApi.getExchangeRate(blockchain.getCurrencyCode()).price.stripTrailingZeros()
             val userData = UserData(order = order, metadata = request.metadata.metadata, rate = rate)
             val wallet = Wallet(
                 walletIdentity,
@@ -115,7 +121,7 @@ class DefaultWalletService(
         request.blockchains.forEach {
             val blockchain = blockchainLookupService.findBlockchain(it.blockchain)
             val walletIdentity = WalletIdentity(blockchain.getName(), it.address)
-            val rate = binanceHttpClientApi.getExchangeRate(blockchain).price.stripTrailingZeros()
+            val rate = binanceHttpClientApi.getExchangeRate(blockchain.getCurrencyCode()).price.stripTrailingZeros()
             val userData = UserData(userId = request.userId, metadata = request.metadata, rate = rate)
             val wallet = Wallet(walletIdentity, request.webhook, request.applicationId, userData = userData, walletType = WalletType.FOR_USER)
             val savedWallet = walletRepository.save(wallet).awaitSingle()

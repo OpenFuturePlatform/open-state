@@ -3,7 +3,7 @@ package io.openfuture.state.webhook
 import com.nhaarman.mockitokotlin2.*
 import io.openfuture.state.base.ServiceTests
 import io.openfuture.state.component.open.DefaultOpenApi
-import io.openfuture.state.domain.WebhookStatus
+import io.openfuture.state.domain.webhook.WebhookStatus
 import io.openfuture.state.property.WebhookProperties
 import io.openfuture.state.service.TransactionService
 import io.openfuture.state.service.WalletService

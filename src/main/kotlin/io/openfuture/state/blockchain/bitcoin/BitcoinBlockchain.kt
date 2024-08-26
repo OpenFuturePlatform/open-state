@@ -28,11 +28,13 @@ class BitcoinBlockchain(private val client: BitcoinClient) : Blockchain() {
         return toUnifiedBlock(block)
     }
 
+    //todo - implement
     override suspend fun getBalance(address: String): BigDecimal {
-        TODO("Not yet implemented")
+        val balance = client.getAddressBalance(address)
+        return BigDecimal.ZERO
     }
 
-    override suspend fun getContractBalance(address: String): BigDecimal {
+    override suspend fun getContractBalance(address: String, contractAddress: String): BigDecimal {
         TODO("Not yet implemented")
     }
 

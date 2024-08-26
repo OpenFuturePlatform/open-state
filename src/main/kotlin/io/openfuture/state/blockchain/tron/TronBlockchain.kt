@@ -1,4 +1,4 @@
-package io.openfuture.state.blockchain.binance
+package io.openfuture.state.blockchain.tron
 
 import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.blockchain.dto.UnifiedBlock
@@ -7,6 +7,7 @@ import io.openfuture.state.domain.CurrencyCode
 import io.openfuture.state.util.toLocalDateTime
 import kotlinx.coroutines.future.await
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import org.web3j.abi.FunctionEncoder
 import org.web3j.abi.FunctionReturnDecoder
@@ -24,17 +25,17 @@ import org.web3j.utils.Convert
 import java.math.BigDecimal
 import java.math.BigInteger
 
-
 @Component
-class BinanceTestnetBlockchain(@Qualifier("web3jBinanceTestnet") private val web3jBinanceTestnet: Web3j): Blockchain() {
+@ConditionalOnProperty(value = ["production.mode.enabled"], havingValue = "true")
+class TronBlockchain(@Qualifier("web3jTronTestnet") private val web3jTronTestnet: Web3j) : Blockchain() {
 
-    override suspend fun getLastBlockNumber(): Int = web3jBinanceTestnet.ethBlockNumber()
+    override suspend fun getLastBlockNumber(): Int = web3jTronTestnet.ethBlockNumber()
         .sendAsync().await()
         .blockNumber.toInt()
 
     override suspend fun getBlock(blockNumber: Int): UnifiedBlock {
         val parameter = DefaultBlockParameterNumber(blockNumber.toLong())
-        val block = web3jBinanceTestnet.ethGetBlockByNumber(parameter, true)
+        val block = web3jTronTestnet.ethGetBlockByNumber(parameter, true)
             .sendAsync().await()
             .block
         val transactions = obtainTransactions(block)
@@ -44,10 +45,9 @@ class BinanceTestnetBlockchain(@Qualifier("web3jBinanceTestnet") private val web
 
     override suspend fun getBalance(address: String): BigDecimal {
         val parameter = DefaultBlockParameterName.LATEST
-        val balanceWei = web3jBinanceTestnet.ethGetBalance(address, parameter)
+        val balanceWei = web3jTronTestnet.ethGetBalance(address, parameter)
             .sendAsync().await()
             .balance
-        //val contractInstance: ERC20 = ERC20.load(contractAddress, web3j, credentials, contractGasProvider)
         return Convert.fromWei(balanceWei.toString(), Convert.Unit.ETHER)
     }
 
@@ -59,7 +59,7 @@ class BinanceTestnetBlockchain(@Qualifier("web3jBinanceTestnet") private val web
             listOf(object : TypeReference<Uint256>() {})
         )
         val encodedFunction = FunctionEncoder.encode(functionBalance)
-        val ethCall: EthCall = web3jBinanceTestnet.ethCall(
+        val ethCall: EthCall = web3jTronTestnet.ethCall(
             Transaction.createEthCallTransaction(address, contractAddress, encodedFunction),
             DefaultBlockParameterName.LATEST
         ).sendAsync().await()
@@ -75,7 +75,7 @@ class BinanceTestnetBlockchain(@Qualifier("web3jBinanceTestnet") private val web
     }
 
     override suspend fun getCurrencyCode(): CurrencyCode {
-        return CurrencyCode.BINANCE
+        return CurrencyCode.TRON
     }
 
     private suspend fun obtainTransactions(ethBlock: EthBlock.Block): List<UnifiedTransaction> = ethBlock.transactions
@@ -86,10 +86,11 @@ class BinanceTestnetBlockchain(@Qualifier("web3jBinanceTestnet") private val web
             UnifiedTransaction(tx.hash, tx.from, to, amount, true, to)
         }
 
-    private suspend fun findContractAddress(transactionHash: String) = web3jBinanceTestnet.ethGetTransactionReceipt(transactionHash)
-        .sendAsync().await()
-        .transactionReceipt.get()
-        .contractAddress
+    private suspend fun findContractAddress(transactionHash: String) =
+        web3jTronTestnet.ethGetTransactionReceipt(transactionHash)
+            .sendAsync().await()
+            .transactionReceipt.get()
+            .contractAddress
 
     companion object {
         private val DECODE_TYPES = Utils.convert(

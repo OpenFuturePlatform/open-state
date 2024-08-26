@@ -1,13 +1,11 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.domain.Transaction
-import io.openfuture.state.domain.WalletIdentity
+import io.openfuture.state.domain.transaction.Transaction
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.TransactionRepository
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Flux
 
 @Service
 class DefaultTransactionService(

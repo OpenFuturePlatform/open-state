@@ -2,6 +2,10 @@ package io.openfuture.state.service
 
 import io.openfuture.state.component.open.DefaultOpenApi
 import io.openfuture.state.domain.*
+import io.openfuture.state.domain.transaction.Transaction
+import io.openfuture.state.domain.wallet.Wallet
+import io.openfuture.state.domain.wallet.WalletType
+import io.openfuture.state.domain.webhook.WebhookCallbackResponse
 import io.openfuture.state.webhook.WebhookPayloadDto
 import io.openfuture.state.webhook.WebhookRestClient
 import kotlinx.coroutines.runBlocking

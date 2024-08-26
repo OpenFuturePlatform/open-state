@@ -1,5 +1,6 @@
-package io.openfuture.state.domain
+package io.openfuture.state.domain.wallet
 
+import io.openfuture.state.domain.Order
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate

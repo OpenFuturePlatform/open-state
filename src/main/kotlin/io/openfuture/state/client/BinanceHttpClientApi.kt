@@ -1,40 +1,67 @@
 package io.openfuture.state.client
 
-import io.openfuture.state.blockchain.Blockchain
-import kotlinx.coroutines.reactive.awaitSingle
+import io.openfuture.state.domain.CoinGateRate
+import io.openfuture.state.domain.CurrencyCode
+import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
-import java.math.BigDecimal
 
 @Component
 class BinanceHttpClientApi(builder: WebClient.Builder) {
 
     val client: WebClient = builder.build()
 
-    suspend fun getExchangeRate(blockchain: Blockchain): ExchangeRate {
-        return when (blockchain.getName()) {
-            "EthereumBlockchain", "GoerliBlockchain" ->
-                getRateFromApi("https://api.coingate.com/v2/rates/merchant/ETH/USDT")
+    suspend fun getExchangeRate(currencyCode: CurrencyCode): ExchangeRate {
+        return when (currencyCode) {
+            CurrencyCode.ETHEREUM ->
+                getRateFromApi(currencyCode.code,"https://api.coingate.com/v2/rates/merchant/ETH/USDT")
 
-            "BitcoinBlockchain" ->
-                getRateFromApi("https://api.coingate.com/v2/rates/merchant/BTC/USDT")
+            CurrencyCode.BITCOIN ->
+                getRateFromApi(currencyCode.code, "https://api.coingate.com/v2/rates/merchant/BTC/USDT")
 
-            "BinanceBlockchain", "BinanceTestnetBlockchain" ->
-                getRateFromApi("https://api.coingate.com/v2/rates/merchant/BNB/USDT")
+            CurrencyCode.BINANCE ->
+                getRateFromApi(currencyCode.code,"https://api.coingate.com/v2/rates/merchant/BNB/USDT")
 
-            else -> {
-                ExchangeRate("UNKNOWN", BigDecimal.ONE)
-            }
+            CurrencyCode.TRON ->
+                getRateFromApi(currencyCode.code,"https://api.coingate.com/v2/rates/merchant/TRX/USDT")
+
         }
     }
 
-    suspend fun getRateFromApi(url: String): ExchangeRate {
-        val response = client.get().uri(url)
-            .exchange().awaitSingle()
+    suspend fun getRateFromApi(symbol: String, url: String): ExchangeRate {
 
-        val rate: BigDecimal = response.toEntity(BigDecimal::class.java).awaitSingle().body!!
+        val rate = client
+            .get()
+            .uri(url)
+            .retrieve()
+            .toEntity(String::class.java)
+            .awaitSingle()
+            .body!!
 
-        return ExchangeRate("", rate)
+        return ExchangeRate(symbol, rate.toBigDecimal())
+    }
+
+    suspend fun getAllRateFromApi(ticker: String?): Any {
+
+        val rates = client
+            .get()
+            .uri("https://api.coingate.com/v2/rates/merchant")
+            .retrieve()
+            .toEntity(CoinGateRate::class.java)
+            .awaitSingle()
+            .body!!
+
+        if (ticker != null){
+            return when(ticker){
+                "BNB" -> rates.BNB
+                "BTC" -> rates.BTC
+                "ETH" -> rates.ETH
+                "TRX" -> rates.TRX
+                else -> {}
+            }
+        }
+
+        return rates
     }
 
 }

@@ -1,8 +1,8 @@
 package io.openfuture.state.webhook
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.openfuture.state.domain.Transaction
-import io.openfuture.state.domain.Wallet
+import io.openfuture.state.domain.transaction.Transaction
+import io.openfuture.state.domain.wallet.Wallet
 import java.math.BigDecimal
 import java.time.LocalDateTime
 

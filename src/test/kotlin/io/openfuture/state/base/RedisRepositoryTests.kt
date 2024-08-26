@@ -1,7 +1,7 @@
 package io.openfuture.state.base
 
 import io.openfuture.state.config.RedisConfig
-import io.openfuture.state.domain.TransactionQueueTask
+import io.openfuture.state.domain.transaction.TransactionQueueTask
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
 import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest
