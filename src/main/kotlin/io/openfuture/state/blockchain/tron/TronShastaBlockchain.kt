@@ -4,6 +4,8 @@ import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.domain.CurrencyCode
+import io.openfuture.state.util.HashUtils.decodeBase58
+import io.openfuture.state.util.HashUtils.toHexString
 import io.openfuture.state.util.toLocalDateTime
 import kotlinx.coroutines.future.await
 import org.springframework.beans.factory.annotation.Qualifier
@@ -26,16 +28,15 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 @Component
-@ConditionalOnProperty(value = ["production.mode.enabled"], havingValue = "true")
-class TronBlockchain(@Qualifier("web3jTron") private val web3jTron: Web3j) : Blockchain() {
+class TronShastaBlockchain(@Qualifier("web3jTronTestnet") private val web3jTronTestnet: Web3j) : Blockchain() {
 
-    override suspend fun getLastBlockNumber(): Int = web3jTron.ethBlockNumber()
+    override suspend fun getLastBlockNumber(): Int = web3jTronTestnet.ethBlockNumber()
         .sendAsync().await()
         .blockNumber.toInt()
 
     override suspend fun getBlock(blockNumber: Int): UnifiedBlock {
         val parameter = DefaultBlockParameterNumber(blockNumber.toLong())
-        val block = web3jTron.ethGetBlockByNumber(parameter, true)
+        val block = web3jTronTestnet.ethGetBlockByNumber(parameter, true)
             .sendAsync().await()
             .block
         val transactions = obtainTransactions(block)
@@ -45,22 +46,32 @@ class TronBlockchain(@Qualifier("web3jTron") private val web3jTron: Web3j) : Blo
 
     override suspend fun getBalance(address: String): BigDecimal {
         val parameter = DefaultBlockParameterName.LATEST
-        val balanceWei = web3jTron.ethGetBalance(address, parameter)
+        val ethAddress = base58ToEthAddress(address)
+        val balanceWei = web3jTronTestnet.ethGetBalance(ethAddress, parameter)
             .sendAsync().await()
             .balance
-        return Convert.fromWei(balanceWei.toString(), Convert.Unit.ETHER)
+        return Convert.fromWei(balanceWei.toString(), Convert.Unit.MWEI)
+    }
+
+    private fun base58ToEthAddress(address: String): String {
+        val addressDecode58 = address.decodeBase58().toHexString()
+        //eth address is 42 length
+        return "0x" + addressDecode58.substring(2, 42)
     }
 
     override suspend fun getContractBalance(address: String, contractAddress: String): BigDecimal {
-
+        val ethAddress = base58ToEthAddress(address)
+        val ethContractAddress = base58ToEthAddress(contractAddress)
+        println("ethAddress: $ethAddress")
+        println("ethCContractAddress: $ethContractAddress")
         val functionBalance = org.web3j.abi.datatypes.Function(
             "balanceOf",
-            listOf(Address(address)),
+            listOf(Address(ethAddress)),
             listOf(object : TypeReference<Uint256>() {})
         )
         val encodedFunction = FunctionEncoder.encode(functionBalance)
-        val ethCall: EthCall = web3jTron.ethCall(
-            Transaction.createEthCallTransaction(address, contractAddress, encodedFunction),
+        val ethCall: EthCall = web3jTronTestnet.ethCall(
+            Transaction.createEthCallTransaction(ethAddress, ethContractAddress, encodedFunction),
             DefaultBlockParameterName.LATEST
         ).sendAsync().await()
 
@@ -71,7 +82,7 @@ class TronBlockchain(@Qualifier("web3jTron") private val web3jTron: Web3j) : Blo
 
         println("Value $value")
 
-        return Convert.fromWei(contractBalance.toString(), Convert.Unit.ETHER)
+        return Convert.fromWei(contractBalance.toString(), Convert.Unit.MWEI)
     }
 
     override suspend fun getCurrencyCode(): CurrencyCode {
@@ -82,12 +93,12 @@ class TronBlockchain(@Qualifier("web3jTron") private val web3jTron: Web3j) : Blo
         .map { it.get() as EthBlock.TransactionObject }
         .map { tx ->
             val to = tx.to ?: findContractAddress(tx.hash)
-            val amount = Convert.fromWei(tx.value.toBigDecimal(), Convert.Unit.ETHER)
+            val amount = Convert.fromWei(tx.value.toBigDecimal(), Convert.Unit.MWEI)
             UnifiedTransaction(tx.hash, tx.from, to, amount, true, to)
         }
 
     private suspend fun findContractAddress(transactionHash: String) =
-        web3jTron.ethGetTransactionReceipt(transactionHash)
+        web3jTronTestnet.ethGetTransactionReceipt(transactionHash)
             .sendAsync().await()
             .transactionReceipt.get()
             .contractAddress

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 
 @Component
-class BinanceHttpClientApi(builder: WebClient.Builder) {
+class CoinGateHttpClientApi(builder: WebClient.Builder) {
 
     val client: WebClient = builder.build()
 

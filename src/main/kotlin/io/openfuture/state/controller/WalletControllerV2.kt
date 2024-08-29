@@ -1,10 +1,12 @@
 package io.openfuture.state.controller
 
+import io.openfuture.state.config.AppProperties
 import io.openfuture.state.controller.request.BalanceRequest
 import io.openfuture.state.service.BlockchainLookupService
 import io.openfuture.state.service.WalletService
 import io.openfuture.state.service.dto.AddWatchResponse
 import io.openfuture.state.service.dto.WalletBalanceResponse
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -17,6 +19,9 @@ class WalletControllerV2(
     private val blockchainLookupService: BlockchainLookupService
 ) {
 
+    @Autowired
+    lateinit var appProperties: AppProperties
+
     @PostMapping("add")
     suspend fun addWallet(@RequestBody request: AddWalletStateForUserRequest): AddWatchResponse {
         return walletService.addWallet(request)
@@ -25,15 +30,26 @@ class WalletControllerV2(
     @PostMapping("/balance")
     suspend fun getBalance(@RequestBody request: BalanceRequest): WalletBalanceResponse {
 
-        // val CONTRACT_ADDRESS = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238" // USDC
+        // val CONTRACT_ADDRESS = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238" // USDC - ETH
         // val CONTRACT_ADDRESS = "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd" // USDT - BNB
         // val CONTRACT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7" // USDT - TRX
 
-        val blockchain = when (request.blockchainName) {
-            "ETH" -> "GoerliBlockchain"
-            "BNB" -> "BinanceTestnetBlockchain"
-            "TRX" -> "TronBlockchain"
-            else -> "GoerliBlockchain"
+        val blockchain = if (appProperties.isProdEnabled == "true") {
+            when (request.blockchainName) {
+                "ETH" -> "EthereumBlockchain"
+                "BNB" -> "BinanceBlockchain"
+                "TRX" -> "TronBlockchain"
+                "BTC" -> "BitcoinBlockchain"
+                else -> "EthereumBlockchain"
+            }
+        } else {
+            when (request.blockchainName) {
+                "ETH" -> "GoerliBlockchain"
+                "BNB" -> "BinanceTestnetBlockchain"
+                "TRX" -> "TronShastaBlockchain"
+                else -> "GoerliBlockchain"
+            }
+
         }
         val chain = blockchainLookupService.findBlockchain(blockchain)
 

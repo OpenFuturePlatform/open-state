@@ -3,7 +3,7 @@ package io.openfuture.state.service
 import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
-import io.openfuture.state.client.BinanceHttpClientApi
+import io.openfuture.state.client.CoinGateHttpClientApi
 import io.openfuture.state.component.open.DefaultOpenApi
 import io.openfuture.state.controller.AddWalletStateForUserRequest
 import io.openfuture.state.controller.WalletController
@@ -36,7 +36,7 @@ class DefaultWalletService(
     private val walletRepository: WalletRepository,
     private val transactionRepository: TransactionRepository,
     private val webhookInvoker: WebhookInvoker,
-    private val binanceHttpClientApi: BinanceHttpClientApi,
+    private val coinGateHttpClientApi: CoinGateHttpClientApi,
     private val orderRepository: OrderRepository,
     private val blockchainLookupService: BlockchainLookupService,
     private val openApi: DefaultOpenApi
@@ -92,7 +92,7 @@ class DefaultWalletService(
         request.blockchains.forEach {
             val blockchain: Blockchain = blockchainLookupService.findBlockchain(it.blockchain)
             val walletIdentity = WalletIdentity(blockchain.getName(), it.address)
-            val rate = binanceHttpClientApi.getExchangeRate(blockchain.getCurrencyCode()).price.stripTrailingZeros()
+            val rate = coinGateHttpClientApi.getExchangeRate(blockchain.getCurrencyCode()).price.stripTrailingZeros()
             val userData = UserData(order = order, metadata = request.metadata.metadata, rate = rate)
             val wallet = Wallet(
                 walletIdentity,
@@ -121,7 +121,7 @@ class DefaultWalletService(
         request.blockchains.forEach {
             val blockchain = blockchainLookupService.findBlockchain(it.blockchain)
             val walletIdentity = WalletIdentity(blockchain.getName(), it.address)
-            val rate = binanceHttpClientApi.getExchangeRate(blockchain.getCurrencyCode()).price.stripTrailingZeros()
+            val rate = coinGateHttpClientApi.getExchangeRate(blockchain.getCurrencyCode()).price.stripTrailingZeros()
             val userData = UserData(userId = request.userId, metadata = request.metadata, rate = rate)
             val wallet = Wallet(walletIdentity, request.webhook, request.applicationId, userData = userData, walletType = WalletType.FOR_USER)
             val savedWallet = walletRepository.save(wallet).awaitSingle()

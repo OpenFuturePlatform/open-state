@@ -1,6 +1,8 @@
 plugins {
     id 'jacoco'
     id 'idea'
+    id 'java'
+    id 'application'
     id 'org.jetbrains.kotlin.jvm' version '1.9.21'
     id 'org.jetbrains.kotlin.plugin.spring' version '1.9.21'
     id 'org.jetbrains.kotlin.kapt' version '1.9.21'
@@ -17,7 +19,15 @@ java.targetCompatibility = JavaVersion.VERSION_17
 repositories {
     mavenCentral()
     jcenter()
-    maven { url "https://jitpack.io" }
+//    maven {
+//        url "https://jitpack.io"
+//    }
+
+    maven {
+        url "https://dl.bintray.com/tronj/tronj"
+    }
+
+
 }
 
 dependencies {
@@ -39,16 +49,16 @@ dependencies {
     implementation('org.jetbrains.kotlinx:kotlinx-coroutines-jdk8')
 
     // Ethereum
-    implementation('org.web3j:core:4.12.0'){
-        exclude group : 'org.bouncycastle', module : 'bcprov-jdk18on'
-        exclude group : 'com.squareup.okhttp3', module : 'okhttp'
+    implementation('org.web3j:core:4.12.0') {
+        exclude group: 'org.bouncycastle', module: 'bcprov-jdk18on'
+        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
     implementation('org.bouncycastle:bcprov-jdk18on:1.78.1')
     implementation('com.squareup.okhttp3:okhttp:4.12.0')
 
     // Binance
     implementation('com.google.protobuf:protobuf-java:4.26.0')
-    implementation('com.github.binance-chain:java-sdk:v1.1.0-bscAlpha.0')
+    //implementation('com.github.binance-chain:java-sdk:v1.1.0-bscAlpha.0')
 
     // Utils
     implementation('commons-validator:commons-validator:1.9.0')

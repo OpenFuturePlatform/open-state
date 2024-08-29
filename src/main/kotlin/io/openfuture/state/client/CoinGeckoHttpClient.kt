@@ -1,6 +1,5 @@
 package io.openfuture.state.client
 
-import org.bitcoinj.core.Ping
 import org.springframework.stereotype.Component
 
 @Component
