@@ -5,6 +5,7 @@ import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
 import io.openfuture.state.client.CoinGateHttpClientApi
 import io.openfuture.state.component.open.DefaultOpenApi
+import io.openfuture.state.config.AppProperties
 import io.openfuture.state.controller.AddWalletStateForUserRequest
 import io.openfuture.state.controller.WalletController
 import io.openfuture.state.domain.*
@@ -26,6 +27,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import lombok.extern.slf4j.Slf4j
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import kotlin.math.pow
@@ -42,6 +44,8 @@ class DefaultWalletService(
     private val openApi: DefaultOpenApi
 ) : WalletService {
 
+    @Autowired
+    lateinit var appProperties: AppProperties
     override suspend fun findByIdentity(blockchain: String, address: String): Wallet {
         val identity = WalletIdentity(blockchain, address)
         return walletRepository.findByIdentity(identity).awaitFirstOrNull()
@@ -159,7 +163,7 @@ class DefaultWalletService(
 
     override suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock) {
         for (transaction in block.transactions) {
-            val identity = WalletIdentity(blockchain.getName(), transaction.to)
+            val identity = WalletIdentity(blockchain.getName(), transaction.to.lowercase())
 
             val wallet = walletRepository.findByIdentity(identity).awaitFirstOrNull()//walletRepository.findByIdentity(identity.blockchain, identity.address).awaitFirstOrNull()
 
@@ -169,6 +173,26 @@ class DefaultWalletService(
 
     override suspend fun updateWebhookStatus(wallet: Wallet, status: WebhookStatus) {
         //do nothing
+    }
+
+    override fun getBlockchainName(requestBlockchainName: String) : String {
+        return if (appProperties.isProdEnabled == "true") {
+            when (requestBlockchainName) {
+                "ETH" -> "EthereumBlockchain"
+                "BNB" -> "BinanceBlockchain"
+                "TRX" -> "TronBlockchain"
+                "BTC" -> "BitcoinBlockchain"
+                else -> "EthereumBlockchain"
+            }
+        } else {
+            when (requestBlockchainName) {
+                "ETH" -> "GoerliBlockchain"
+                "BNB" -> "BinanceTestnetBlockchain"
+                "TRX" -> "TronShastaBlockchain"
+                else -> "GoerliBlockchain"
+            }
+
+        }
     }
 
     private suspend fun saveTransaction(wallet: Wallet, block: UnifiedBlock, unifiedTransaction: UnifiedTransaction) {

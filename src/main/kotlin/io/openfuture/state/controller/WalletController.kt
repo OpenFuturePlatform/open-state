@@ -1,11 +1,13 @@
 package io.openfuture.state.controller
 
 import io.openfuture.state.blockchain.Blockchain
+import io.openfuture.state.config.AppProperties
 import io.openfuture.state.domain.wallet.Wallet
 import io.openfuture.state.domain.wallet.WalletPaymentDetail
 import io.openfuture.state.service.WalletService
 import io.openfuture.state.service.WalletTransactionFacade
 import io.openfuture.state.service.dto.PlaceOrderResponse
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -21,7 +23,6 @@ class WalletController(
     private val walletTransactionFacade: WalletTransactionFacade,
     private val blockchains: List<Blockchain>
 ) {
-
     @PostMapping
     suspend fun saveMultiple(@Valid @RequestBody request: SaveOrderWalletRequest): PlaceOrderResponse {
         return walletService.saveOrder(request)
@@ -29,8 +30,11 @@ class WalletController(
 
     @PostMapping("/single")
     suspend fun saveSingle(@Valid @RequestBody request: SaveWalletRequest): WalletDto {
-        val blockchain = findBlockchain(request.blockchain)
-        val wallet = walletService.save(blockchain, request.address, request.webhook!!, request.applicationId)
+
+        val blockchainName = walletService.getBlockchainName(request.blockchain)
+        val blockchain = findBlockchain(blockchainName)
+
+        val wallet = walletService.save(blockchain, request.address.lowercase(), request.webhook!!, request.applicationId)
         return WalletDto(wallet)
     }
 

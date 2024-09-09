@@ -19,9 +19,6 @@ class WalletControllerV2(
     private val blockchainLookupService: BlockchainLookupService
 ) {
 
-    @Autowired
-    lateinit var appProperties: AppProperties
-
     @PostMapping("add")
     suspend fun addWallet(@RequestBody request: AddWalletStateForUserRequest): AddWatchResponse {
         return walletService.addWallet(request)
@@ -34,28 +31,14 @@ class WalletControllerV2(
         // val CONTRACT_ADDRESS = "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd" // USDT - BNB
         // val CONTRACT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7" // USDT - TRX
 
-        val blockchain = if (appProperties.isProdEnabled == "true") {
-            when (request.blockchainName) {
-                "ETH" -> "EthereumBlockchain"
-                "BNB" -> "BinanceBlockchain"
-                "TRX" -> "TronBlockchain"
-                "BTC" -> "BitcoinBlockchain"
-                else -> "EthereumBlockchain"
-            }
-        } else {
-            when (request.blockchainName) {
-                "ETH" -> "GoerliBlockchain"
-                "BNB" -> "BinanceTestnetBlockchain"
-                "TRX" -> "TronShastaBlockchain"
-                else -> "GoerliBlockchain"
-            }
-
-        }
+        val blockchain = walletService.getBlockchainName(request.blockchainName)
         val chain = blockchainLookupService.findBlockchain(blockchain)
 
         val balance =
-            if (request.contractAddress == null) chain.getBalance(request.address)
-            else chain.getContractBalance(request.address, request.contractAddress)
+            if (request.contractAddress == null)
+                chain.getBalance(request.address)
+            else
+                chain.getContractBalance(request.address, request.contractAddress)
         println("Balance response for address: ${request.address} is $balance")
 
         return WalletBalanceResponse(

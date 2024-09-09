@@ -33,7 +33,7 @@ class DefaultWebhookExecutor(
         val response =
             if (wallet.walletType == WalletType.FOR_ORDER)
                 restClient.doPostWoocommerce(wallet.webhook, signature, woocommerceDto)
-            else restClient.doPost(wallet.webhook, WebhookPayloadDto(transaction, wallet.userData.userId, wallet.userData))
+            else restClient.doPost(wallet.webhook, wallet.identity.address, WebhookPayloadDto(transaction, wallet.userData.userId, wallet.userData))
         webhookInvocationService.registerInvocation(wallet, transactionTask, response)
 
         if (response.status.is2xxSuccessful) {

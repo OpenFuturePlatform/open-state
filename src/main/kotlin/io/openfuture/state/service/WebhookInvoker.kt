@@ -40,14 +40,14 @@ class WebhookInvoker(
             val signature = openApi.generateSignature(wallet.identity.address, woocommerceDto)
             log.info("Invoking webhook signature $signature")
             webhookRestClient.doPostWoocommerce(wallet.webhook, signature, woocommerceDto)
-        } else webhookRestClient.doPost(wallet.webhook, WebhookPayloadDto(transaction, userId = wallet.userData.userId, metadata = wallet.userData))
+        } else webhookRestClient.doPost(wallet.webhook, wallet.identity.address, WebhookPayloadDto(transaction, userId = wallet.userData.userId, metadata = wallet.userData))
 
-        webhookRestClient.doPost(wallet.webhook, webhookBody)
+        webhookRestClient.doPost(wallet.webhook, wallet.identity.address, webhookBody)
     }
 
     suspend fun invoke(webHook: String, transaction: Transaction, metadata: Any, userId: String?) = runBlocking {
         log.info("Invoking webhook $webHook $metadata $userId $transaction")
-        webhookRestClient.doPost(webHook, WebhookPayloadDto(transaction, userId, metadata))
+        webhookRestClient.doPost(webHook, transaction.walletIdentity.address, WebhookPayloadDto(transaction, userId, metadata))
     }
 
     companion object {
