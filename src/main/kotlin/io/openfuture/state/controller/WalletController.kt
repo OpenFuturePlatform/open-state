@@ -1,24 +1,20 @@
 package io.openfuture.state.controller
 
 import io.openfuture.state.blockchain.Blockchain
-import io.openfuture.state.domain.Wallet
-import io.openfuture.state.domain.WalletPaymentDetail
-import io.openfuture.state.repository.OrderRepository
+import io.openfuture.state.config.AppProperties
+import io.openfuture.state.domain.wallet.Wallet
+import io.openfuture.state.domain.wallet.WalletPaymentDetail
 import io.openfuture.state.service.WalletService
 import io.openfuture.state.service.WalletTransactionFacade
 import io.openfuture.state.service.dto.PlaceOrderResponse
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
-import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
-import java.util.stream.Collector
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotEmpty
-import kotlin.streams.toList
 
 @RestController
 @RequestMapping("/api/wallets")
@@ -27,7 +23,6 @@ class WalletController(
     private val walletTransactionFacade: WalletTransactionFacade,
     private val blockchains: List<Blockchain>
 ) {
-
     @PostMapping
     suspend fun saveMultiple(@Valid @RequestBody request: SaveOrderWalletRequest): PlaceOrderResponse {
         return walletService.saveOrder(request)
@@ -35,8 +30,11 @@ class WalletController(
 
     @PostMapping("/single")
     suspend fun saveSingle(@Valid @RequestBody request: SaveWalletRequest): WalletDto {
-        val blockchain = findBlockchain(request.blockchain)
-        val wallet = walletService.save(blockchain, request.address, request.webhook!!, request.applicationId)
+
+        val blockchainName = walletService.getBlockchainName(request.blockchain)
+        val blockchain = findBlockchain(blockchainName)
+
+        val wallet = walletService.save(blockchain, request.address.lowercase(), request.webhook!!, request.applicationId)
         return WalletDto(wallet)
     }
 
@@ -63,9 +61,9 @@ class WalletController(
     }
 
     private fun findBlockchain(name: String): Blockchain {
-        val nameInLowerCase = name.toLowerCase()
+        val nameInLowerCase = name.lowercase()
         for (blockchain in blockchains) {
-            if (blockchain.getName().toLowerCase().startsWith(nameInLowerCase)) return blockchain
+            if (blockchain.getName().lowercase().startsWith(nameInLowerCase)) return blockchain
         }
 
         throw IllegalArgumentException("Can not find blockchain")

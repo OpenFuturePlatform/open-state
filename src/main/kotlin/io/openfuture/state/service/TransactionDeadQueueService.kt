@@ -1,8 +1,8 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.domain.TransactionDeadQueue
-import io.openfuture.state.domain.TransactionQueueTask
-import io.openfuture.state.domain.WalletIdentity
+import io.openfuture.state.domain.transaction.TransactionDeadQueue
+import io.openfuture.state.domain.transaction.TransactionQueueTask
+import io.openfuture.state.domain.wallet.WalletIdentity
 
 interface TransactionDeadQueueService {
 

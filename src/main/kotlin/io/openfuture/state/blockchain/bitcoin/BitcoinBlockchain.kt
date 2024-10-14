@@ -9,6 +9,8 @@ import io.openfuture.state.domain.CurrencyCode
 import io.openfuture.state.util.toLocalDateTimeInSeconds
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
+import java.math.BigInteger
 
 @Component
 @ConditionalOnProperty(value = ["production.mode.enabled"], havingValue = "true")
@@ -19,11 +21,40 @@ class BitcoinBlockchain(private val client: BitcoinClient) : Blockchain() {
         return client.getBlockHeight(latestBlockHash)
     }
 
+    override suspend fun getNonce(address: String): BigInteger {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun broadcastTransaction(signedTransaction: String): String {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getTransactionStatus(transactionHash: String): Boolean {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getBlock(blockNumber: Int): UnifiedBlock {
         val blockHash = client.getBlockHash(blockNumber)
         val block = client.getBlock(blockHash)
 
         return toUnifiedBlock(block)
+    }
+
+    override suspend fun getGasPrice(): BigInteger {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getGasLimit(): BigInteger {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getBalance(address: String): BigDecimal {
+        val balance = client.getAddressBalance(address)
+        return balance.toBigDecimal()
+    }
+
+    override suspend fun getContractBalance(address: String, contractAddress: String): BigDecimal {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getCurrencyCode(): CurrencyCode {

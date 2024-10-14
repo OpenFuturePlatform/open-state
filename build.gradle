@@ -1,29 +1,44 @@
 plugins {
     id 'jacoco'
     id 'idea'
-    id 'org.jetbrains.kotlin.jvm' version '1.4.0'
-    id 'org.jetbrains.kotlin.plugin.spring' version '1.4.0'
-    id 'org.jetbrains.kotlin.kapt' version '1.4.0'
-    id 'org.springframework.boot' version '2.3.3.RELEASE'
+    id 'java'
+    id 'application'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.21'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.9.21'
+    id 'org.jetbrains.kotlin.kapt' version '1.9.21'
+    id 'org.springframework.boot' version '2.7.18'
 }
 
 apply plugin: 'io.spring.dependency-management'
 
 group = "io.openfuture"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_11
+java.sourceCompatibility = JavaVersion.VERSION_17
+java.targetCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
-    maven { url "https://jitpack.io" }
+    jcenter()
+//    maven {
+//        url "https://jitpack.io"
+//    }
+
+    maven {
+        url "https://dl.bintray.com/tronj/tronj"
+    }
+
+
 }
 
 dependencies {
+    // Lombok fix
+    implementation('org.projectlombok:lombok:1.18.22')
     // Spring
     implementation('org.springframework.boot:spring-boot-starter-webflux')
     implementation('org.springframework.boot:spring-boot-starter-data-mongodb-reactive')
     implementation('org.springframework.boot:spring-boot-starter-data-redis-reactive')
     implementation('org.springframework.boot:spring-boot-starter-validation')
+    implementation('org.springframework.boot:spring-boot-starter-actuator')
 
     // Kotlin
     implementation('com.fasterxml.jackson.module:jackson-module-kotlin')
@@ -34,16 +49,23 @@ dependencies {
     implementation('org.jetbrains.kotlinx:kotlinx-coroutines-jdk8')
 
     // Ethereum
-    implementation('org.web3j:core:4.6.3')
-    implementation('com.squareup.okhttp3:okhttp:4.8.1')
+    implementation('org.web3j:core:4.12.0') {
+        exclude group: 'org.bouncycastle', module: 'bcprov-jdk18on'
+        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+    }
+    implementation('org.bouncycastle:bcprov-jdk18on:1.78.1')
+    implementation('com.squareup.okhttp3:okhttp:4.12.0')
 
     // Binance
-    implementation('com.google.protobuf:protobuf-java:3.15.6')
-    implementation('com.github.binance-chain:java-sdk:v1.1.0-bscAlpha.0')
+    implementation('com.google.protobuf:protobuf-java:4.26.0')
+    //implementation('com.github.binance-chain:java-sdk:v1.1.0-bscAlpha.0')
 
     // Utils
-    implementation('commons-validator:commons-validator:1.7')
-    implementation('org.apache.httpcomponents:httpclient:4.5.12')
+    implementation('commons-validator:commons-validator:1.9.0')
+    implementation('org.apache.httpcomponents:httpclient:4.5.13')
+
+    // Monitoring
+    implementation('io.micrometer:micrometer-registry-prometheus')
 
     // DevTools
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
@@ -68,19 +90,23 @@ sourceSets {
 compileKotlin {
     kotlinOptions {
         freeCompilerArgs = ["-Xjsr305=strict"]
-        jvmTarget = "11"
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 }
 compileTestKotlin {
     kotlinOptions {
         freeCompilerArgs = ["-Xjsr305=strict"]
-        jvmTarget = "11"
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 }
 
 // Tests
 test {
     useJUnitPlatform()
+
+    testLogging {
+        showStandardStreams = true
+    }
 
     if (project.hasProperty('maxParallelForks')) {
         maxParallelForks = project.maxParallelForks as int
@@ -90,7 +116,7 @@ test {
     }
 }
 jacoco {
-    toolVersion = "0.8.5"
+    toolVersion = "0.8.7"
 }
 jacocoTestReport {
     reports {

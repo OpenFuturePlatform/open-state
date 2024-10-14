@@ -1,7 +1,7 @@
 package io.openfuture.state.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.openfuture.state.domain.TransactionQueueTask
+import io.openfuture.state.domain.transaction.TransactionQueueTask
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory

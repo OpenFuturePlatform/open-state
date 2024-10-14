@@ -3,11 +3,18 @@ package io.openfuture.state.service
 import io.openfuture.state.blockchain.Blockchain
 import io.openfuture.state.blockchain.dto.UnifiedBlock
 import io.openfuture.state.blockchain.dto.UnifiedTransaction
-import io.openfuture.state.client.BinanceHttpClientApi
+import io.openfuture.state.client.CoinGateHttpClientApi
 import io.openfuture.state.component.open.DefaultOpenApi
+import io.openfuture.state.config.AppProperties
 import io.openfuture.state.controller.AddWalletStateForUserRequest
 import io.openfuture.state.controller.WalletController
 import io.openfuture.state.domain.*
+import io.openfuture.state.domain.transaction.Transaction
+import io.openfuture.state.domain.wallet.UserData
+import io.openfuture.state.domain.wallet.Wallet
+import io.openfuture.state.domain.wallet.WalletIdentity
+import io.openfuture.state.domain.wallet.WalletType
+import io.openfuture.state.domain.webhook.WebhookStatus
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.OrderRepository
 import io.openfuture.state.repository.TransactionRepository
@@ -20,10 +27,10 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import lombok.extern.slf4j.Slf4j
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 import java.math.BigDecimal
+import kotlin.math.pow
 
 @Slf4j
 @Service
@@ -31,12 +38,14 @@ class DefaultWalletService(
     private val walletRepository: WalletRepository,
     private val transactionRepository: TransactionRepository,
     private val webhookInvoker: WebhookInvoker,
-    private val binanceHttpClientApi: BinanceHttpClientApi,
+    private val coinGateHttpClientApi: CoinGateHttpClientApi,
     private val orderRepository: OrderRepository,
     private val blockchainLookupService: BlockchainLookupService,
     private val openApi: DefaultOpenApi
 ) : WalletService {
 
+    @Autowired
+    lateinit var appProperties: AppProperties
     override suspend fun findByIdentity(blockchain: String, address: String): Wallet {
         val identity = WalletIdentity(blockchain, address)
         return walletRepository.findByIdentity(identity).awaitFirstOrNull()
@@ -87,7 +96,7 @@ class DefaultWalletService(
         request.blockchains.forEach {
             val blockchain: Blockchain = blockchainLookupService.findBlockchain(it.blockchain)
             val walletIdentity = WalletIdentity(blockchain.getName(), it.address)
-            val rate = binanceHttpClientApi.getExchangeRate(blockchain).price.stripTrailingZeros()
+            val rate = coinGateHttpClientApi.getExchangeRate(blockchain.getCurrencyCode()).price.stripTrailingZeros()
             val userData = UserData(order = order, metadata = request.metadata.metadata, rate = rate)
             val wallet = Wallet(
                 walletIdentity,
@@ -116,7 +125,7 @@ class DefaultWalletService(
         request.blockchains.forEach {
             val blockchain = blockchainLookupService.findBlockchain(it.blockchain)
             val walletIdentity = WalletIdentity(blockchain.getName(), it.address)
-            val rate = binanceHttpClientApi.getExchangeRate(blockchain).price.stripTrailingZeros()
+            val rate = coinGateHttpClientApi.getExchangeRate(blockchain.getCurrencyCode()).price.stripTrailingZeros()
             val userData = UserData(userId = request.userId, metadata = request.metadata, rate = rate)
             val wallet = Wallet(walletIdentity, request.webhook, request.applicationId, userData = userData, walletType = WalletType.FOR_USER)
             val savedWallet = walletRepository.save(wallet).awaitSingle()
@@ -154,7 +163,7 @@ class DefaultWalletService(
 
     override suspend fun addTransactions(blockchain: Blockchain, block: UnifiedBlock) {
         for (transaction in block.transactions) {
-            val identity = WalletIdentity(blockchain.getName(), transaction.to)
+            val identity = WalletIdentity(blockchain.getName(), transaction.to.lowercase())
 
             val wallet = walletRepository.findByIdentity(identity).awaitFirstOrNull()//walletRepository.findByIdentity(identity.blockchain, identity.address).awaitFirstOrNull()
 
@@ -166,27 +175,46 @@ class DefaultWalletService(
         //do nothing
     }
 
+    override fun getBlockchainName(requestBlockchainName: String) : String {
+        return if (appProperties.isProdEnabled == "true") {
+            when (requestBlockchainName) {
+                "ETH" -> "EthereumBlockchain"
+                "BNB" -> "BinanceBlockchain"
+                "TRX" -> "TronBlockchain"
+                "BTC" -> "BitcoinBlockchain"
+                else -> "EthereumBlockchain"
+            }
+        } else {
+            when (requestBlockchainName) {
+                "ETH" -> "GoerliBlockchain"
+                "BNB" -> "BinanceTestnetBlockchain"
+                "TRX" -> "TronShastaBlockchain"
+                else -> "GoerliBlockchain"
+            }
+        }
+    }
+
     private suspend fun saveTransaction(wallet: Wallet, block: UnifiedBlock, unifiedTransaction: UnifiedTransaction) {
         log.info("Saving Transaction")
         if (!transactionRepository.existsTransactionByHash(unifiedTransaction.hash)) {
 
             var amount = unifiedTransaction.amount
 
-//            var tokenType = ""
-//            if (!unifiedTransaction.native) {
-//                val tokens = openApi.getTokens()
-//
-//                val customToken = tokens.first { customToken ->
-//                    customToken.address.equals(
-//                        unifiedTransaction.contractAddress,
-//                        ignoreCase = true
-//                    )
-//                }
-//                tokenType = customToken.symbol
-//                val result = customToken.decimal.let { 10.0.pow(it.toDouble()) }
-//                amount = amount.divide(result.toBigDecimal())
-//
-//            }
+            var tokenType = ""
+            if (!unifiedTransaction.native) {
+                val tokens = openApi.getTokens()
+
+                val customToken = tokens.first { customToken ->
+                    customToken.address.equals(
+                        unifiedTransaction.contractAddress,
+                        ignoreCase = true
+                    )
+                }
+                tokenType = customToken.symbol
+                val result = customToken.decimal.let { 10.0.pow(it.toDouble()) }
+                amount = amount.divide(result.toBigDecimal())
+
+            }
 
             val transaction = Transaction(
                 wallet.identity,
@@ -198,7 +226,7 @@ class DefaultWalletService(
                 block.number,
                 block.hash,
                 unifiedTransaction.native,
-                "tokenType"
+                tokenType
             )
             transactionRepository.save(transaction).awaitSingle()
             log.info("Saved transaction ${transaction.id}")

@@ -3,7 +3,7 @@ package io.openfuture.state.service
 import com.nhaarman.mockitokotlin2.given
 import com.nhaarman.mockitokotlin2.mock
 import io.openfuture.state.base.ServiceTests
-import io.openfuture.state.domain.WalletIdentity
+import io.openfuture.state.domain.wallet.WalletIdentity
 import io.openfuture.state.repository.TransactionDeadQueueRepository
 import io.openfuture.state.util.createDummyTransactionDeadQueue
 import io.openfuture.state.util.createDummyTransactionQueueTask

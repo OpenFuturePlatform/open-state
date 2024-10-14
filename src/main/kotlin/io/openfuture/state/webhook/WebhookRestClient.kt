@@ -6,6 +6,7 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
+import java.math.BigDecimal
 import java.net.UnknownHostException
 import java.util.concurrent.TimeUnit
 
@@ -15,7 +16,7 @@ class WebhookRestClient(builder: WebClient.Builder) {
     private val client: WebClient = builder.build()
 
 
-    suspend fun doPost(url: String, body: Any): WebhookResponse {
+    suspend fun doPost(url: String, address: String, body: Any): WebhookResponse {
         println("webhook body $body")
         return try {
             val response = client.post()

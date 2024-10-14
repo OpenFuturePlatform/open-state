@@ -2,7 +2,6 @@ package io.openfuture.state.client
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.bitcoinj.core.Ping
 
 
 interface CoinGeckoApiClient {

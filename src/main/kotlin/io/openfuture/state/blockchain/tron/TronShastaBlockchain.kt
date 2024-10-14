@@ -1,0 +1,151 @@
+package io.openfuture.state.blockchain.tron
+
+import io.openfuture.state.blockchain.Blockchain
+import io.openfuture.state.blockchain.dto.UnifiedBlock
+import io.openfuture.state.blockchain.dto.UnifiedTransaction
+import io.openfuture.state.domain.CurrencyCode
+import io.openfuture.state.util.HashUtils.decodeBase58
+import io.openfuture.state.util.HashUtils.toHexString
+import io.openfuture.state.util.toLocalDateTime
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.withContext
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.stereotype.Component
+import org.web3j.protocol.core.DefaultBlockParameterName.LATEST
+import org.web3j.abi.FunctionEncoder
+import org.web3j.abi.FunctionReturnDecoder
+import org.web3j.abi.TypeReference
+import org.web3j.abi.Utils
+import org.web3j.abi.datatypes.Address
+import org.web3j.abi.datatypes.generated.Uint256
+import org.web3j.protocol.Web3j
+import org.web3j.protocol.core.DefaultBlockParameterName
+import org.web3j.protocol.core.DefaultBlockParameterNumber
+import org.web3j.protocol.core.methods.request.Transaction
+import org.web3j.protocol.core.methods.response.EthBlock
+import org.web3j.protocol.core.methods.response.EthCall
+import org.web3j.utils.Convert
+import java.lang.Exception
+import java.math.BigDecimal
+import java.math.BigInteger
+
+@Component
+class TronShastaBlockchain(@Qualifier("web3jTronTestnet") private val web3jTronTestnet: Web3j) : Blockchain() {
+
+    override suspend fun getLastBlockNumber(): Int = web3jTronTestnet.ethBlockNumber()
+        .sendAsync().await()
+        .blockNumber.toInt()
+
+    override suspend fun getNonce(address: String): BigInteger {
+        val ethAddress = base58ToEthAddress(address)
+        println("ETH ADDRESS: $ethAddress")
+        return web3jTronTestnet.ethGetTransactionCount(ethAddress, LATEST).send().transactionCount
+    }
+    override suspend fun broadcastTransaction(signedTransaction: String): String {
+        val result = web3jTronTestnet.ethSendRawTransaction(signedTransaction).send()
+
+        if (result.hasError()) {
+            throw Exception(result.error.message)
+        }
+
+        while (!web3jTronTestnet.ethGetTransactionReceipt(result.transactionHash).send().transactionReceipt.isPresent) {
+            withContext(Dispatchers.IO) {
+                Thread.sleep(1000)
+            }
+        }
+
+        return web3jTronTestnet.ethGetTransactionReceipt(result.transactionHash).send().transactionReceipt.get().transactionHash
+    }
+
+    override suspend fun getTransactionStatus(transactionHash: String): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getBlock(blockNumber: Int): UnifiedBlock {
+        val parameter = DefaultBlockParameterNumber(blockNumber.toLong())
+        val block = web3jTronTestnet.ethGetBlockByNumber(parameter, true)
+            .sendAsync().await()
+            .block
+        val transactions = obtainTransactions(block)
+        val date = block.timestamp.toLong().toLocalDateTime()
+        return UnifiedBlock(transactions, date, block.number.toLong(), block.hash)
+    }
+    override suspend fun getGasPrice(): BigInteger {
+        return web3jTronTestnet.ethGasPrice().sendAsync().await().gasPrice
+    }
+
+    override suspend fun getGasLimit(): BigInteger {
+        return web3jTronTestnet
+            .ethGetBlockByNumber(LATEST, false)
+            .sendAsync().await()
+            .block
+            .gasLimit
+    }
+
+    override suspend fun getBalance(address: String): BigDecimal {
+        val ethAddress = base58ToEthAddress(address)
+        val balanceWei = web3jTronTestnet.ethGetBalance(ethAddress, LATEST)
+            .sendAsync().await()
+            .balance
+        return Convert.fromWei(balanceWei.toString(), Convert.Unit.MWEI)
+    }
+
+    private fun base58ToEthAddress(address: String): String {
+        val addressDecode58 = address.decodeBase58().toHexString()
+        //eth address is 42 length
+        return "0x" + addressDecode58.substring(2, 42)
+    }
+
+    override suspend fun getContractBalance(address: String, contractAddress: String): BigDecimal {
+        val ethAddress = base58ToEthAddress(address)
+        val ethContractAddress = base58ToEthAddress(contractAddress)
+
+        val functionBalance = org.web3j.abi.datatypes.Function(
+            "balanceOf",
+            listOf(Address(ethAddress)),
+            listOf(object : TypeReference<Uint256>() {})
+        )
+        val encodedFunction = FunctionEncoder.encode(functionBalance)
+        val ethCall: EthCall = web3jTronTestnet.ethCall(
+            Transaction.createEthCallTransaction(ethAddress, ethContractAddress, encodedFunction),
+            LATEST
+        ).sendAsync().await()
+
+        val value = ethCall.value
+        val contractBalance = BigInteger(value.substring(2, value.length), 16)
+
+        return Convert.fromWei(contractBalance.toBigDecimal(), Convert.Unit.MWEI)
+    }
+
+    override suspend fun getCurrencyCode(): CurrencyCode {
+        return CurrencyCode.TRON
+    }
+
+    private suspend fun obtainTransactions(ethBlock: EthBlock.Block): List<UnifiedTransaction> = ethBlock.transactions
+        .map { it.get() as EthBlock.TransactionObject }
+        .map { tx ->
+            val to = tx.to ?: findContractAddress(tx.hash)
+            val amount = Convert.fromWei(tx.value.toBigDecimal(), Convert.Unit.GWEI)
+            UnifiedTransaction(tx.hash, tx.from, to, amount, true, to)
+        }
+
+    private suspend fun findContractAddress(transactionHash: String) =
+        web3jTronTestnet.ethGetTransactionReceipt(transactionHash)
+            .sendAsync().await()
+            .transactionReceipt.get()
+            .contractAddress
+
+    companion object {
+        private val DECODE_TYPES = Utils.convert(
+            listOf(
+                object : TypeReference<Address>(true) {},
+                object : TypeReference<Uint256>() {}
+            )
+        )
+
+        private const val TRANSFER_METHOD_SIGNATURE = "0xa9059cbb"
+        private const val TRANSFER_INPUT_LENGTH = 138
+    }
+}

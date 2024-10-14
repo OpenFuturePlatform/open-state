@@ -1,6 +1,10 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.domain.*
+import io.openfuture.state.domain.transaction.Transaction
+import io.openfuture.state.domain.transaction.TransactionQueueTask
+import io.openfuture.state.domain.wallet.Wallet
+import io.openfuture.state.domain.wallet.WalletIdentity
+import io.openfuture.state.domain.wallet.WalletQueueTask
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.property.WebhookProperties
 import io.openfuture.state.repository.WebhookQueueRedisRepository
@@ -9,8 +13,6 @@ import io.openfuture.state.util.toEpochMillis
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
-import java.util.*
-import java.util.concurrent.ArrayBlockingQueue
 import kotlin.collections.ArrayList
 
 @Service

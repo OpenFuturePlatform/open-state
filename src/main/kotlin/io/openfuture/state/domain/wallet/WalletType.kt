@@ -1,4 +1,4 @@
-package io.openfuture.state.domain
+package io.openfuture.state.domain.wallet
 
 enum class WalletType {
     FOR_USER,

@@ -1,7 +1,6 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.domain.Transaction
-import reactor.core.publisher.Flux
+import io.openfuture.state.domain.transaction.Transaction
 
 interface TransactionService {
 

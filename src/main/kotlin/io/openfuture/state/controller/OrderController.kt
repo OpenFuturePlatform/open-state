@@ -1,11 +1,10 @@
 package io.openfuture.state.controller
 
-import io.openfuture.state.domain.Wallet
+import io.openfuture.state.domain.wallet.Wallet
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.repository.OrderRepository
 import io.openfuture.state.service.TransactionService
 import io.openfuture.state.service.WalletService
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

@@ -40,6 +40,16 @@ class BitcoinClient(
         return response.result.height
     }
 
+    suspend fun broadcastRawTransaction(signature: String): Int {
+        val command = BitcoinCommand("send")
+        val response = client.post()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(BodyInserters.fromValue(command))
+            .retrieve()
+            .awaitBody<BitcoinResponse<BlockHeightBitcoinResponse>>()
+        return response.result.height
+    }
+
     suspend fun getBlockHash(blockHeight: Int): String {
         val command = BitcoinCommand("getblockhash", listOf(blockHeight))
         val response = client.post()
@@ -70,6 +80,16 @@ class BitcoinClient(
         return response.result.vout
             .first { it.n == outputNumber }
             .addresses
+    }
+
+    suspend fun getAddressBalance(address: String): String {
+        val command = BitcoinCommand("getbalance")
+        val response = client.post()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(BodyInserters.fromValue(command))
+            .retrieve()
+            .awaitBody<BitcoinResponse<String>>()
+        return response.result
     }
 
 }

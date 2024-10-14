@@ -1,8 +1,8 @@
 package io.openfuture.state.service
 
-import io.openfuture.state.domain.Transaction
-import io.openfuture.state.domain.WalletPaymentDetail
-import io.openfuture.state.domain.WalletTransactionDetail
+import io.openfuture.state.domain.transaction.Transaction
+import io.openfuture.state.domain.wallet.WalletPaymentDetail
+import io.openfuture.state.domain.wallet.WalletTransactionDetail
 
 interface WalletTransactionFacade {
     suspend fun findByAddress(address: String): WalletTransactionDetail

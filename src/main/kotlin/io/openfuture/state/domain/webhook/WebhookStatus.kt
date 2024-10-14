@@ -1,4 +1,4 @@
-package io.openfuture.state.domain
+package io.openfuture.state.domain.webhook
 
 enum class WebhookStatus {
     OK,

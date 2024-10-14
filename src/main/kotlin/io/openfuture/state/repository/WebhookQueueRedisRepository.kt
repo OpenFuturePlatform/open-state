@@ -1,6 +1,6 @@
 package io.openfuture.state.repository
 
-import io.openfuture.state.domain.TransactionQueueTask
+import io.openfuture.state.domain.transaction.TransactionQueueTask
 import io.openfuture.state.extensions.keyToByteBuffer
 import io.openfuture.state.extensions.valueToByteBuffer
 import io.openfuture.state.property.WebhookProperties

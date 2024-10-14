@@ -2,7 +2,6 @@ package io.openfuture.state.service
 
 import com.nhaarman.mockitokotlin2.*
 import io.openfuture.state.base.ServiceTests
-import io.openfuture.state.domain.WebhookStatus
 import io.openfuture.state.exception.NotFoundException
 import io.openfuture.state.property.WebhookProperties
 import io.openfuture.state.repository.WebhookQueueRedisRepository

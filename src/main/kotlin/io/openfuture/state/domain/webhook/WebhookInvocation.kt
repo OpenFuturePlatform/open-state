@@ -1,5 +1,6 @@
-package io.openfuture.state.domain
+package io.openfuture.state.domain.webhook
 
+import io.openfuture.state.domain.wallet.WalletIdentity
 import io.openfuture.state.webhook.WebhookRestClient
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.index.Indexed

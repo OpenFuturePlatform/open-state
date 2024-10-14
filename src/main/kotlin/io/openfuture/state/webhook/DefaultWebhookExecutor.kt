@@ -1,10 +1,10 @@
 package io.openfuture.state.webhook
 
 import io.openfuture.state.component.open.DefaultOpenApi
-import io.openfuture.state.domain.TransactionQueueTask
-import io.openfuture.state.domain.Wallet
-import io.openfuture.state.domain.WalletType
-import io.openfuture.state.domain.WebhookStatus
+import io.openfuture.state.domain.transaction.TransactionQueueTask
+import io.openfuture.state.domain.wallet.Wallet
+import io.openfuture.state.domain.wallet.WalletType
+import io.openfuture.state.domain.webhook.WebhookStatus
 import io.openfuture.state.property.WebhookProperties
 import io.openfuture.state.service.TransactionService
 import io.openfuture.state.service.WalletService
@@ -33,7 +33,7 @@ class DefaultWebhookExecutor(
         val response =
             if (wallet.walletType == WalletType.FOR_ORDER)
                 restClient.doPostWoocommerce(wallet.webhook, signature, woocommerceDto)
-            else restClient.doPost(wallet.webhook, WebhookPayloadDto(transaction, wallet.userData.userId, wallet.userData))
+            else restClient.doPost(wallet.webhook, wallet.identity.address, WebhookPayloadDto(transaction, wallet.userData.userId, wallet.userData))
         webhookInvocationService.registerInvocation(wallet, transactionTask, response)
 
         if (response.status.is2xxSuccessful) {
