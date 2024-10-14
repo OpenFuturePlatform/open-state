@@ -7,10 +7,13 @@ import io.openfuture.state.domain.CurrencyCode
 import io.openfuture.state.util.HashUtils.decodeBase58
 import io.openfuture.state.util.HashUtils.toHexString
 import io.openfuture.state.util.toLocalDateTime
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
+import kotlinx.coroutines.withContext
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
+import org.web3j.protocol.core.DefaultBlockParameterName.LATEST
 import org.web3j.abi.FunctionEncoder
 import org.web3j.abi.FunctionReturnDecoder
 import org.web3j.abi.TypeReference
@@ -24,6 +27,7 @@ import org.web3j.protocol.core.methods.request.Transaction
 import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.protocol.core.methods.response.EthCall
 import org.web3j.utils.Convert
+import java.lang.Exception
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -34,6 +38,31 @@ class TronShastaBlockchain(@Qualifier("web3jTronTestnet") private val web3jTronT
         .sendAsync().await()
         .blockNumber.toInt()
 
+    override suspend fun getNonce(address: String): BigInteger {
+        val ethAddress = base58ToEthAddress(address)
+        println("ETH ADDRESS: $ethAddress")
+        return web3jTronTestnet.ethGetTransactionCount(ethAddress, LATEST).send().transactionCount
+    }
+    override suspend fun broadcastTransaction(signedTransaction: String): String {
+        val result = web3jTronTestnet.ethSendRawTransaction(signedTransaction).send()
+
+        if (result.hasError()) {
+            throw Exception(result.error.message)
+        }
+
+        while (!web3jTronTestnet.ethGetTransactionReceipt(result.transactionHash).send().transactionReceipt.isPresent) {
+            withContext(Dispatchers.IO) {
+                Thread.sleep(1000)
+            }
+        }
+
+        return web3jTronTestnet.ethGetTransactionReceipt(result.transactionHash).send().transactionReceipt.get().transactionHash
+    }
+
+    override suspend fun getTransactionStatus(transactionHash: String): Boolean {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getBlock(blockNumber: Int): UnifiedBlock {
         val parameter = DefaultBlockParameterNumber(blockNumber.toLong())
         val block = web3jTronTestnet.ethGetBlockByNumber(parameter, true)
@@ -43,11 +72,21 @@ class TronShastaBlockchain(@Qualifier("web3jTronTestnet") private val web3jTronT
         val date = block.timestamp.toLong().toLocalDateTime()
         return UnifiedBlock(transactions, date, block.number.toLong(), block.hash)
     }
+    override suspend fun getGasPrice(): BigInteger {
+        return web3jTronTestnet.ethGasPrice().sendAsync().await().gasPrice
+    }
+
+    override suspend fun getGasLimit(): BigInteger {
+        return web3jTronTestnet
+            .ethGetBlockByNumber(LATEST, false)
+            .sendAsync().await()
+            .block
+            .gasLimit
+    }
 
     override suspend fun getBalance(address: String): BigDecimal {
-        val parameter = DefaultBlockParameterName.LATEST
         val ethAddress = base58ToEthAddress(address)
-        val balanceWei = web3jTronTestnet.ethGetBalance(ethAddress, parameter)
+        val balanceWei = web3jTronTestnet.ethGetBalance(ethAddress, LATEST)
             .sendAsync().await()
             .balance
         return Convert.fromWei(balanceWei.toString(), Convert.Unit.MWEI)
@@ -71,7 +110,7 @@ class TronShastaBlockchain(@Qualifier("web3jTronTestnet") private val web3jTronT
         val encodedFunction = FunctionEncoder.encode(functionBalance)
         val ethCall: EthCall = web3jTronTestnet.ethCall(
             Transaction.createEthCallTransaction(ethAddress, ethContractAddress, encodedFunction),
-            DefaultBlockParameterName.LATEST
+            LATEST
         ).sendAsync().await()
 
         val value = ethCall.value

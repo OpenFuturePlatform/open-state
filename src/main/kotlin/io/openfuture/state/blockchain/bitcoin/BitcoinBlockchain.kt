@@ -21,6 +21,18 @@ class BitcoinBlockchain(private val client: BitcoinClient) : Blockchain() {
         return client.getBlockHeight(latestBlockHash)
     }
 
+    override suspend fun getNonce(address: String): BigInteger {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun broadcastTransaction(signedTransaction: String): String {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getTransactionStatus(transactionHash: String): Boolean {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getBlock(blockNumber: Int): UnifiedBlock {
         val blockHash = client.getBlockHash(blockNumber)
         val block = client.getBlock(blockHash)
@@ -28,10 +40,17 @@ class BitcoinBlockchain(private val client: BitcoinClient) : Blockchain() {
         return toUnifiedBlock(block)
     }
 
-    //todo - implement
+    override suspend fun getGasPrice(): BigInteger {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getGasLimit(): BigInteger {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getBalance(address: String): BigDecimal {
         val balance = client.getAddressBalance(address)
-        return BigDecimal.ZERO
+        return balance.toBigDecimal()
     }
 
     override suspend fun getContractBalance(address: String, contractAddress: String): BigDecimal {

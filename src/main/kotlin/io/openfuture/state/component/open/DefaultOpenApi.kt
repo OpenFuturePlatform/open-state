@@ -16,7 +16,7 @@ class DefaultOpenApi(
     }
 
     override suspend fun getTokens(): Array<CustomToken> {
-        val url = "/token/list"
+        val url = "/api/token/list"
         val response = openRestTemplate.getForEntity(url, Array<CustomToken>::class.java)
         return response.body!!
     }

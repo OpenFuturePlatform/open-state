@@ -11,7 +11,9 @@ data class CoinGateRate(
     @JsonProperty("TRX")
     val TRX: CoinGateExchangeRate,
     @JsonProperty("ETH")
-    val ETH: CoinGateExchangeRate
+    val ETH: CoinGateExchangeRate,
+    @JsonProperty("SOL")
+    val SOL: CoinGateExchangeRate
 )
 
 data class CoinGateExchangeRate(

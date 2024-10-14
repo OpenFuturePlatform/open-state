@@ -191,7 +191,6 @@ class DefaultWalletService(
                 "TRX" -> "TronShastaBlockchain"
                 else -> "GoerliBlockchain"
             }
-
         }
     }
 

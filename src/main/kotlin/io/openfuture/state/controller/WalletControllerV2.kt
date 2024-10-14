@@ -1,16 +1,17 @@
 package io.openfuture.state.controller
 
-import io.openfuture.state.config.AppProperties
 import io.openfuture.state.controller.request.BalanceRequest
+import io.openfuture.state.controller.request.BlockchainRequest
+import io.openfuture.state.controller.request.BroadcastRequest
 import io.openfuture.state.service.BlockchainLookupService
 import io.openfuture.state.service.WalletService
 import io.openfuture.state.service.dto.AddWatchResponse
 import io.openfuture.state.service.dto.WalletBalanceResponse
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.math.BigInteger
 
 @RestController
 @RequestMapping("/api/wallets/v2/")
@@ -26,10 +27,6 @@ class WalletControllerV2(
 
     @PostMapping("/balance")
     suspend fun getBalance(@RequestBody request: BalanceRequest): WalletBalanceResponse {
-
-        // val CONTRACT_ADDRESS = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238" // USDC - ETH
-        // val CONTRACT_ADDRESS = "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd" // USDT - BNB
-        // val CONTRACT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7" // USDT - TRX
 
         val blockchain = walletService.getBlockchainName(request.blockchainName)
         val chain = blockchainLookupService.findBlockchain(blockchain)
@@ -48,6 +45,41 @@ class WalletControllerV2(
         )
     }
 
+    @PostMapping("/nonce")
+    suspend fun getNonce(@RequestBody request: BalanceRequest): BigInteger {
+
+        val blockchain = walletService.getBlockchainName(request.blockchainName)
+        val chain = blockchainLookupService.findBlockchain(blockchain)
+
+        return chain.getNonce(request.address)
+    }
+
+    @PostMapping("/gas-limit")
+    suspend fun getGasLimit(@RequestBody request: BlockchainRequest): BigInteger {
+
+        val blockchain = walletService.getBlockchainName(request.blockchainName)
+        val chain = blockchainLookupService.findBlockchain(blockchain)
+
+        return chain.getGasLimit()
+    }
+
+    @PostMapping("/gas-price")
+    suspend fun getGasPrice(@RequestBody request: BlockchainRequest): BigInteger {
+
+        val blockchain = walletService.getBlockchainName(request.blockchainName)
+        val chain = blockchainLookupService.findBlockchain(blockchain)
+
+        return chain.getGasPrice()
+    }
+
+    @PostMapping("/broadcast")
+    suspend fun broadcast(@RequestBody request: BroadcastRequest): String {
+
+        val blockchain = walletService.getBlockchainName(request.blockchainName)
+        val chain = blockchainLookupService.findBlockchain(blockchain)
+
+        return chain.broadcastTransaction(request.signature)
+    }
 }
 
 data class AddWalletStateForUserRequest(
